@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YouTube List View</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 320px;
+      padding: 16px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #0f0f0f;
+      color: #f1f1f1;
+    }
+    
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #272727;
+    }
+    
+    .logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #ff0000 0%, #cc0000 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      font-size: 18px;
+    }
+    
+    h1 {
+      font-size: 16px;
+      font-weight: 600;
+      color: #f1f1f1;
+    }
+    
+    .status-card {
+      background: #272727;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .status-title {
+      font-size: 12px;
+      color: #aaa;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .status-text {
+      font-size: 14px;
+      color: #f1f1f1;
+      line-height: 1.5;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      background: #00ff00;
+      border-radius: 50%;
+      margin-right: 6px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    .features {
+      margin-bottom: 16px;
+    }
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      font-size: 13px;
+      color: #aaa;
+    }
+    
+    .feature-icon {
+      font-size: 16px;
+    }
+    
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    button {
+      width: 100%;
+      padding: 10px 16px;
+      cursor: pointer;
+      background: #3f3f3f;
+      color: #f1f1f1;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    
+    button:hover {
+      background: #4f4f4f;
+      transform: translateY(-1px);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    button.primary {
+      background: #ff0000;
+      color: white;
+    }
+    
+    button.primary:hover {
+      background: #cc0000;
+    }
+    
+    .footer {
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid #272727;
+      text-align: center;
+      font-size: 11px;
+      color: #666;
+    }
+    
+    .footer a {
+      color: #aaa;
+      text-decoration: none;
+    }
+    
+    .footer a:hover {
+      color: #f1f1f1;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">▶</div>
+    <h1>YouTube List View</h1>
+  </div>
+  
+  <div class="status-card">
+    <div class="status-title">Estado</div>
+    <div class="status-text">
+      <span class="status-indicator"></span>
+      Extensión activa en suscripciones
+    </div>
+  </div>
+  
+  <div class="features">
+    <div class="feature-item">
+      <span class="feature-icon">✓</span>
+      Vista de lista horizontal
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">✓</span>
+      Descripciones de videos
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">✓</span>
+      Optimización de rendimiento
+    </div>
+  </div>
+  
+  <div class="buttons">
+    <button id="refresh" class="primary">
+      🔄 Actualizar página
+    </button>
+    <button id="goToSubs">
+      📺 Ir a Suscripciones
+    </button>
+  </div>
+  
+  <div class="footer">
+    <p>v1.0 • Réplica de la vista LIST de YouTube</p>
+  </div>
+  
+  <script src="popup.js"></script>
+</body>
+</html>
