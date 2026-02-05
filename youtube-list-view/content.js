@@ -99,75 +99,66 @@
     }
     
     /**
-     * CORREGIDA CON SELECTORES EXACTOS del HTML real
+     * MOVER AVATAR Y NOMBRE DEL CANAL AL HEADER
      */
     function addChannelHeader(item) {
-        if (item.querySelector('.custom-channel-header')) {
+        if (item.dataset.headerProcessed === 'true') {
             return;
         }
         
-        let channelName = null;
-        let channelUrl = null;
-        let avatarUrl = null;
+        const lockup = item.querySelector('.yt-lockup-view-model');
+        const metadataModel = item.querySelector('yt-content-metadata-view-model');
         
-        // SELECTOR EXACTO basado en tu HTML:
-        // <a class="yt-core-attributed-string__link..." href="/@MARTIIE">MARTIIE</a>
-        const channelLink = item.querySelector('a.yt-core-attributed-string__link[href*="/@"]') ||
-                           item.querySelector('a.yt-core-attributed-string__link[href*="/channel/"]') ||
-                           item.querySelector('a[href*="/@"]:not([href*="/watch"])') ||
-                           item.querySelector('yt-content-metadata-view-model a');
-        
-        if (channelLink) {
-            channelName = channelLink.textContent.trim();
-            channelUrl = channelLink.href;
+        if (!lockup || !metadataModel) {
+            return;
+        }
+
+        // Crear contenedor del header si no existe
+        let customHeader = item.querySelector('.custom-video-header');
+        if (!customHeader) {
+            customHeader = document.createElement('div');
+            customHeader.className = 'custom-video-header';
+            item.insertBefore(customHeader, item.firstChild);
         }
         
-        // AVATAR: Buscar en yt-spec-avatar-shape__image
-        const avatarImg = item.querySelector('.yt-spec-avatar-shape__image') ||
-                         item.querySelector('yt-avatar-shape img') ||
-                         item.querySelector('.yt-lockup-metadata-view-model__avatar img');
-        
-        if (avatarImg) {
-            // El src puede estar vacío, intentar obtenerlo de varios atributos
-            avatarUrl = avatarImg.src || avatarImg.getAttribute('src') || '';
-            
-            // Si sigue vacío, esperar a que se cargue
-            if (!avatarUrl && avatarImg.loading === 'lazy') {
-                // Forzar carga de imagen lazy
-                avatarImg.loading = 'eager';
-                setTimeout(() => {
-                    if (avatarImg.src) {
-                        const header = item.querySelector('.custom-channel-header img');
-                        if (header) header.src = avatarImg.src;
+        // 1. MOVER EL AVATAR AL HEADER
+        const moveAvatar = () => {
+            const avatarContainer = item.querySelector('.yt-lockup-metadata-view-model__avatar');
+            if (avatarContainer && !customHeader.querySelector('.yt-lockup-metadata-view-model__avatar')) {
+                // Hacer clickable el avatar
+                const channelLinkEl = metadataModel.querySelector('a');
+                if (channelLinkEl && !avatarContainer.querySelector('.custom-avatar-link')) {
+                    const channelUrl = channelLinkEl.href;
+                    const anchor = document.createElement('a');
+                    anchor.href = channelUrl;
+                    anchor.classList.add('custom-avatar-link');
+                    while (avatarContainer.firstChild) {
+                        anchor.appendChild(avatarContainer.firstChild);
                     }
-                }, 100);
+                    avatarContainer.appendChild(anchor);
+                }
+                customHeader.appendChild(avatarContainer);
+                return true;
+            }
+            return false;
+        };
+
+        if (!moveAvatar()) {
+            setTimeout(moveAvatar, 100);
+            setTimeout(moveAvatar, 500);
+        }
+        
+        // 2. CLONAR NOMBRE DEL CANAL AL HEADER
+        if (!customHeader.querySelector('.cloned-channel-name')) {
+            const originalChannelRow = metadataModel.querySelector('.yt-content-metadata-view-model__metadata-row');
+            if (originalChannelRow) {
+                const clone = originalChannelRow.cloneNode(true);
+                clone.classList.add('cloned-channel-name');
+                customHeader.appendChild(clone);
             }
         }
         
-        if (!channelName || !channelUrl) {
-            console.warn('❌ No se pudo extraer canal de:', item);
-            console.log('channelLink encontrado:', channelLink);
-            return;
-        }
-        
-        // Crear header
-        const header = document.createElement('div');
-        header.className = 'custom-channel-header';
-        
-        const avatarHTML = avatarUrl ? 
-            `<img src="${avatarUrl}" class="custom-channel-header__avatar" alt="${channelName}" onerror="this.style.display='none'">` : 
-            `<div class="custom-channel-header__avatar-placeholder">📺</div>`;
-        
-        header.innerHTML = `
-            <a href="${channelUrl}" class="custom-channel-header__link">
-                ${avatarHTML}
-                <span class="custom-channel-header__name">${channelName}</span>
-            </a>
-        `;
-        
-        item.insertBefore(header, item.firstChild);
-        
-        console.log('✅ Header creado:', channelName);
+        item.dataset.headerProcessed = 'true';
     }
     
     function addDescriptionToItem(item, url) {
@@ -176,15 +167,19 @@
                 const description = await fetchDescription(url);
                 
                 if (description && description.trim() !== "") {
-                    // Buscar contenedor de metadata
-                    const metadataContainer = item.querySelector('yt-lockup-metadata-view-model') ||
-                                            item.querySelector('.yt-lockup-view-model__metadata');
+                    // Buscar el contenedor principal de metadata
+                    const metadataContainer = item.querySelector('yt-lockup-metadata-view-model');
                     
-                    if (metadataContainer && !item.querySelector('.custom-description')) {
+                    // Buscar la row de metadata (canal • vistas • fecha)
+                    const metadataRow = item.querySelector('.yt-lockup-metadata-view-model__metadata');
+                    
+                    if (metadataContainer && metadataRow && !item.querySelector('.custom-description')) {
                         const descDiv = document.createElement('div');
                         descDiv.className = 'custom-description';
                         descDiv.textContent = description;
-                        metadataContainer.appendChild(descDiv);
+                        
+                        // Insertar después de la metadata row
+                        metadataRow.parentNode.insertBefore(descDiv, metadataRow.nextSibling);
                     }
                 }
                 
