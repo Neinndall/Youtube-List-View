@@ -3,7 +3,7 @@
    FILTRADO ESTRICTO POR PÁGINA DE SUSCRIPCIONES
    ============================================ */
 
-/* 1. ELIMINAR CUALQUIER LÍMITE DE ANCHO SOLO EN SUSCRIPCIONES */
+/* 1. ELIMINAR CUALQUIER LÍMITE DE ANCHO Y ESPACIOS SUPERIORES */
 ytd-browse[page-subtype="subscriptions"],
 ytd-browse[page-subtype="subscriptions"] ytd-two-column-browse-results-renderer,
 ytd-browse[page-subtype="subscriptions"] #primary,
@@ -13,6 +13,14 @@ ytd-browse[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer {
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
+    padding-top: 0 !important;
+    --ytd-rich-grid-header-margin: 0px !important; /* Reset de variable de YouTube */
+}
+
+/* Ocultar barra de filtros (Hoy, Directos, etc) que quita espacio */
+ytd-browse[page-subtype="subscriptions"] ytd-feed-filter-chip-bar-renderer,
+ytd-browse[page-subtype="subscriptions"] #chips-wrapper {
+    display: none !important;
 }
 
 ytd-browse[page-subtype="subscriptions"] #primary {
@@ -23,15 +31,22 @@ ytd-browse[page-subtype="subscriptions"] #primary {
 /* ============================================
    CABECERA: "Más recientes" (Ocultar y Compactar)
    ============================================ */
-ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer {
-    display: none !important;
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer,
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #dismissible,
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader {
+    margin: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    min-height: 0 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] #header.ytd-rich-grid-renderer {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader,
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #title-container,
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #subscribe-button,
+ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer {
+    display: none !important;
     height: 0 !important;
-    overflow: hidden !important;
+    visibility: hidden !important;
 }
 
 /* 4. CONTENEDOR DE VIDEO - ANCHO COMPLETO */
@@ -177,18 +192,22 @@ ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__badges 
     width: 100% !important;
 }
 
-/* 10. SHORTS - Solo en suscripciones */
+/* 10. SHORTS Y SECCIONES - Solo en suscripciones */
 ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
     width: 100% !important;
-    margin: 24px 0 !important;
+    margin: 0 0 24px 0 !important; /* Margen SOLO abajo, cero arriba */
+    padding: 0 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer #contents {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 12px !important;
-    justify-content: flex-start !important;
-    overflow-x: auto !important;
+/* Forzar colapso total de la zona del header */
+ytd-browse[page-subtype="subscriptions"] #header.ytd-rich-grid-renderer,
+ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #header,
+ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer {
+    display: none !important;
+    height: 0 !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer ytd-rich-item-renderer {

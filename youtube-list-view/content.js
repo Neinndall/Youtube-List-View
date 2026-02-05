@@ -202,12 +202,26 @@
         };
     }
     
+    function removeExtraHeaders() {
+        if (!isSubscriptionsPage()) return;
+        
+        // Buscar el subheader de 'Más recientes'
+        const headers = document.querySelectorAll('ytd-shelf-renderer .grid-subheader, ytd-rich-grid-header-renderer');
+        headers.forEach(h => {
+            if (h.textContent.includes('Más recientes') || h.querySelector('[aria-label="Todas las suscripciones"]')) {
+                h.style.display = 'none';
+                h.remove(); // Borrar del DOM
+            }
+        });
+    }
+
     function injectDescriptions() {
         chrome.storage.local.get(['enabled', 'showDescriptions'], function(result) {
             if (result.enabled === false) return;
             if (!isSubscriptionsPage()) return;
             
             ensurePageAttribute();
+            removeExtraHeaders(); // LIMPIAR HEADERS
             
             const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
             
