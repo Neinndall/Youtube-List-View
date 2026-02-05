@@ -20,15 +20,18 @@ ytd-browse[page-subtype="subscriptions"] #primary {
     box-sizing: border-box !important;
 }
 
-/* 3. ELIMINAR ESPACIO SUPERIOR (CABECERA) */
+/* ============================================
+   CABECERA: "Más recientes" (Ocultar y Compactar)
+   ============================================ */
 ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer {
-    margin: 0 !important;
-    padding: 0 !important;
+    display: none !important;
 }
 
 ytd-browse[page-subtype="subscriptions"] #header.ytd-rich-grid-renderer {
     margin-top: 0 !important;
-    padding-top: 5px !important;
+    padding-top: 0 !important;
+    height: 0 !important;
+    overflow: hidden !important;
 }
 
 /* 4. CONTENEDOR DE VIDEO - ANCHO COMPLETO */
@@ -60,34 +63,47 @@ ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-sec
 ytd-browse[page-subtype="subscriptions"] .custom-video-header {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important; /* REDUCIDO DE 12PX A 8PX */
+    gap: 8px !important;
     padding: 5px 0 !important;
     margin-bottom: 10px !important;
 }
 
+/* AVATAR con soporte para anillo de DIRECTO */
 ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadata-view-model__avatar {
     display: block !important;
     visibility: visible !important;
-    width: 30px !important;
-    height: 30px !important;
+    width: 36px !important;
+    height: 36px !important;
     position: relative !important;
 }
 
-/* Ocultar el indicador de DIRECTO (Live ring) en el avatar del header custom */
-ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-avatar-shape--live-ring::after,
+/* Ajustar el anillo rojo de DIRECTO para que sea perfecto a 36px */
+ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-avatar-shape--live-ring::after {
+    display: block !important;
+    width: 40px !important;
+    height: 40px !important;
+    top: -2px !important;
+    left: -2px !important;
+    border: 2px solid #f00 !important;
+}
+
+/* Subir la etiqueta "DIRECTO" para que esté pegada al avatar */
 ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-avatar-shape__live-badge {
-    display: none !important;
+    display: block !important;
+    bottom: 2px !important;
+    transform: scale(0.8) !important;
 }
 
 ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadata-view-model__avatar img {
     display: block !important;
-    width: 30px !important;
-    height: 30px !important;
+    width: 36px !important;
+    height: 36px !important;
     border-radius: 50% !important;
+    object-fit: cover !important;
 }
 
 ytd-browse[page-subtype="subscriptions"] .custom-video-header .cloned-channel-name a {
-    font-size: 18px !important;
+    font-size: 20px !important;
     font-weight: 600 !important;
     color: #fff !important;
     text-decoration: none !important;
