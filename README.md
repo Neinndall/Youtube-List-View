@@ -96,15 +96,6 @@ Esto asegura que los Shorts se vean correctamente en formato vertical como está
 
 ## 📝 Notas Importantes
 
-### Iconos
-
-Los iconos ya están **incluidos** en la carpeta `icons/`:
-- ✅ `icons/icon16.png` - Icono pequeño (16x16)
-- ✅ `icons/icon48.png` - Icono mediano (48x48)
-- ✅ `icons/icon128.png` - Icono grande (128x128)
-
-El diseño representa la vista LIST con 3 filas horizontales (miniatura + texto) sobre fondo rojo de YouTube.
-
 ### Permisos
 
 La extensión requiere:
