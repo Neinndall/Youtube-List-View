@@ -31,22 +31,19 @@ ytd-browse[page-subtype="subscriptions"] #primary {
 /* ============================================
    CABECERA: "Más recientes" (Ocultar y Compactar)
    ============================================ */
-ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer,
-ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #dismissible,
-ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader {
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    min-height: 0 !important;
-}
-
-ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader,
-ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #title-container,
-ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #subscribe-button,
-ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer {
+ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer,
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer, 
+ytd-browse[page-subtype="subscriptions"] #header.ytd-rich-grid-renderer {
     display: none !important;
     height: 0 !important;
-    visibility: hidden !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Forzar que el grid no tenga ningún espacio arriba */
+ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
 /* 4. CONTENEDOR DE VIDEO - ANCHO COMPLETO */
