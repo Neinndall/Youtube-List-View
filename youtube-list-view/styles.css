@@ -86,8 +86,8 @@ ytd-rich-grid-header-renderer {
     flex-direction: row !important; /* Asegurar orden horizontal */
     align-items: center !important;
     gap: 12px !important;
-    padding: 12px 0 !important;
-    margin-bottom: 12px !important;
+    padding: 6px 0 !important;
+    margin-bottom: 8px !important;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
     width: 100% !important;
 }
@@ -141,7 +141,7 @@ ytd-rich-grid-header-renderer {
 ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) {
     width: 100% !important;
     max-width: 100% !important;
-    margin: 0 0 24px 0 !important;
+    margin: 0 0 12px 0 !important;
     padding: 0 !important;
     display: flex !important;
     flex-direction: column !important;
@@ -191,19 +191,32 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt
     margin-bottom: 4px !important;
 }
 
-/* Metadata: Vistas • Fecha */
-.yt-lockup-metadata-view-model__metadata {
+/* Metadata: Canal • Vistas • Fecha */
+.yt-lockup-view-model__metadata {
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
-    gap: 8px !important;
+    align-items: center !important;
+    gap: 0 !important; /* El espacio lo darán los separadores */
     color: #aaa !important;
     font-size: 12px !important;
 }
 
-/* Ocultar avatar y nombre original en la metadata inferior para evitar duplicados */
-.yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar,
-yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row:first-of-type {
+/* Mostrar las filas de metadata inline */
+yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row {
+    display: inline-flex !important;
+    align-items: center !important;
+}
+
+/* Añadir separador • entre Canal, Vistas y Fecha */
+yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row:not(:last-child)::after {
+    content: "•" !important;
+    margin: 0 8px !important;
+    color: #aaa !important;
+}
+
+/* Ocultar SOLO el avatar de la metadata inferior (porque ya está en el header) */
+.yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar {
     display: none !important;
 }
 
