@@ -3,17 +3,26 @@
    CON HEADER DE CANAL
    ============================================ */
 
-/* RESET DE GRID - Forzar 1 columna SOLO para videos normales */
+/* RESET DE GRID - Forzar 1 columna y ANCHO TOTAL */
+ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer,
+ytd-browse[page-subtype="subscriptions"] #primary {
+    max-width: none !important;
+    width: 100% !important;
+    padding-left: 24px !important; /* Espacio para que no pegue al panel lateral */
+    box-sizing: border-box !important;
+}
+
 ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer {
     --ytd-rich-grid-items-per-row: 1 !important;
     display: block !important;
-    max-width: none !important;
 }
 
 ytd-browse[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer {
     display: block !important;
     max-width: none !important;
     width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
 }
 
 /* ============================================
@@ -126,8 +135,8 @@ ytd-rich-grid-header-renderer {
 .custom-video-header .cloned-channel-name a,
 .custom-video-header .cloned-channel-name span {
     color: #fff !important;
-    font-weight: 500 !important;
-    font-size: 14px !important;
+    font-weight: 600 !important; /* Más peso para que resalte */
+    font-size: 16px !important;   /* Tamaño aumentado */
     text-decoration: none !important;
 }
 
@@ -145,6 +154,7 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) {
     padding: 0 !important;
     display: flex !important;
     flex-direction: column !important;
+    position: relative !important; /* IMPORTANTE para el menú */
 }
 
 /* ============================================
@@ -154,14 +164,34 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt
     display: flex !important;
     flex-direction: row !important;
     padding: 0 !important;
-    gap: 16px !important;
+    gap: 16px !important; /* Más separación para que no esté pegado */
     align-items: flex-start !important;
+    justify-content: flex-start !important;
     width: 100% !important;
+    position: relative !important;
 }
 
 /* ============================================
-   MINIATURA DEL VIDEO
+   MENU DE 3 PUNTOS (⋮)
    ============================================ */
+ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) #menu.ytd-rich-grid-media,
+ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) #menu.ytd-rich-item-renderer,
+ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt-lockup-view-model__menu,
+ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) ytd-menu-renderer {
+    position: absolute !important;
+    top: 48px !important; /* Ajustado para estar debajo del header custom */
+    right: 0 !important;
+    display: block !important;
+    z-index: 10 !important;
+}
+
+/* Forzar que CUALQUIER contenedor intermedio no tenga margen */
+ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt-lockup-view-model > * {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* Asegurar que la miniatura es rígida */
 ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt-lockup-view-model__content-image {
     width: 246px !important;
     min-width: 246px !important;
@@ -169,6 +199,7 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt
     border-radius: 8px !important;
     overflow: hidden !important;
     flex-shrink: 0 !important;
+    margin-right: 0 !important; /* Asegurar */
 }
 
 /* ============================================
@@ -180,6 +211,9 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt
     flex-direction: column !important;
     gap: 4px !important;
     min-width: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    align-items: flex-start !important; /* Alinear todo a la izquierda */
 }
 
 /* Título */
@@ -188,7 +222,8 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt
     font-weight: 500 !important;
     line-height: 1.4 !important;
     color: #fff !important;
-    margin-bottom: 4px !important;
+    margin: 0 0 4px 0 !important; /* Reset total de márgenes */
+    padding: 0 !important;       /* Reset total de padding */
 }
 
 /* Metadata: Canal • Vistas • Fecha */
@@ -197,9 +232,11 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) .yt
     flex-direction: row !important;
     flex-wrap: wrap !important;
     align-items: center !important;
-    gap: 0 !important; /* El espacio lo darán los separadores */
+    gap: 0 !important;
     color: #aaa !important;
     font-size: 12px !important;
+    margin: 0 !important;        /* Reset total de márgenes */
+    padding: 0 !important;       /* Reset total de padding */
 }
 
 /* Mostrar las filas de metadata inline */
