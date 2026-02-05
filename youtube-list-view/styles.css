@@ -77,7 +77,7 @@ ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadat
 }
 
 ytd-browse[page-subtype="subscriptions"] .custom-video-header .cloned-channel-name a {
-    font-size: 16px !important;
+    font-size: 18px !important;
     font-weight: 600 !important;
     color: #fff !important;
     text-decoration: none !important;
