@@ -1,82 +1,82 @@
 /* ============================================
    YOUTUBE LIST VIEW - RECONSTRUCCIÓN TOTAL
+   FILTRADO ESTRICTO POR PÁGINA DE SUSCRIPCIONES
    ============================================ */
 
-/* 1. ELIMINAR CUALQUIER LÍMITE DE ANCHO EN LA PÁGINA */
+/* 1. ELIMINAR CUALQUIER LÍMITE DE ANCHO SOLO EN SUSCRIPCIONES */
 ytd-browse[page-subtype="subscriptions"],
-ytd-two-column-browse-results-renderer,
-#primary,
-ytd-rich-grid-renderer,
-#contents.ytd-rich-grid-renderer {
+ytd-browse[page-subtype="subscriptions"] ytd-two-column-browse-results-renderer,
+ytd-browse[page-subtype="subscriptions"] #primary,
+ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer,
+ytd-browse[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer {
     max-width: none !important;
     width: 100% !important;
     margin: 0 !important;
     padding: 0 !important;
 }
 
-/* 2. ESPACIADO DEL PANEL LATERAL */
-#primary {
+ytd-browse[page-subtype="subscriptions"] #primary {
     padding-left: 20px !important;
     box-sizing: border-box !important;
 }
 
 /* 3. ELIMINAR ESPACIO SUPERIOR (CABECERA) */
-ytd-rich-grid-header-renderer {
+ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer {
     margin: 0 !important;
     padding: 0 !important;
 }
 
-#header.ytd-rich-grid-renderer {
+ytd-browse[page-subtype="subscriptions"] #header.ytd-rich-grid-renderer {
     margin-top: 0 !important;
     padding-top: 5px !important;
 }
 
 /* 4. CONTENEDOR DE VIDEO - ANCHO COMPLETO */
-ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) {
+ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) {
     width: 100% !important;
     display: block !important;
     position: relative !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 12px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+    padding-bottom: 12px !important;
 }
 
 /* 5. EL MENÚ DE 3 PUNTOS - DERECHA ABSOLUTA */
-/* Buscamos el botón de menú y lo clavamos al borde derecho de la pantalla */
-ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) #menu.ytd-rich-grid-media,
-ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) #menu.ytd-rich-item-renderer,
-ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) ytd-menu-renderer {
+ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) #menu.ytd-rich-grid-media,
+ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) #menu.ytd-rich-item-renderer,
+ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) ytd-menu-renderer {
     position: absolute !important;
-    right: 20px !important; /* Pegado al borde derecho del navegador */
-    top: 50px !important;
+    right: 20px !important;
+    top: 55px !important;
     left: auto !important;
     display: block !important;
+    z-index: 10 !important;
 }
 
 /* 6. HEADER DEL CANAL (AVATAR + NOMBRE) */
-.custom-video-header {
+ytd-browse[page-subtype="subscriptions"] .custom-video-header {
     display: flex !important;
     align-items: center !important;
-    gap: 12px !important;
+    gap: 8px !important; /* REDUCIDO DE 12PX A 8PX */
     padding: 5px 0 !important;
-    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
     margin-bottom: 10px !important;
 }
 
-/* Forzar visibilidad del AVATAR arriba */
-.custom-video-header .yt-lockup-metadata-view-model__avatar {
+ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadata-view-model__avatar {
     display: block !important;
     visibility: visible !important;
     width: 32px !important;
     height: 32px !important;
 }
 
-.custom-video-header .yt-lockup-metadata-view-model__avatar img {
+ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadata-view-model__avatar img {
     display: block !important;
     width: 32px !important;
     height: 32px !important;
     border-radius: 50% !important;
 }
 
-.custom-video-header .cloned-channel-name a {
+ytd-browse[page-subtype="subscriptions"] .custom-video-header .cloned-channel-name a {
     font-size: 16px !important;
     font-weight: 600 !important;
     color: #fff !important;
@@ -84,14 +84,14 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) ytd
 }
 
 /* 7. LAYOUT DE VIDEO (Miniatura + Info) */
-.yt-lockup-view-model {
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model {
     display: flex !important;
     flex-direction: row !important;
-    gap: 15px !important;
+    gap: 16px !important;
     align-items: flex-start !important;
 }
 
-.yt-lockup-view-model__content-image {
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__content-image {
     width: 246px !important;
     min-width: 246px !important;
     height: 138px !important;
@@ -99,46 +99,65 @@ ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) ytd
 }
 
 /* 8. METADATA (Título, Stats, Desc) */
-.yt-lockup-view-model__metadata {
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__metadata {
     flex: 1 !important;
-    padding-right: 50px !important; /* Espacio para que el texto no pise el botón */
+    padding-right: 60px !important; /* Espacio para el menú */
+    display: flex !important;
+    flex-direction: column !important;
 }
 
-/* Mostrar la metadata row que contiene el CANAL debajo del título */
-yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row {
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__title {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    margin: 0 0 4px 0 !important;
+    line-height: 1.4 !important;
+}
+
+ytd-browse[page-subtype="subscriptions"] yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row {
     display: inline-flex !important;
     align-items: center !important;
-}
-
-/* Añadir el separador • después de cada dato */
-yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row:not(:last-child)::after {
-    content: "•" !important;
-    margin: 0 8px !important;
+    font-size: 12px !important;
     color: #aaa !important;
 }
 
-/* Ocultar elementos originales duplicados */
-.yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar {
+ytd-browse[page-subtype="subscriptions"] yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row:not(:last-child)::after {
+    content: "•" !important;
+    margin: 0 8px !important;
+}
+
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar {
     display: none !important;
 }
 
-.custom-description {
+ytd-browse[page-subtype="subscriptions"] .custom-description {
     font-size: 12px !important;
     color: #aaa !important;
-    margin-top: 10px !important;
+    margin-top: 8px !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
+    line-height: 1.5 !important;
 }
 
-/* 9. SHORTS - Mantenerlos a la izquierda y estirados */
-ytd-rich-section-renderer {
+/* 9. BOTONES DE ACCIÓN (Recibir Aviso, etc.) */
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__badges,
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__badges {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    margin-top: 10px !important;
     width: 100% !important;
-    margin: 20px 0 !important;
 }
 
-ytd-rich-section-renderer #contents {
+/* 10. SHORTS - Solo en suscripciones */
+ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
+    width: 100% !important;
+    margin: 24px 0 !important;
+}
+
+ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer #contents {
     display: flex !important;
     flex-direction: row !important;
     gap: 12px !important;
@@ -146,7 +165,7 @@ ytd-rich-section-renderer #contents {
     overflow-x: auto !important;
 }
 
-ytd-rich-section-renderer ytd-rich-item-renderer {
+ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer ytd-rich-item-renderer {
     width: 180px !important;
     min-width: 180px !important;
 }

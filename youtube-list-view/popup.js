@@ -1,37 +1,52 @@
-// Botón de refrescar página
-document.getElementById('refresh').addEventListener('click', () => {
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    chrome.tabs.reload(tabs[0].id);
-    window.close();
-  });
-});
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleEnabled = document.getElementById('toggle-enabled');
+    const statusEnabled = document.getElementById('status-enabled');
+    const toggleDesc = document.getElementById('toggle-desc');
+    const statusDesc = document.getElementById('status-desc');
+    const refreshBtn = document.getElementById('refresh');
+    const goToSubsBtn = document.getElementById('goToSubs');
 
-// Botón para ir a suscripciones
-document.getElementById('goToSubs').addEventListener('click', () => {
-  chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-    const currentTab = tabs[0];
-    
-    // Si ya estamos en YouTube, solo navegar
-    if (currentTab.url && currentTab.url.includes('youtube.com')) {
-      chrome.tabs.update(currentTab.id, {
-        url: 'https://www.youtube.com/feed/subscriptions'
-      });
-    } else {
-      // Si no, crear nueva pestaña
-      chrome.tabs.create({
-        url: 'https://www.youtube.com/feed/subscriptions'
-      });
+    // Cargar estados guardados
+    chrome.storage.local.get(['enabled', 'showDescriptions'], function(result) {
+        const isEnabled = result.enabled !== false;
+        const showDesc = result.showDescriptions !== false;
+        
+        toggleEnabled.checked = isEnabled;
+        statusEnabled.textContent = isEnabled ? 'Activado' : 'Desactivado';
+        
+        toggleDesc.checked = showDesc;
+        statusDesc.textContent = showDesc ? 'Mostrando' : 'Ocultas';
+    });
+
+    // Manejar cambio de interruptor de habilitación
+    toggleEnabled.addEventListener('change', function() {
+        const isEnabled = toggleEnabled.checked;
+        statusEnabled.textContent = isEnabled ? 'Activado' : 'Desactivado';
+        chrome.storage.local.set({ enabled: isEnabled }, function() {
+            reloadCurrentTab();
+        });
+    });
+
+    // Manejar cambio de interruptor de descripciones
+    toggleDesc.addEventListener('change', function() {
+        const showDesc = toggleDesc.checked;
+        statusDesc.textContent = showDesc ? 'Mostrando' : 'Ocultas';
+        chrome.storage.local.set({ showDescriptions: showDesc }, function() {
+            reloadCurrentTab();
+        });
+    });
+
+    function reloadCurrentTab() {
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            if (tabs[0] && tabs[0].url.includes('youtube.com')) {
+                chrome.tabs.reload(tabs[0].id);
+            }
+        });
     }
-    
-    window.close();
-  });
-});
 
-// Mostrar información adicional si estamos en la página correcta
-chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
-  const currentTab = tabs[0];
-  
-  if (currentTab.url && currentTab.url.includes('/feed/subscriptions')) {
-    console.log('Usuario en página de suscripciones');
-  }
+    refreshBtn.addEventListener('click', reloadCurrentTab);
+
+    goToSubsBtn.addEventListener('click', function() {
+        chrome.tabs.create({ url: 'https://www.youtube.com/feed/subscriptions' });
+    });
 });

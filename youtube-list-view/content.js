@@ -19,8 +19,17 @@
     
     function ensurePageAttribute() {
         const browse = document.querySelector('ytd-browse');
-        if (browse && !browse.getAttribute('page-subtype')) {
-            browse.setAttribute('page-subtype', 'subscriptions');
+        if (!browse) return;
+
+        if (isSubscriptionsPage()) {
+            if (browse.getAttribute('page-subtype') !== 'subscriptions') {
+                browse.setAttribute('page-subtype', 'subscriptions');
+            }
+        } else {
+            // Si salimos de suscripciones, quitamos el atributo para que el CSS no aplique
+            if (browse.getAttribute('page-subtype') === 'subscriptions') {
+                browse.removeAttribute('page-subtype');
+            }
         }
     }
     
@@ -194,36 +203,34 @@
     }
     
     function injectDescriptions() {
-        if (!isSubscriptionsPage()) return;
-        
-        ensurePageAttribute();
-        
-        console.log('🔍 Buscando videos...');
-        
-        const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
-        
-        console.log(`📦 Encontrados ${items.length} videos`);
-        
-        items.forEach((item, index) => {
-            // 1. Header del canal
-            addChannelHeader(item);
+        chrome.storage.local.get(['enabled', 'showDescriptions'], function(result) {
+            if (result.enabled === false) return;
+            if (!isSubscriptionsPage()) return;
             
-            // 2. Descripción
-            if (item.dataset.descAdded === 'true' || item.dataset.descFetching === 'true') {
-                return;
-            }
+            ensurePageAttribute();
             
-            const titleLink = item.querySelector('a[href*="/watch"]');
+            const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
             
-            if (!titleLink || !titleLink.href) {
-                return;
-            }
+            items.forEach((item) => {
+                // 1. Header del canal
+                addChannelHeader(item);
+                
+                // 2. Descripción (solo si está habilitado)
+                if (result.showDescriptions === false) return;
+                
+                if (item.dataset.descAdded === 'true' || item.dataset.descFetching === 'true') {
+                    return;
+                }
+                
+                const titleLink = item.querySelector('a[href*="/watch"]');
+                if (!titleLink || !titleLink.href) return;
+                
+                item.dataset.descFetching = 'true';
+                fetchQueue.push(addDescriptionToItem(item, titleLink.href));
+            });
             
-            item.dataset.descFetching = 'true';
-            fetchQueue.push(addDescriptionToItem(item, titleLink.href));
+            processFetchQueue();
         });
-        
-        processFetchQueue();
     }
     
     function debounce(func, wait) {
@@ -278,17 +285,24 @@
     }
     
     function init() {
-        if (!isSubscriptionsPage()) return;
-        
-        console.log('🚀 YouTube List View: Inicializando...');
-        
-        ensurePageAttribute();
-        injectDescriptions();
-        setupObserver();
-        
-        setInterval(cleanupCache, 1000 * 60 * 10);
-        
-        console.log('✅ YouTube List View: Activo');
+        chrome.storage.local.get(['enabled'], function(result) {
+            if (result.enabled === false) {
+                console.log('❌ YouTube List View: Desactivado por el usuario');
+                return;
+            }
+
+            if (!isSubscriptionsPage()) return;
+            
+            console.log('🚀 YouTube List View: Inicializando...');
+            
+            ensurePageAttribute();
+            injectDescriptions();
+            setupObserver();
+            
+            setInterval(cleanupCache, 1000 * 60 * 10);
+            
+            console.log('✅ YouTube List View: Activo');
+        });
     }
     
     if (document.readyState === 'loading') {
