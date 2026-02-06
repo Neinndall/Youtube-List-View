@@ -134,6 +134,7 @@ ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__content-image {
     min-width: 246px !important;
     height: 138px !important;
     flex-shrink: 0 !important;
+    border-radius: 8px !important; /* Añadido un poco de radio para que se vea mejor */
 }
 
 /* 8. METADATA (Título, Stats, Desc) */
@@ -210,4 +211,10 @@ ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer {
 ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer ytd-rich-item-renderer {
     width: 180px !important;
     min-width: 180px !important;
+}
+
+/* SALVAGUARDA: Ocultar elementos inyectados en CUALQUIER otra página (Inicio, Canales, etc) */
+ytd-browse:not([page-subtype="subscriptions"]) .custom-video-header,
+ytd-browse:not([page-subtype="subscriptions"]) .custom-description {
+    display: none !important;
 }
