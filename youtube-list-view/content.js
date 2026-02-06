@@ -20,18 +20,20 @@
     
     function ensurePageAttribute(isEnabled) {
         // SI ESTAMOS NAVEGANDO, NO TOCAMOS NADA.
-        // Esto evita que el diseño de suscripciones se aplique a la Home durante la carga.
         if (estaNavegando) return;
 
         const browse = document.querySelector('ytd-browse');
         if (!browse) return;
 
         const onSubs = isSubscriptionsPage();
+        
+        // Lógica estricta: Solo aplicar si está habilitado Y estamos en suscripciones
         if (isEnabled && onSubs) {
             if (browse.getAttribute('page-subtype') !== 'subscriptions') {
                 browse.setAttribute('page-subtype', 'subscriptions');
             }
         } else {
+            // En cualquier otro caso (deshabilitado O no suscripciones), limpiar atributo
             if (browse.getAttribute('page-subtype') === 'subscriptions') {
                 browse.removeAttribute('page-subtype');
             }
@@ -98,79 +100,89 @@
         }
     }
     
-    function addChannelHeader(item) {
-        if (estaNavegando) return;
-        if (item.dataset.headerProcessed === 'true') return;
-        
-        const lockup = item.querySelector('.yt-lockup-view-model');
-        const metadataModel = item.querySelector('yt-content-metadata-view-model');
-        
-        if (!lockup || !metadataModel) return;
-
-        let customHeader = item.querySelector('.custom-video-header');
-        if (!customHeader) {
-            customHeader = document.createElement('div');
-            customHeader.className = 'custom-video-header';
-            item.insertBefore(customHeader, item.firstChild);
-        }
-        
-        const moveAvatar = () => {
+        function addChannelHeader(item) {
             if (estaNavegando) return;
-            const avatarContainer = item.querySelector('.yt-lockup-metadata-view-model__avatar');
-            if (avatarContainer && !customHeader.querySelector('.yt-lockup-metadata-view-model__avatar')) {
-                const channelLinkEl = metadataModel.querySelector('a');
-                if (channelLinkEl && !avatarContainer.querySelector('.custom-avatar-link')) {
-                    const anchor = document.createElement('a');
-                    anchor.href = channelLinkEl.href;
-                    anchor.classList.add('custom-avatar-link');
-                    while (avatarContainer.firstChild) {
-                        anchor.appendChild(avatarContainer.firstChild);
-                    }
-                    avatarContainer.appendChild(anchor);
-                }
-                customHeader.appendChild(avatarContainer);
-                return true;
-            }
-            return false;
-        };
-
-        moveAvatar();
-        
-        if (!customHeader.querySelector('.cloned-channel-name')) {
-            const originalChannelRow = metadataModel.querySelector('.yt-content-metadata-view-model__metadata-row');
-            if (originalChannelRow) {
-                const clone = originalChannelRow.cloneNode(true);
-                clone.classList.add('cloned-channel-name');
-                customHeader.appendChild(clone);
-            }
-        }
-        
-        item.dataset.headerProcessed = 'true';
-    }
+            
+            // Verificación física: ¿Existe el header?
+            const hasHeader = !!item.querySelector('.custom-video-header');
+            if (item.dataset.headerProcessed === 'true' && hasHeader) return;
+            
+            const lockup = item.querySelector('.yt-lockup-view-model');
+            const metadataModel = item.querySelector('yt-content-metadata-view-model');
+            
+            if (!lockup || !metadataModel) return;
     
-    function addDescriptionToItem(item, url) {
-        return async () => {
-            if (estaNavegando) return;
-            try {
-                const description = await fetchDescription(url);
-                if (description && description.trim() !== "") {
-                    const metadataRow = item.querySelector('.yt-lockup-metadata-view-model__metadata');
-                    if (metadataRow && !item.querySelector('.custom-description')) {
-                        const descDiv = document.createElement('div');
-                        descDiv.className = 'custom-description';
+            let customHeader = item.querySelector('.custom-video-header');
+            if (!customHeader) {
+                customHeader = document.createElement('div');
+                customHeader.className = 'custom-video-header';
+                item.insertBefore(customHeader, item.firstChild);
+            }
+            
+            const moveAvatar = () => {
+                if (estaNavegando) return;
+                const avatarContainer = item.querySelector('.yt-lockup-metadata-view-model__avatar');
+                if (avatarContainer && !customHeader.querySelector('.yt-lockup-metadata-view-model__avatar')) {
+                    const channelLinkEl = metadataModel.querySelector('a');
+                    if (channelLinkEl && !avatarContainer.querySelector('.custom-avatar-link')) {
+                        const anchor = document.createElement('a');
+                        anchor.href = channelLinkEl.href;
+                        anchor.classList.add('custom-avatar-link');
+                        while (avatarContainer.firstChild) {
+                            anchor.appendChild(avatarContainer.firstChild);
+                        }
+                        avatarContainer.appendChild(anchor);
+                    }
+                    customHeader.appendChild(avatarContainer);
+                    return true;
+                }
+                return false;
+            };
+    
+            moveAvatar();
+            
+            if (!customHeader.querySelector('.cloned-channel-name')) {
+                const originalChannelRow = metadataModel.querySelector('.yt-content-metadata-view-model__metadata-row');
+                if (originalChannelRow) {
+                    const clone = originalChannelRow.cloneNode(true);
+                    clone.classList.add('cloned-channel-name');
+                    customHeader.appendChild(clone);
+                }
+            }
+            
+            item.dataset.headerProcessed = 'true';
+        }
+    
+        function addDescriptionToItem(item, url) {
+            return async () => {
+                if (estaNavegando) return;
+                try {
+                    const description = await fetchDescription(url);
+                    const descDiv = item.querySelector('.custom-description');
+                    
+                    if (description && description.trim() !== "" && descDiv) {
                         descDiv.textContent = description;
-                        metadataRow.parentNode.insertBefore(descDiv, metadataRow.nextSibling);
                     }
+                    
+                    item.dataset.descAdded = 'true';
+                    delete item.dataset.descFetching;
+                } catch (error) {
+                    item.dataset.descAdded = 'true';
+                    delete item.dataset.descFetching;
                 }
-                item.dataset.descAdded = 'true';
-                delete item.dataset.descFetching;
-            } catch (error) {
-                item.dataset.descAdded = 'true';
-                delete item.dataset.descFetching;
-            }
-        };
+            };
+        }
+        
+    function getVideoId(url) {
+        if (!url) return null;
+        try {
+            const urlObj = new URL(url);
+            return urlObj.searchParams.get('v');
+        } catch (e) {
+            return null;
+        }
     }
-    
+
     function processItems() {
         if (estaNavegando) return;
         if (typeof chrome === 'undefined' || !chrome.runtime?.id) return;
@@ -186,23 +198,57 @@
                 const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
                 
                 items.forEach((item) => {
+                    const titleLink = item.querySelector('a[href*="/watch"]');
+                    const videoUrl = titleLink ? titleLink.href : '';
+                    const videoId = getVideoId(videoUrl);
+                    
+                    // Si no hay ID de video (transición o invalido), no tocamos nada
+                    if (!videoId) return;
+
+                    // Sincronización física: Si ya tiene texto, marcamos como añadido
+                    const descDiv = item.querySelector('.custom-description');
+                    const hasDescriptionText = descDiv && descDiv.textContent.trim().length > 0;
+                    if (hasDescriptionText) {
+                        item.dataset.descAdded = 'true';
+                    }
+
+                    // DETECCIÓN DE CAMBIO ROBUSTA: Comparamos IDs, no URLs completas
+                    if (item.dataset.lastVideoId && item.dataset.lastVideoId !== videoId) {
+                        delete item.dataset.headerProcessed;
+                        delete item.dataset.descAdded;
+                        delete item.dataset.descFetching;
+                        // MEJORA VISUAL: NO borramos el texto sincrónicamente.
+                        // Dejamos el texto anterior hasta que el nuevo llegue y lo sobrescriba.
+                        // Esto evita el "parpadeo" (texto -> vacío -> texto).
+                        // if (descDiv) descDiv.textContent = ''; 
+                    }
+                    item.dataset.lastVideoId = videoId;
+
                     addChannelHeader(item);
                     
-                    if (item.dataset.descAdded === 'true' || item.dataset.descFetching === 'true') return;
+                    // Si ya está añadido y tiene texto (y coincide con el ID actual según nuestra lógica de flujo), saltamos
+                    if ((item.dataset.descAdded === 'true' && hasDescriptionText) || item.dataset.descFetching === 'true') return;
                     
-                    const titleLink = item.querySelector('a[href*="/watch"]');
-                    if (!titleLink || !titleLink.href) return;
-                    
-                    item.dataset.descFetching = 'true';
-                    fetchQueue.push(addDescriptionToItem(item, titleLink.href));
+                    // PRE-INSERCIÓN: Aseguramos que el contenedor existe
+                    const metadataRow = item.querySelector('.yt-lockup-metadata-view-model__metadata');
+                    if (metadataRow && !descDiv) {
+                        const newDescDiv = document.createElement('div');
+                        newDescDiv.className = 'custom-description';
+                        metadataRow.parentNode.insertBefore(newDescDiv, metadataRow.nextSibling);
+                    } else if (descDiv && !hasDescriptionText) {
+                        item.dataset.descAdded = 'false';
+                    }
+
+                    if (item.dataset.descAdded !== 'true') {
+                        item.dataset.descFetching = 'true';
+                        fetchQueue.push(addDescriptionToItem(item, videoUrl));
+                    }
                 });
                 
                 processFetchQueue();
             });
         } catch (e) {}
-    }
-    
-    function debounce(func, wait) {
+    }    function debounce(func, wait) {
         let timeout;
         return function executedFunction(...args) {
             const later = () => {
@@ -254,12 +300,14 @@
     // 1. Al empezar a navegar: LIMPIEZA TOTAL
     document.addEventListener('yt-navigate-start', () => {
         estaNavegando = true; // Bloqueamos cualquier proceso de la extensión
+        fetchQueue = []; // Limpiamos la cola para no arrastrar peticiones de la página anterior
         const browse = document.querySelector('ytd-browse');
         if (browse) browse.removeAttribute('page-subtype'); // Quitamos el estilo de lista YA
     });
 
     // 2. Al terminar de navegar: REINICIO
     document.addEventListener('yt-navigate-finish', init);
+    document.addEventListener('yt-page-data-updated', init); // Fallback para cambios de datos en la misma SPA
     
     // Fallback inicial
     init();

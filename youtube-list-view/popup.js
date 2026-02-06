@@ -1,37 +1,34 @@
 document.addEventListener('DOMContentLoaded', function() {
-    const toggleEnabled = document.getElementById('toggle-enabled');
-    const statusEnabled = document.getElementById('status-enabled');
-    const refreshBtn = document.getElementById('refresh');
-    const goToSubsBtn = document.getElementById('goToSubs');
+    const toggle = document.getElementById('toggle-enabled');
+    const statusLabel = document.getElementById('status-label');
 
-    // Cargar estados guardados
-    chrome.storage.local.get(['enabled'], function(result) {
-        const isEnabled = result.enabled !== false;
-        
-        toggleEnabled.checked = isEnabled;
-        statusEnabled.textContent = isEnabled ? 'Activado' : 'Desactivado';
-    });
-
-    // Manejar cambio de interruptor de habilitación
-    toggleEnabled.addEventListener('change', function() {
-        const isEnabled = toggleEnabled.checked;
-        statusEnabled.textContent = isEnabled ? 'Activado' : 'Desactivado';
-        chrome.storage.local.set({ enabled: isEnabled }, function() {
-            reloadCurrentTab();
-        });
-    });
-
-    function reloadCurrentTab() {
-        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            if (tabs[0] && tabs[0].url.includes('youtube.com')) {
-                chrome.tabs.reload(tabs[0].id);
-            }
-        });
+    function updateStatus(isEnabled) {
+        statusLabel.textContent = isEnabled ? 'Activado' : 'Desactivado';
+        // El color y el punto se manejan vía CSS basado en el checkbox :checked
     }
 
-    refreshBtn.addEventListener('click', reloadCurrentTab);
+    // 1. Cargar estado inicial
+    chrome.storage.local.get(['enabled'], function(result) {
+        // Por defecto true si no existe
+        const isEnabled = result.enabled !== false;
+        toggle.checked = isEnabled;
+        updateStatus(isEnabled);
+    });
 
-    goToSubsBtn.addEventListener('click', function() {
-        chrome.tabs.create({ url: 'https://www.youtube.com/feed/subscriptions' });
+    // 2. Manejar cambios
+    toggle.addEventListener('change', function() {
+        const isEnabled = toggle.checked;
+        updateStatus(isEnabled);
+
+        // Guardar estado
+        chrome.storage.local.set({ enabled: isEnabled }, function() {
+            // RECARGAR PESTAÑA AUTOMÁTICAMENTE
+            // Esto es crucial para revertir limpiamente los cambios en el DOM
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                if (tabs[0] && tabs[0].url.includes('youtube.com')) {
+                    chrome.tabs.reload(tabs[0].id);
+                }
+            });
+        });
     });
 });
