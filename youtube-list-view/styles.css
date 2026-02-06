@@ -114,7 +114,8 @@ ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadat
     object-fit: cover !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .custom-video-header .cloned-channel-name a {
+ytd-browse[page-subtype="subscriptions"] .cloned-channel-name a,
+ytd-browse[page-subtype="subscriptions"] .cloned-channel-name span {
     font-size: 20px !important;
     font-weight: 600 !important;
     color: #fff !important;
@@ -177,6 +178,33 @@ ytd-browse[page-subtype="subscriptions"] .custom-description {
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     line-height: 1.5 !important;
+    transition: opacity 0.2s ease-in-out !important;
+}
+
+/* Header visible y alineado */
+ytd-browse[page-subtype="subscriptions"] .custom-video-header {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    margin-bottom: 8px !important;
+    min-height: 40px !important; /* Altura mínima para asegurar que se ve el hueco del avatar */
+}
+
+/* Avatar forzado */
+ytd-browse[page-subtype="subscriptions"] .custom-avatar-wrapper {
+    width: 36px !important;
+    height: 36px !important;
+    border-radius: 50% !important;
+    background-color: #333 !important; /* Fondo por si tarda la imagen */
+    flex-shrink: 0 !important;
+    overflow: hidden !important;
+}
+
+ytd-browse[page-subtype="subscriptions"] .custom-avatar-wrapper img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
 }
 
 /* 9. BOTONES DE ACCIÓN (Recibir Aviso, etc.) */

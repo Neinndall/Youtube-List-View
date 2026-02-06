@@ -1,15 +1,16 @@
 (function() {
     'use strict';
     
-    // Configuración
     const CONFIG = {
-        maxConcurrentFetches: 10,
-        debounceDelay: 300,
+        maxConcurrentFetches: 15,
+        debounceDelay: 100,
         retryAttempts: 1,
-        cacheExpiration: 1000 * 60 * 60 // 1 hora
+        cacheExpiration: 1000 * 60 * 60
     };
     
-    const descriptionCache = new Map();
+    // Almacén central de datos: videoId -> { description, channelName, avatarUrl }
+    const videoDataMap = new Map();
+    const cache = new Map();
     let fetchQueue = [];
     let activeFetches = 0;
     let estaNavegando = false;
@@ -18,72 +19,102 @@
         return window.location.href.includes('/feed/subscriptions');
     }
     
-    function ensurePageAttribute(isEnabled) {
-        // SI ESTAMOS NAVEGANDO, NO TOCAMOS NADA.
-        if (estaNavegando) return;
+    function getVideoId(url) {
+        if (!url) return null;
+        try { return new URL(url).searchParams.get('v'); } catch (e) { return null; }
+    }
 
+    // --- CAPA 1: DATOS NATIVOS (ytInitialData) ---
+    function updateNativeDataMap() {
+        try {
+            const scripts = document.querySelectorAll('script');
+            for (const script of scripts) {
+                if (script.textContent.includes('var ytInitialData =')) {
+                    const jsonStr = script.textContent.split('var ytInitialData =')[1].split('};')[0] + '}';
+                    const data = JSON.parse(jsonStr);
+                    const processObj = (obj) => {
+                        if (!obj || typeof obj !== 'object') return;
+                        if (obj.videoRenderer) {
+                            const v = obj.videoRenderer;
+                            const vidId = v.videoId;
+                            if (vidId) {
+                                // Extraer todo lo posible
+                                const desc = v.descriptionSnippet?.runs?.[0]?.text;
+                                const name = v.ownerText?.runs?.[0]?.text;
+                                const avatar = v.channelThumbnailSupportedRenderers?.channelThumbnailWithLinkRenderer?.thumbnail?.thumbnails?.[0]?.url;
+                                
+                                // Guardar en el mapa si tenemos ALGO
+                                if (desc || name || avatar) {
+                                    videoDataMap.set(vidId, {
+                                        description: desc,
+                                        channelName: name,
+                                        avatarUrl: avatar
+                                    });
+                                }
+                            }
+                        }
+                        Object.values(obj).forEach(processObj);
+                    };
+                    processObj(data);
+                    break;
+                }
+            }
+        } catch (e) {}
+    }
+
+    // --- CAPA 3: EXTRACCIÓN REMOTA (Desde la página del video) ---
+    async function fetchVideoDetails(url, retries = CONFIG.retryAttempts) {
+        // Verificar caché
+        const cached = cache.get(url);
+        if (cached && (Date.now() - cached.timestamp < CONFIG.cacheExpiration)) return cached.data;
+        
+        try {
+            const response = await fetch(url);
+            const html = await response.text();
+            
+            // 1. Descripción (Meta tag)
+            const metaMatch = html.match(/<meta name="description" content="([^"]*)"/);
+            const description = metaMatch ? metaMatch[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").trim() : null;
+
+            // 2. Avatar del CANAL (Buscamos específicamente el renderer del dueño, NO el user avatar)
+            // Buscamos "videoOwnerRenderer" o "channelThumbnailWithLinkRenderer" para asegurar que es el creador
+            let avatarUrl = null;
+            const ownerAvatarMatch = html.match(/"channelThumbnailWithLinkRenderer":\{"thumbnail":\{"thumbnails":\[\{"url":"([^"]+)"/);
+            if (ownerAvatarMatch) {
+                avatarUrl = ownerAvatarMatch[1];
+            } else {
+                // Fallback: buscar cerca de owner
+                const alternateMatch = html.match(/"owner":\{.*?"thumbnails":\[\{"url":"([^"]+)"/);
+                if (alternateMatch) avatarUrl = alternateMatch[1];
+            }
+
+            // 3. Nombre del Canal
+            let channelName = null;
+            const nameMatch = html.match(/"owner":{"videoOwnerRenderer":.*?"title":{"runs":\[{"text":"([^"]+)"/);
+            if (nameMatch) channelName = nameMatch[1];
+
+            const result = { description, channelName, avatarUrl };
+            cache.set(url, { data: result, timestamp: Date.now() });
+            return result;
+        } catch (error) {
+            if (retries > 0) return fetchVideoDetails(url, retries - 1);
+            return null;
+        }
+    }
+    
+    function ensurePageAttribute(isEnabled) {
+        if (estaNavegando) return;
         const browse = document.querySelector('ytd-browse');
         if (!browse) return;
-
         const onSubs = isSubscriptionsPage();
-        
-        // Lógica estricta: Solo aplicar si está habilitado Y estamos en suscripciones
         if (isEnabled && onSubs) {
             if (browse.getAttribute('page-subtype') !== 'subscriptions') {
                 browse.setAttribute('page-subtype', 'subscriptions');
             }
         } else {
-            // En cualquier otro caso (deshabilitado O no suscripciones), limpiar atributo
             if (browse.getAttribute('page-subtype') === 'subscriptions') {
                 browse.removeAttribute('page-subtype');
             }
-        }
-    }
-    
-    function extractDescription(html) {
-        try {
-            const metaMatch = html.match(/<meta name="description" content="([^"]*)"/);
-            if (metaMatch && metaMatch[1]) {
-                return metaMatch[1]
-                    .replace(/&amp;/g, '&')
-                    .replace(/&lt;/g, '<')
-                    .replace(/&gt;/g, '>')
-                    .replace(/&quot;/g, '"')
-                    .replace(/&#39;/g, "'")
-                    .replace(/&nbsp;/g, ' ')
-                    .trim();
-            }
-        } catch (error) {
-            console.warn('Error extracting description:', error);
-        }
-        return null;
-    }
-    
-    async function fetchDescription(url, retries = CONFIG.retryAttempts) {
-        const cached = descriptionCache.get(url);
-        if (cached && (Date.now() - cached.timestamp < CONFIG.cacheExpiration)) {
-            return cached.description;
-        }
-        
-        try {
-            const response = await fetch(url);
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            const html = await response.text();
-            const description = extractDescription(html);
-            
-            descriptionCache.set(url, {
-                description,
-                timestamp: Date.now()
-            });
-            
-            return description;
-        } catch (error) {
-            if (retries > 0) {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                return fetchDescription(url, retries - 1);
-            }
-            return null;
         }
     }
     
@@ -92,94 +123,71 @@
             const task = fetchQueue.shift();
             if (task) {
                 activeFetches++;
-                task().finally(() => {
-                    activeFetches--;
-                    processFetchQueue();
-                });
+                task().finally(() => { activeFetches--; processFetchQueue(); });
             }
         }
     }
     
-        function addChannelHeader(item) {
-            if (estaNavegando) return;
-            
-            // Verificación física: ¿Existe el header?
-            const hasHeader = !!item.querySelector('.custom-video-header');
-            if (item.dataset.headerProcessed === 'true' && hasHeader) return;
-            
-            const lockup = item.querySelector('.yt-lockup-view-model');
-            const metadataModel = item.querySelector('yt-content-metadata-view-model');
-            
-            if (!lockup || !metadataModel) return;
-    
-            let customHeader = item.querySelector('.custom-video-header');
-            if (!customHeader) {
-                customHeader = document.createElement('div');
-                customHeader.className = 'custom-video-header';
-                item.insertBefore(customHeader, item.firstChild);
-            }
-            
-            const moveAvatar = () => {
-                if (estaNavegando) return;
-                const avatarContainer = item.querySelector('.yt-lockup-metadata-view-model__avatar');
-                if (avatarContainer && !customHeader.querySelector('.yt-lockup-metadata-view-model__avatar')) {
-                    const channelLinkEl = metadataModel.querySelector('a');
-                    if (channelLinkEl && !avatarContainer.querySelector('.custom-avatar-link')) {
-                        const anchor = document.createElement('a');
-                        anchor.href = channelLinkEl.href;
-                        anchor.classList.add('custom-avatar-link');
-                        while (avatarContainer.firstChild) {
-                            anchor.appendChild(avatarContainer.firstChild);
-                        }
-                        avatarContainer.appendChild(anchor);
-                    }
-                    customHeader.appendChild(avatarContainer);
-                    return true;
-                }
-                return false;
-            };
-    
-            moveAvatar();
-            
-            if (!customHeader.querySelector('.cloned-channel-name')) {
-                const originalChannelRow = metadataModel.querySelector('.yt-content-metadata-view-model__metadata-row');
-                if (originalChannelRow) {
-                    const clone = originalChannelRow.cloneNode(true);
-                    clone.classList.add('cloned-channel-name');
-                    customHeader.appendChild(clone);
-                }
-            }
-            
-            item.dataset.headerProcessed = 'true';
+    // CONSTRUCTOR DE UI
+    function updateItemUI(item, data) {
+        if (!data) return;
+
+        // --- HEADER (Avatar + Nombre) ---
+        let customHeader = item.querySelector('.custom-video-header');
+        if (!customHeader) {
+            customHeader = document.createElement('div');
+            customHeader.className = 'custom-video-header';
+            item.insertBefore(customHeader, item.firstChild);
         }
-    
-        function addDescriptionToItem(item, url) {
-            return async () => {
-                if (estaNavegando) return;
-                try {
-                    const description = await fetchDescription(url);
-                    const descDiv = item.querySelector('.custom-description');
-                    
-                    if (description && description.trim() !== "" && descDiv) {
-                        descDiv.textContent = description;
-                    }
-                    
-                    item.dataset.descAdded = 'true';
-                    delete item.dataset.descFetching;
-                } catch (error) {
-                    item.dataset.descAdded = 'true';
-                    delete item.dataset.descFetching;
-                }
-            };
+
+        // Avatar
+        if (data.avatarUrl) {
+            let wrapper = customHeader.querySelector('.custom-avatar-wrapper');
+            if (!wrapper) {
+                wrapper = document.createElement('div');
+                wrapper.className = 'custom-avatar-wrapper';
+                const img = document.createElement('img');
+                img.src = data.avatarUrl;
+                wrapper.appendChild(img);
+                customHeader.appendChild(wrapper);
+            } else {
+                // Si ya existe, nos aseguramos que la URL sea la correcta (la del JSON, no la del DOM viejo)
+                const img = wrapper.querySelector('img');
+                if (img && img.src !== data.avatarUrl) img.src = data.avatarUrl;
+            }
+        }
+
+        // Nombre
+        if (data.channelName) {
+            let nameDiv = customHeader.querySelector('.cloned-channel-name');
+            if (!nameDiv) {
+                nameDiv = document.createElement('div');
+                nameDiv.className = 'cloned-channel-name';
+                const span = document.createElement('span'); 
+                span.textContent = data.channelName;
+                span.style.color = '#fff';
+                span.style.fontWeight = 'bold';
+                nameDiv.appendChild(span);
+                customHeader.appendChild(nameDiv);
+            } else {
+                 const span = nameDiv.querySelector('span') || nameDiv.querySelector('a');
+                 if (span && span.textContent !== data.channelName) span.textContent = data.channelName;
+            }
+        }
+
+        // --- DESCRIPCIÓN ---
+        let descDiv = item.querySelector('.custom-description');
+        if (!descDiv) {
+            const metadataArea = item.querySelector('#metadata, .yt-lockup-view-model__metadata');
+            if (metadataArea) {
+                descDiv = document.createElement('div');
+                descDiv.className = 'custom-description';
+                metadataArea.appendChild(descDiv);
+            }
         }
         
-    function getVideoId(url) {
-        if (!url) return null;
-        try {
-            const urlObj = new URL(url);
-            return urlObj.searchParams.get('v');
-        } catch (e) {
-            return null;
+        if (descDiv && data.description && !descDiv.textContent) {
+            descDiv.textContent = data.description;
         }
     }
 
@@ -187,137 +195,97 @@
         if (estaNavegando) return;
         if (typeof chrome === 'undefined' || !chrome.runtime?.id) return;
         
-        try {
-            chrome.storage.local.get(['enabled'], function(result) {
-                if (chrome.runtime.lastError) return;
-                const isEnabled = result ? result.enabled !== false : true;
-                ensurePageAttribute(isEnabled);
+        chrome.storage.local.get(['enabled'], function(result) {
+            if (chrome.runtime.lastError) return;
+            const isEnabled = result.enabled !== false;
+            ensurePageAttribute(isEnabled);
+            if (!isEnabled || !isSubscriptionsPage()) return;
+            
+            updateNativeDataMap();
+
+            const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
+            
+            items.forEach((item) => {
+                const titleLink = item.querySelector('a[href*="/watch"]');
+                const videoUrl = titleLink ? titleLink.href : '';
+                const videoId = getVideoId(videoUrl);
                 
-                if (!isEnabled || !isSubscriptionsPage()) return;
-                
-                const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
-                
-                items.forEach((item) => {
-                    const titleLink = item.querySelector('a[href*="/watch"]');
-                    const videoUrl = titleLink ? titleLink.href : '';
-                    const videoId = getVideoId(videoUrl);
+                if (!videoId) return;
+
+                if (item.dataset.lastVideoId && item.dataset.lastVideoId !== videoId) {
+                    item.querySelectorAll('.custom-video-header, .custom-description').forEach(el => el.remove());
+                    delete item.dataset.processed;
+                    delete item.dataset.fetching;
+                }
+                item.dataset.lastVideoId = videoId;
+
+                // 1. Intentar datos nativos (Capa 1)
+                const nativeData = videoDataMap.get(videoId);
+                if (nativeData) updateItemUI(item, nativeData);
+
+                // 2. DOM Fallback (Limitado): SOLO si no tenemos nada
+                if (!nativeData) {
+                    const domAvatar = item.querySelector('#avatar-link img, ytd-channel-name + a #img');
+                    const domName = item.querySelector('ytd-channel-name #text');
                     
-                    // Si no hay ID de video (transición o invalido), no tocamos nada
-                    if (!videoId) return;
-
-                    // Sincronización física: Si ya tiene texto, marcamos como añadido
-                    const descDiv = item.querySelector('.custom-description');
-                    const hasDescriptionText = descDiv && descDiv.textContent.trim().length > 0;
-                    if (hasDescriptionText) {
-                        item.dataset.descAdded = 'true';
+                    if (domAvatar && domAvatar.src && !item.querySelector('.custom-avatar-wrapper')) {
+                         updateItemUI(item, { avatarUrl: domAvatar.src });
                     }
-
-                    // DETECCIÓN DE CAMBIO ROBUSTA: Comparamos IDs, no URLs completas
-                    if (item.dataset.lastVideoId && item.dataset.lastVideoId !== videoId) {
-                        delete item.dataset.headerProcessed;
-                        delete item.dataset.descAdded;
-                        delete item.dataset.descFetching;
-                        // MEJORA VISUAL: NO borramos el texto sincrónicamente.
-                        // Dejamos el texto anterior hasta que el nuevo llegue y lo sobrescriba.
-                        // Esto evita el "parpadeo" (texto -> vacío -> texto).
-                        // if (descDiv) descDiv.textContent = ''; 
+                    if (domName && domName.textContent && !item.querySelector('.cloned-channel-name')) {
+                         updateItemUI(item, { channelName: domName.textContent.trim() });
                     }
-                    item.dataset.lastVideoId = videoId;
+                }
 
-                    addChannelHeader(item);
-                    
-                    // Si ya está añadido y tiene texto (y coincide con el ID actual según nuestra lógica de flujo), saltamos
-                    if ((item.dataset.descAdded === 'true' && hasDescriptionText) || item.dataset.descFetching === 'true') return;
-                    
-                    // PRE-INSERCIÓN: Aseguramos que el contenedor existe
-                    const metadataRow = item.querySelector('.yt-lockup-metadata-view-model__metadata');
-                    if (metadataRow && !descDiv) {
-                        const newDescDiv = document.createElement('div');
-                        newDescDiv.className = 'custom-description';
-                        metadataRow.parentNode.insertBefore(newDescDiv, metadataRow.nextSibling);
-                    } else if (descDiv && !hasDescriptionText) {
-                        item.dataset.descAdded = 'false';
-                    }
+                // 3. Extracción Remota (Capa 3)
+                const hasDesc = !!item.querySelector('.custom-description')?.textContent;
+                const hasAvatar = !!item.querySelector('.custom-avatar-wrapper');
 
-                    if (item.dataset.descAdded !== 'true') {
-                        item.dataset.descFetching = 'true';
-                        fetchQueue.push(addDescriptionToItem(item, videoUrl));
-                    }
-                });
-                
-                processFetchQueue();
+                if (hasDesc && hasAvatar) {
+                    item.dataset.processed = 'true';
+                } else if (item.dataset.fetching !== 'true') {
+                    item.dataset.fetching = 'true';
+                    fetchQueue.push(async () => {
+                        const remoteData = await fetchVideoDetails(videoUrl);
+                        if (remoteData) {
+                            updateItemUI(item, remoteData);
+                            if (remoteData.avatarUrl && remoteData.channelName) {
+                                videoDataMap.set(videoId, remoteData);
+                            }
+                        }
+                        item.dataset.processed = 'true';
+                        delete item.dataset.fetching;
+                    });
+                }
             });
-        } catch (e) {}
-    }    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-    
-    const debouncedProcess = debounce(processItems, CONFIG.debounceDelay);
-    
-    let observer = null;
-    function setupObserver() {
-        if (observer) observer.disconnect();
-        observer = new MutationObserver((mutations) => {
-            if (estaNavegando) return;
-            const hasRelevantChanges = mutations.some(mutation => {
-                return Array.from(mutation.addedNodes).some(node => {
-                    if (node.nodeType !== 1) return false;
-                    return node.tagName === 'YTD-RICH-ITEM-RENDERER' ||
-                           node.querySelector?.('ytd-rich-item-renderer');
-                });
-            });
-            if (hasRelevantChanges) debouncedProcess();
+            processFetchQueue();
         });
-        observer.observe(document.body, { childList: true, subtree: true });
     }
+    
+    const debouncedProcess = (function(f, w) {
+        let t; return function(...a) { clearTimeout(t); t = setTimeout(() => f(...a), w); };
+    })(processItems, CONFIG.debounceDelay);
     
     function init() {
         if (typeof chrome === 'undefined' || !chrome.runtime?.id) return;
-        estaNavegando = false; // Confirmamos que ya no estamos navegando
-        try {
-            chrome.storage.local.get(['enabled'], function(result) {
-                if (chrome.runtime.lastError) return;
-                const isEnabled = result ? result.enabled !== false : true;
-                ensurePageAttribute(isEnabled);
-                if (isEnabled && isSubscriptionsPage()) processItems();
-                setupObserver();
-            });
-        } catch (e) {
-            console.debug('[YouTube List View] Extension context invalidated.');
-        }
+        estaNavegando = false;
+        chrome.storage.local.get(['enabled'], (res) => {
+            const en = res.enabled !== false;
+            ensurePageAttribute(en);
+            if (en && isSubscriptionsPage()) processItems();
+            if (!observer) {
+                observer = new MutationObserver(() => { if (!estaNavegando) debouncedProcess(); });
+                observer.observe(document.body, { childList: true, subtree: true });
+            }
+        });
     }
     
-    // ESCUCHADORES DE EVENTOS DE YOUTUBE
-    
-    // 1. Al empezar a navegar: LIMPIEZA TOTAL
+    let observer = null;
     document.addEventListener('yt-navigate-start', () => {
-        estaNavegando = true; // Bloqueamos cualquier proceso de la extensión
-        fetchQueue = []; // Limpiamos la cola para no arrastrar peticiones de la página anterior
+        estaNavegando = true; fetchQueue = [];
         const browse = document.querySelector('ytd-browse');
-        if (browse) browse.removeAttribute('page-subtype'); // Quitamos el estilo de lista YA
+        if (browse) browse.removeAttribute('page-subtype');
     });
-
-    // 2. Al terminar de navegar: REINICIO
     document.addEventListener('yt-navigate-finish', init);
-    document.addEventListener('yt-page-data-updated', init); // Fallback para cambios de datos en la misma SPA
-    
-    // Fallback inicial
+    document.addEventListener('yt-page-data-updated', init);
     init();
-    
-    // Limpieza de caché
-    setInterval(() => {
-        const now = Date.now();
-        for (const [url, data] of descriptionCache.entries()) {
-            if (now - data.timestamp > CONFIG.cacheExpiration) descriptionCache.delete(url);
-        }
-    }, 1000 * 60 * 10);
-    
 })();
