@@ -1,275 +1,374 @@
-/* ============================================
-   YOUTUBE LIST VIEW - RECONSTRUCCIÓN TOTAL
-   FILTRADO ESTRICTO POR PÁGINA DE SUSCRIPCIONES
-   ============================================ */
+/* YouTube Subscription List View Styles */
 
-/* 1. ELIMINAR CUALQUIER LÍMITE DE ANCHO Y ESPACIOS SUPERIORES */
-ytd-browse[page-subtype="subscriptions"],
-ytd-browse[page-subtype="subscriptions"] ytd-two-column-browse-results-renderer,
-ytd-browse[page-subtype="subscriptions"] #primary,
-ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer,
-ytd-browse[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer {
-    max-width: none !important;
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    padding-top: 0 !important;
-    --ytd-rich-grid-header-margin: 0px !important; /* Reset de variable de YouTube */
+#yslv-subs-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 12px;
+  position: relative;
 }
 
-/* Ocultar barra de filtros (Hoy, Directos, etc) que quita espacio */
-ytd-browse[page-subtype="subscriptions"] ytd-feed-filter-chip-bar-renderer,
-ytd-browse[page-subtype="subscriptions"] #chips-wrapper {
-    display: none !important;
+#yslv-subs-toggle .yslv-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--yt-spec-10-percent-layer, rgba(255, 255, 255, 0.12));
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--yt-spec-text-primary, #fff);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
 }
 
-ytd-browse[page-subtype="subscriptions"] #primary {
-    padding-left: 24px !important;
-    box-sizing: border-box !important;
+#yslv-subs-toggle .yslv-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.18);
 }
 
-/* ============================================
-   CABECERA: "Más recientes" (Ocultar y Compactar)
-   ============================================ */
-ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer,
-ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer, 
-ytd-browse[page-subtype="subscriptions"] #header.ytd-rich-grid-renderer {
-    display: none !important;
-    height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+#yslv-subs-toggle .yslv-btn[data-active] {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.28);
 }
 
-/* Forzar que el grid no tenga ningún espacio arriba */
-ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+#yslv-subs-toggle .yslv-btn .yslv-btn-ic {
+  width: 20px;
+  height: 20px;
+  display: block;
+  pointer-events: none;
 }
 
-/* 4. CONTENEDOR DE VIDEO - ANCHO COMPLETO */
-ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) {
-    width: 100% !important;
-    display: block !important;
-    position: relative !important;
-    margin-left: 0 !important;   /* Alineación perfecta a la izquierda */
-    margin-right: 0 !important;
-    margin-bottom: 12px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
-    padding-bottom: 12px !important;
-    padding-left: 0 !important;
+#yslv-subs-toggle .yslv-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  opacity: 0.95;
+  display: block;
+  pointer-events: none;
 }
 
-/* 5. EL MENÚ DE 3 PUNTOS - DERECHA ABSOLUTA */
-ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) #menu.ytd-rich-grid-media,
-ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) #menu.ytd-rich-item-renderer,
-ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer) ytd-menu-renderer {
-    position: absolute !important;
-    right: 20px !important;
-    top: 55px !important;
-    left: auto !important;
-    display: block !important;
-    z-index: 100 !important;
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader #title-container,
+ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader #title-container {
+  display: flex !important;
+  align-items: center !important;
+  position: relative !important;
 }
 
-/* 6. HEADER DEL CANAL (AVATAR + NOMBRE) */
-ytd-browse[page-subtype="subscriptions"] .custom-video-header {
-    display: flex !important;
-    align-items: center !important;
-    gap: 8px !important;
-    padding: 5px 0 !important;
-    margin-bottom: 10px !important;
+ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader #title-container #spacer,
+ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader #title-container #spacer {
+  flex: 1 1 auto !important;
 }
 
-/* AVATAR con soporte para anillo de DIRECTO */
-ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadata-view-model__avatar {
-    display: block !important;
-    visibility: visible !important;
-    width: 36px !important;
-    height: 36px !important;
-    position: relative !important;
+ytd-masthead {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 3000 !important;
 }
 
-/* Ajustar el anillo rojo de DIRECTO para que sea perfecto a 36px */
-ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-avatar-shape--live-ring::after {
-    display: block !important;
-    width: 40px !important;
-    height: 40px !important;
-    top: -2px !important;
-    left: -2px !important;
-    border: 2px solid #f00 !important;
+#title-text {
+  position: relative !important;
+  z-index: 1 !important;
 }
 
-/* Subir la etiqueta "DIRECTO" para que esté pegada al avatar */
-ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-avatar-shape__live-badge {
-    display: block !important;
-    bottom: 2px !important;
-    transform: scale(0.8) !important;
+html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer {
+  margin: 0 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadata-view-model__avatar img {
-    display: block !important;
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 50% !important;
-    object-fit: cover !important;
+html[data-yslv-subs-view="list"] ytd-rich-grid-renderer {
+  --ytd-rich-grid-item-max-width: 100% !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .custom-avatar-wrapper img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    display: block !important;
+html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
+  display: block !important;
+  max-width: 95% !important;
+  margin: 0 auto !important;
+  width: 100% !important;
+  padding: 0 24px !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .cloned-channel-name a,
-ytd-browse[page-subtype="subscriptions"] .cloned-channel-name span {
-    font-size: 20px !important;
-    font-weight: 600 !important;
-    color: #ffffff !important;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
-    text-decoration: none !important;
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
+  display: block !important;
+  width: 100% !important;
+  padding: 22px 0 !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--yt-spec-10-percent-layer, var(--yslv-sep, rgba(0, 0, 0, 0.1))) !important;
 }
 
-/* 7. LAYOUT DE VIDEO (Miniatura + Info) */
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 16px !important;
-    align-items: flex-start !important;
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short {
+  display: inline-block !important;
+  width: auto !important;
+  padding: 0 10px 0 0 !important;
+  margin: 0 !important;
+  border-bottom: 0 !important;
+  vertical-align: top !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__content-image {
-    width: 246px !important;
-    min-width: 246px !important;
-    height: 138px !important;
-    flex-shrink: 0 !important;
-    border-radius: 8px !important; /* Añadido un poco de radio para que se vea mejor */
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer:first-child {
+  padding-top: 0 !important;
 }
 
-/* 8. METADATA (Título, Stats, Desc) */
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__metadata {
-    flex: 1 !important;
-    padding-right: 60px !important; /* Espacio para el menú */
-    display: flex !important;
-    flex-direction: column !important;
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer:last-child {
+  border-bottom: 0 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__title {
-    font-size: 16px !important;
-    font-weight: 500 !important;
-    margin: 0 0 4px 0 !important;
-    line-height: 1.4 !important;
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead {
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  margin: 0 0 20px 0 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row {
-    display: inline-flex !important;
-    align-items: center !important;
-    font-size: 12px !important;
-    color: #aaa !important;
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar {
+  display: flex !important;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  margin: 0 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row:not(:last-child)::after {
-    content: "•" !important;
-    margin: 0 8px !important;
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape {
+  width: 32px !important;
+  height: 32px !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar {
-    display: none !important;
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead-name {
+  color: var(--yt-spec-text-primary) !important;
+  text-decoration: none !important;
+  font-weight: 700 !important;
+  font-size: 18px !important;
+  line-height: 1.15 !important;
+  display: inline-flex !important;
+  align-items: center !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .custom-description {
-    font-size: 12px !important;
-    color: #aaa !important;
-    margin-top: 8px !important;
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2 !important;
-    -webkit-box-orient: vertical !important;
-    overflow: hidden !important;
-    line-height: 1.5 !important;
-    transition: opacity 0.2s ease-in-out !important;
+html[data-yslv-subs-view="list"] .yt-lockup-view-model.yt-lockup-view-model--vertical {
+  display: grid !important;
+  grid-template-columns: 240px minmax(0, 1fr) auto !important;
+  grid-template-rows: auto auto !important;
+  column-gap: 18px !important;
+  row-gap: 10px !important;
+  align-items: start !important;
 }
 
-/* Header visible y alineado */
-ytd-browse[page-subtype="subscriptions"] .custom-video-header {
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    margin-bottom: 8px !important;
-    min-height: 40px !important;
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image {
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
 }
 
-/* Avatar con placeholder */
-ytd-browse[page-subtype="subscriptions"] .custom-avatar-wrapper {
-    width: 36px !important;
-    height: 36px !important;
-    border-radius: 50% !important;
-    background-color: #222 !important; /* Más oscuro para que no brille tanto al aparecer */
-    flex-shrink: 0 !important;
-    overflow: hidden !important;
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image img {
+  width: 100% !important;
+  height: auto !important;
+  border-radius: 14px !important;
+  object-fit: cover !important;
+  display: block !important;
 }
 
-/* Nombre del canal con placeholder si está vacío */
-ytd-browse[page-subtype="subscriptions"] .cloned-channel-name {
-    min-width: 100px !important;
-    min-height: 20px !important;
-    display: flex !important;
-    align-items: center !important;
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  min-width: 0 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .cloned-channel-name:empty::before {
-    content: "" !important;
-    display: block !important;
-    width: 120px !important;
-    height: 14px !important;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border-radius: 4px !important;
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__menu-button {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: start !important;
 }
 
-/* 9. BOTONES DE ACCIÓN (Recibir Aviso, etc.) */
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__badges,
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__badges,
-ytd-browse[page-subtype="subscriptions"] ytd-subscription-notification-toggle-button-renderer,
-ytd-browse[page-subtype="subscriptions"] yt-button-shape,
-ytd-browse[page-subtype="subscriptions"] .yt-spec-button-shape-next {
-    display: inline-block !important;
-    width: auto !important;
-    max-width: fit-content !important;
-    flex: none !important;
-    margin-top: 10px !important;
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  line-height: 1.35 !important;
+  font-weight: 600 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__badges {
-    display: block !important;
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar {
+  display: none !important;
 }
 
-/* 10. SHORTS Y SECCIONES - Solo en suscripciones */
-ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer {
-    width: 100% !important;
-    margin: 0 0 24px 0 !important; /* Margen SOLO abajo, cero arriba */
-    padding: 0 !important;
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__metadata yt-content-metadata-view-model {
+  display: block !important;
+  position: absolute !important;
+  left: -99999px !important;
+  top: auto !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
-/* Forzar colapso total de la zona del header */
-ytd-browse[page-subtype="subscriptions"] #header.ytd-rich-grid-renderer,
-ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #header,
-ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-header-renderer {
-    display: none !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+html[data-yslv-subs-view="list"] .yslv-subs-mrow {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  margin-top: 6px !important;
+  min-width: 0 !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer ytd-rich-item-renderer {
-    width: 180px !important;
-    min-width: 180px !important;
+html[data-yslv-subs-view="list"] .yslv-subs-mch {
+  min-width: 0 !important;
+  color: var(--yt-spec-text-secondary) !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  flex: 0 1 auto !important;
+  display: flex !important;
+  align-items: center !important;
 }
 
-/* SALVAGUARDA: Ocultar elementos inyectados en CUALQUIER otra página (Inicio, Canales, etc) */
-ytd-browse:not([page-subtype="subscriptions"]) .custom-video-header,
-ytd-browse:not([page-subtype="subscriptions"]) .custom-description {
-    display: none !important;
+html[data-yslv-subs-view="list"] .yslv-subs-mch a {
+  color: inherit !important;
+  text-decoration: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  min-width: 0 !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-mch a > span {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-mch .yt-icon-shape.ytSpecIconShapeHost {
+  margin-right: 2px !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-mrt {
+  color: var(--yt-spec-text-secondary) !important;
+  font-size: 12px !important;
+  line-height: 1.35 !important;
+  white-space: nowrap !important;
+  opacity: 0.95 !important;
+  flex: 0 0 auto !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-desc {
+  margin-top: 10px !important;
+  font-size: 12px !important;
+  line-height: 1.45 !important;
+  color: var(--yt-spec-text-secondary) !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel {
+  display: block !important;
+  -webkit-line-clamp: unset !important;
+  overflow: hidden !important;
+  color: transparent !important;
+  position: relative !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span {
+  display: block !important;
+  border-radius: 9px !important;
+  opacity: 1 !important;
+  pointer-events: none !important;
+  background-color: var(--yslv-skel-base, rgba(0, 0, 0, 0.1)) !important;
+  background-image: linear-gradient(
+    90deg,
+    var(--yslv-skel-base, rgba(0, 0, 0, 0.1)) 0%,
+    var(--yt-spec-10-percent-layer, rgba(255, 255, 255, 0.2)) 50%,
+    var(--yslv-skel-base, rgba(0, 0, 0, 0.1)) 100%
+  ) !important;
+  background-size: 220% 100% !important;
+  background-position: var(--yslvSkelX, 200%) 0 !important;
+  transform: translateZ(0) !important;
+  will-change: background-position !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(1) {
+  height: 12px !important;
+  width: min(520px, 82%) !important;
+  margin-top: 0px !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(2) {
+  height: 12px !important;
+  width: min(520px, 74%) !important;
+  margin-top: 6px !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(3) {
+  height: 12px !important;
+  width: min(520px, 58%) !important;
+  margin-top: 6px !important;
+}
+
+html[data-yslv-subs-view="list"] {
+  --yslvShortW: 170px;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short #content {
+  width: var(--yslvShortW) !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short a.reel-item-endpoint,
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short a.shortsLockupViewModelHostEndpoint.reel-item-endpoint {
+  width: var(--yslvShortW) !important;
+  display: block !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short yt-thumbnail-view-model,
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short .ytThumbnailViewModelImage,
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short .shortsLockupViewModelHostThumbnailParentContainer {
+  width: var(--yslvShortW) !important;
+  aspect-ratio: 2/3 !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short img.ytCoreImageHost {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  border-radius: 14px !important;
+  display: block !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #dismissible {
+  margin-top: 2rem !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short > #content {
+  padding-bottom: 3rem !important;
+}
+
+html[dark][data-yslv-subs-view="list"] {
+  --yslv-sep: rgba(255, 255, 255, 0.18);
+  --yslv-skel-base: rgba(255, 255, 255, 0.1);
+}
+
+html:not([dark])[data-yslv-subs-view="list"] {
+  --yslv-sep: rgba(0, 0, 0, 0.1);
+  --yslv-skel-base: rgba(0, 0, 0, 0.1);
+}
+
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost {
+  width: fit-content !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-counterfactual-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-list-header-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-shelf-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
+  margin-bottom: 1rem !important;
 }

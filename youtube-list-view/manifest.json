@@ -1,20 +1,27 @@
 {
   "manifest_version": 3,
-  "name": "YouTube Subscriptions List View",
-  "version": "1.0",
-  "description": "Recupera la vista de lista en la página de suscripciones de YouTube.",
-  "permissions": ["storage"],
+  "name": "YouTube Subscription List View",
+  "version": "1.0.0",
+  "description": "Alterna entre vista de cuadrícula y lista en tus suscripciones de YouTube",
+  "permissions": [
+    "storage"
+  ],
   "host_permissions": [
     "https://www.youtube.com/*"
   ],
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "css": ["styles.css"],
       "js": ["content.js"],
+      "css": ["styles.css"],
       "run_at": "document_end"
     }
   ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
   "action": {
     "default_popup": "popup.html",
     "default_icon": {
@@ -22,10 +29,5 @@
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
-  },
-  "icons": {
-    "16": "icons/icon16.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
   }
 }
