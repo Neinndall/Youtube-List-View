@@ -114,12 +114,23 @@ ytd-browse[page-subtype="subscriptions"] .custom-video-header .yt-lockup-metadat
     object-fit: cover !important;
 }
 
+ytd-browse[page-subtype="subscriptions"] .custom-avatar-wrapper img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
 ytd-browse[page-subtype="subscriptions"] .cloned-channel-name a,
 ytd-browse[page-subtype="subscriptions"] .cloned-channel-name span {
     font-size: 20px !important;
     font-weight: 600 !important;
-    color: #fff !important;
+    color: #ffffff !important;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.5) !important;
     text-decoration: none !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
 }
 
 /* 7. LAYOUT DE VIDEO (Miniatura + Info) */
@@ -187,24 +198,34 @@ ytd-browse[page-subtype="subscriptions"] .custom-video-header {
     align-items: center !important;
     gap: 10px !important;
     margin-bottom: 8px !important;
-    min-height: 40px !important; /* Altura mínima para asegurar que se ve el hueco del avatar */
+    min-height: 40px !important;
 }
 
-/* Avatar forzado */
+/* Avatar con placeholder */
 ytd-browse[page-subtype="subscriptions"] .custom-avatar-wrapper {
     width: 36px !important;
     height: 36px !important;
     border-radius: 50% !important;
-    background-color: #333 !important; /* Fondo por si tarda la imagen */
+    background-color: #222 !important; /* Más oscuro para que no brille tanto al aparecer */
     flex-shrink: 0 !important;
     overflow: hidden !important;
 }
 
-ytd-browse[page-subtype="subscriptions"] .custom-avatar-wrapper img {
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
+/* Nombre del canal con placeholder si está vacío */
+ytd-browse[page-subtype="subscriptions"] .cloned-channel-name {
+    min-width: 100px !important;
+    min-height: 20px !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+ytd-browse[page-subtype="subscriptions"] .cloned-channel-name:empty::before {
+    content: "" !important;
     display: block !important;
+    width: 120px !important;
+    height: 14px !important;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-radius: 4px !important;
 }
 
 /* 9. BOTONES DE ACCIÓN (Recibir Aviso, etc.) */
