@@ -103,22 +103,15 @@
     }
     
     function ensurePageAttribute(isEnabled) {
-        if (estaNavegando) return;
         const browse = document.querySelector('ytd-browse');
         if (!browse) return;
-
-        // SALVAGUARDA CRÍTICA:
-        // Si el contenedor actual dice explícitamente que es "home", NO lo tocamos.
-        // Esto evita que, al navegar de Inicio -> Suscripciones, apliquemos el estilo
-        // a la Home justo antes de que desaparezca (porque la URL cambia antes que el DOM).
-        if (browse.getAttribute('page-subtype') === 'home') return;
 
         const onSubs = isSubscriptionsPage();
         if (isEnabled && onSubs) {
             if (browse.getAttribute('page-subtype') !== 'subscriptions') {
                 browse.setAttribute('page-subtype', 'subscriptions');
             }
-        } else {
+        } else if (!onSubs) {
             if (browse.getAttribute('page-subtype') === 'subscriptions') {
                 browse.removeAttribute('page-subtype');
             }
@@ -268,6 +261,13 @@
         });
     }
     
+    let isEnabledCache = true;
+    if (typeof chrome !== 'undefined' && chrome.storage?.local) {
+        chrome.storage.local.get(['enabled'], (res) => {
+            isEnabledCache = res.enabled !== false;
+        });
+    }
+
     const debouncedProcess = (function(f, w) {
         let t; return function(...a) { clearTimeout(t); t = setTimeout(() => f(...a), w); };
     })(processItems, CONFIG.debounceDelay);
@@ -275,23 +275,32 @@
     function init() {
         if (typeof chrome === 'undefined' || !chrome.runtime?.id) return;
         estaNavegando = false;
-        chrome.storage.local.get(['enabled'], (res) => {
-            const en = res.enabled !== false;
-            ensurePageAttribute(en);
-            if (en && isSubscriptionsPage()) processItems();
-            if (!observer) {
-                observer = new MutationObserver(() => { if (!estaNavegando) debouncedProcess(); });
-                observer.observe(document.body, { childList: true, subtree: true });
-            }
-        });
+        
+        const onSubs = isSubscriptionsPage();
+        if (isEnabledCache && onSubs) {
+            ensurePageAttribute(true);
+            processItems();
+        } else {
+            ensurePageAttribute(false);
+        }
+
+        if (!observer) {
+            observer = new MutationObserver(() => { if (!estaNavegando) debouncedProcess(); });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
     }
     
     let observer = null;
-    document.addEventListener('yt-navigate-start', () => {
+    document.addEventListener('yt-navigate-start', (event) => {
         estaNavegando = true; 
         fetchQueue = [];
+        
+        // LIMPIEZA TOTAL: Al navegar, sea a donde sea, quitamos el estilo de lista.
+        // Esto garantiza que la página que estamos dejando (ej. Inicio) NO se rompa.
         const browse = document.querySelector('ytd-browse');
-        if (browse) browse.removeAttribute('page-subtype');
+        if (browse) {
+            browse.removeAttribute('page-subtype');
+        }
     });
     document.addEventListener('yt-navigate-finish', init);
     document.addEventListener('yt-page-data-updated', init);
