@@ -229,13 +229,19 @@
     }
     
     function init() {
+        if (typeof chrome === 'undefined' || !chrome.runtime?.id) return;
         estaNavegando = false; // Confirmamos que ya no estamos navegando
-        chrome.storage.local.get(['enabled'], function(result) {
-            const isEnabled = result.enabled !== false;
-            ensurePageAttribute(isEnabled);
-            if (isEnabled && isSubscriptionsPage()) processItems();
-            setupObserver();
-        });
+        try {
+            chrome.storage.local.get(['enabled'], function(result) {
+                if (chrome.runtime.lastError) return;
+                const isEnabled = result ? result.enabled !== false : true;
+                ensurePageAttribute(isEnabled);
+                if (isEnabled && isSubscriptionsPage()) processItems();
+                setupObserver();
+            });
+        } catch (e) {
+            console.debug('[YouTube List View] Extension context invalidated.');
+        }
     }
     
     // ESCUCHADORES DE EVENTOS DE YOUTUBE
