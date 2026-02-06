@@ -173,28 +173,33 @@
     
     function processItems() {
         if (estaNavegando) return;
-        chrome.storage.local.get(['enabled'], function(result) {
-            const isEnabled = result.enabled !== false;
-            ensurePageAttribute(isEnabled);
-            
-            if (!isEnabled || !isSubscriptionsPage()) return;
-            
-            const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
-            
-            items.forEach((item) => {
-                addChannelHeader(item);
+        if (typeof chrome === 'undefined' || !chrome.runtime?.id) return;
+        
+        try {
+            chrome.storage.local.get(['enabled'], function(result) {
+                if (chrome.runtime.lastError) return;
+                const isEnabled = result ? result.enabled !== false : true;
+                ensurePageAttribute(isEnabled);
                 
-                if (item.dataset.descAdded === 'true' || item.dataset.descFetching === 'true') return;
+                if (!isEnabled || !isSubscriptionsPage()) return;
                 
-                const titleLink = item.querySelector('a[href*="/watch"]');
-                if (!titleLink || !titleLink.href) return;
+                const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
                 
-                item.dataset.descFetching = 'true';
-                fetchQueue.push(addDescriptionToItem(item, titleLink.href));
+                items.forEach((item) => {
+                    addChannelHeader(item);
+                    
+                    if (item.dataset.descAdded === 'true' || item.dataset.descFetching === 'true') return;
+                    
+                    const titleLink = item.querySelector('a[href*="/watch"]');
+                    if (!titleLink || !titleLink.href) return;
+                    
+                    item.dataset.descFetching = 'true';
+                    fetchQueue.push(addDescriptionToItem(item, titleLink.href));
+                });
+                
+                processFetchQueue();
             });
-            
-            processFetchQueue();
-        });
+        } catch (e) {}
     }
     
     function debounce(func, wait) {
