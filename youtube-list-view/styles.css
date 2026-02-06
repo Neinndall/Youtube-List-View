@@ -68,7 +68,7 @@ ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:not(ytd-rich-sec
     top: 55px !important;
     left: auto !important;
     display: block !important;
-    z-index: 10 !important;
+    z-index: 100 !important;
 }
 
 /* 6. HEADER DEL CANAL (AVATAR + NOMBRE) */
@@ -181,13 +181,19 @@ ytd-browse[page-subtype="subscriptions"] .custom-description {
 
 /* 9. BOTONES DE ACCIÓN (Recibir Aviso, etc.) */
 ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__badges,
-ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__badges {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__badges,
+ytd-browse[page-subtype="subscriptions"] ytd-subscription-notification-toggle-button-renderer,
+ytd-browse[page-subtype="subscriptions"] yt-button-shape,
+ytd-browse[page-subtype="subscriptions"] .yt-spec-button-shape-next {
+    display: inline-block !important;
+    width: auto !important;
+    max-width: fit-content !important;
+    flex: none !important;
     margin-top: 10px !important;
-    width: 100% !important;
+}
+
+ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__badges {
+    display: block !important;
 }
 
 /* 10. SHORTS Y SECCIONES - Solo en suscripciones */
