@@ -3,30 +3,35 @@
     
     // Configuración
     const CONFIG = {
-        maxConcurrentFetches: 6, // Un balance seguro
+        maxConcurrentFetches: 10,
         debounceDelay: 300,
-        retryAttempts: 2,
+        retryAttempts: 1,
         cacheExpiration: 1000 * 60 * 60 // 1 hora
     };
     
     const descriptionCache = new Map();
     let fetchQueue = [];
     let activeFetches = 0;
+    let estaNavegando = false;
     
     function isSubscriptionsPage() {
         return window.location.href.includes('/feed/subscriptions');
     }
     
     function ensurePageAttribute(isEnabled) {
+        // SI ESTAMOS NAVEGANDO, NO TOCAMOS NADA.
+        // Esto evita que el diseño de suscripciones se aplique a la Home durante la carga.
+        if (estaNavegando) return;
+
         const browse = document.querySelector('ytd-browse');
         if (!browse) return;
 
-        if (isEnabled && isSubscriptionsPage()) {
+        const onSubs = isSubscriptionsPage();
+        if (isEnabled && onSubs) {
             if (browse.getAttribute('page-subtype') !== 'subscriptions') {
                 browse.setAttribute('page-subtype', 'subscriptions');
             }
         } else {
-            // Si salimos de suscripciones, quitamos el atributo
             if (browse.getAttribute('page-subtype') === 'subscriptions') {
                 browse.removeAttribute('page-subtype');
             }
@@ -94,6 +99,7 @@
     }
     
     function addChannelHeader(item) {
+        if (estaNavegando) return;
         if (item.dataset.headerProcessed === 'true') return;
         
         const lockup = item.querySelector('.yt-lockup-view-model');
@@ -109,6 +115,7 @@
         }
         
         const moveAvatar = () => {
+            if (estaNavegando) return;
             const avatarContainer = item.querySelector('.yt-lockup-metadata-view-model__avatar');
             if (avatarContainer && !customHeader.querySelector('.yt-lockup-metadata-view-model__avatar')) {
                 const channelLinkEl = metadataModel.querySelector('a');
@@ -127,9 +134,7 @@
             return false;
         };
 
-        if (!moveAvatar()) {
-            setTimeout(moveAvatar, 100);
-        }
+        moveAvatar();
         
         if (!customHeader.querySelector('.cloned-channel-name')) {
             const originalChannelRow = metadataModel.querySelector('.yt-content-metadata-view-model__metadata-row');
@@ -145,6 +150,7 @@
     
     function addDescriptionToItem(item, url) {
         return async () => {
+            if (estaNavegando) return;
             try {
                 const description = await fetchDescription(url);
                 if (description && description.trim() !== "") {
@@ -166,9 +172,9 @@
     }
     
     function processItems() {
+        if (estaNavegando) return;
         chrome.storage.local.get(['enabled'], function(result) {
             const isEnabled = result.enabled !== false;
-            
             ensurePageAttribute(isEnabled);
             
             if (!isEnabled || !isSubscriptionsPage()) return;
@@ -176,10 +182,8 @@
             const items = document.querySelectorAll('ytd-rich-item-renderer:not(ytd-rich-section-renderer ytd-rich-item-renderer)');
             
             items.forEach((item) => {
-                // Siempre añadir header
                 addChannelHeader(item);
                 
-                // Siempre añadir descripción (sin check de configuración)
                 if (item.dataset.descAdded === 'true' || item.dataset.descFetching === 'true') return;
                 
                 const titleLink = item.querySelector('a[href*="/watch"]');
@@ -211,12 +215,12 @@
     function setupObserver() {
         if (observer) observer.disconnect();
         observer = new MutationObserver((mutations) => {
+            if (estaNavegando) return;
             const hasRelevantChanges = mutations.some(mutation => {
                 return Array.from(mutation.addedNodes).some(node => {
                     if (node.nodeType !== 1) return false;
                     return node.tagName === 'YTD-RICH-ITEM-RENDERER' ||
-                           node.querySelector?.('ytd-rich-item-renderer') ||
-                           node.tagName === 'YTD-BROWSE';
+                           node.querySelector?.('ytd-rich-item-renderer');
                 });
             });
             if (hasRelevantChanges) debouncedProcess();
@@ -225,29 +229,36 @@
     }
     
     function init() {
+        estaNavegando = false; // Confirmamos que ya no estamos navegando
         chrome.storage.local.get(['enabled'], function(result) {
             const isEnabled = result.enabled !== false;
             ensurePageAttribute(isEnabled);
-            if (isEnabled && isSubscriptionsPage()) {
-                processItems();
-            }
+            if (isEnabled && isSubscriptionsPage()) processItems();
             setupObserver();
         });
     }
-
-    // EVENTOS DE NAVEGACIÓN (Lo que pediste mantener)
-    document.addEventListener('yt-navigate-finish', init);
-    document.addEventListener('yt-page-data-updated', init);
     
+    // ESCUCHADORES DE EVENTOS DE YOUTUBE
+    
+    // 1. Al empezar a navegar: LIMPIEZA TOTAL
+    document.addEventListener('yt-navigate-start', () => {
+        estaNavegando = true; // Bloqueamos cualquier proceso de la extensión
+        const browse = document.querySelector('ytd-browse');
+        if (browse) browse.removeAttribute('page-subtype'); // Quitamos el estilo de lista YA
+    });
+
+    // 2. Al terminar de navegar: REINICIO
+    document.addEventListener('yt-navigate-finish', init);
+    
+    // Fallback inicial
     init();
     
-    // Intervalo de seguridad por si YouTube falla en disparar eventos
-    let lastUrl = location.href;
+    // Limpieza de caché
     setInterval(() => {
-        if (location.href !== lastUrl) {
-            lastUrl = location.href;
-            init();
+        const now = Date.now();
+        for (const [url, data] of descriptionCache.entries()) {
+            if (now - data.timestamp > CONFIG.cacheExpiration) descriptionCache.delete(url);
         }
-    }, 500);
+    }, 1000 * 60 * 10);
     
 })();
