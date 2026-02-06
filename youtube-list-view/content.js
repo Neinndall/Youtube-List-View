@@ -106,6 +106,13 @@
         if (estaNavegando) return;
         const browse = document.querySelector('ytd-browse');
         if (!browse) return;
+
+        // SALVAGUARDA CRÍTICA:
+        // Si el contenedor actual dice explícitamente que es "home", NO lo tocamos.
+        // Esto evita que, al navegar de Inicio -> Suscripciones, apliquemos el estilo
+        // a la Home justo antes de que desaparezca (porque la URL cambia antes que el DOM).
+        if (browse.getAttribute('page-subtype') === 'home') return;
+
         const onSubs = isSubscriptionsPage();
         if (isEnabled && onSubs) {
             if (browse.getAttribute('page-subtype') !== 'subscriptions') {
@@ -281,11 +288,13 @@
     
     let observer = null;
     document.addEventListener('yt-navigate-start', () => {
-        estaNavegando = true; fetchQueue = [];
+        estaNavegando = true; 
+        fetchQueue = [];
         const browse = document.querySelector('ytd-browse');
         if (browse) browse.removeAttribute('page-subtype');
     });
     document.addEventListener('yt-navigate-finish', init);
     document.addEventListener('yt-page-data-updated', init);
+    init();
     init();
 })();
