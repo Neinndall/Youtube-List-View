@@ -1,155 +1,42 @@
-# YouTube Subscriptions List View
+# Youtube List View
 
-Extensión de Chrome/Edge que recupera la vista de lista clásica en la página de suscripciones de YouTube.
+**Youtube List View** is a browser extension designed to enhance your YouTube Subscriptions experience by allowing you to toggle between the default grid layout and a professional, clean list view.
 
-## 🎯 Características
+## 🚀 Features
 
-- ✅ **Vista de lista horizontal** con miniaturas a la izquierda
-- ✅ **Descripciones de videos** automáticas
-- ✅ **Diseño fiel** a la vista LIST original de YouTube
-- ✅ **Shorts mantienen su diseño original** en grid horizontal
-- ✅ **Optimizado** para rendimiento (cache, debouncing, límite de peticiones)
-- ✅ **Hover effects** y diseño responsive
-- ✅ **Compatible** con Chrome, Edge, Brave y otros navegadores basados en Chromium
+- **Dynamic Toggle**: Easily switch between Grid and List views directly from the Subscriptions page header.
+- **Smart Descriptions**: Automatically fetches and summarizes video descriptions to give you more context without leaving the page.
+- **Persistent Preferences**: Saves your preferred view mode and applies it automatically on every visit.
+- **Advanced Caching**: Implements a high-performance local cache for video descriptions with TTL (Time To Live) logic to minimize network requests.
+- **Modern UI/UX**:
+    - Clean row-based layout for videos.
+    - Integrated channel headers with avatars and names.
+    - Skeleton screens with shimmer animations for a "content-first" loading experience.
+    - Full support for both **Light** and **Dark** themes.
+- **Optimized Performance**: Uses `MutationObserver` and asynchronous processing queues (`requestIdleCallback`) to ensure a smooth scrolling experience even with thousands of subscriptions.
 
-## 📦 Instalación
+## 🛠️ How It Works
 
-### Método 1: Instalación Manual (Desarrollo)
+The extension works by injecting a lightweight content script that observes changes in the YouTube DOM. When the List view is active, it:
+1.  **Re-layouts the Grid**: Transforms the standard `ytd-rich-grid-renderer` into a vertical list using optimized CSS variables.
+2.  **Enriches Metadata**: Moves channel information and video details into a more readable horizontal format.
+3.  **Fetches Content**: Periodically scans visible videos and fetches their short descriptions directly from YouTube's internal data structures, ensuring zero impact on your browser's speed.
 
-1. **Descarga los archivos** de la extensión
-2. **Abre tu navegador** (Chrome/Edge)
-3. **Ve a extensiones**:
-   - Chrome: `chrome://extensions/`
-   - Edge: `edge://extensions/`
-4. **Activa el "Modo de desarrollador"** (toggle en la esquina superior derecha)
-5. **Haz clic en "Cargar extensión sin empaquetar"**
-6. **Selecciona la carpeta** donde descargaste los archivos
-7. ✅ ¡Listo! La extensión está instalada
+## 📦 Installation
 
-## 🚀 Uso
+1.  Download or clone this repository.
+2.  Open your browser and navigate to `chrome://extensions/` (or equivalent for your browser).
+3.  Enable **Developer mode** in the top right corner.
+4.  Click on **Load unpacked** and select the project folder.
+5.  Go to your [YouTube Subscriptions](https://www.youtube.com/feed/subscriptions) and enjoy the new view!
 
-1. Ve a **YouTube** → **Suscripciones**: `https://www.youtube.com/feed/subscriptions`
-2. La vista LIST se aplicará **automáticamente**
-3. Las descripciones se cargarán progresivamente
+## 🔧 Technologies Used
 
-### Popup de la Extensión
-
-Haz clic en el icono de la extensión para:
-- 🔄 **Actualizar la página** actual
-- 📺 **Ir a Suscripciones** directamente
-
-## 📁 Estructura de Archivos
-
-```
-youtube-list-view/
-├── manifest.json       # Configuración de la extensión
-├── content.js          # Script principal (inyecta descripciones)
-├── styles.css          # Estilos de la vista LIST
-├── popup.html          # Interfaz del popup
-├── popup.js            # Lógica del popup
-├── icon-generator.html # Generador de iconos (opcional)
-└── icons/              # Carpeta de iconos
-    ├── icon16.png      # Icono 16x16
-    ├── icon48.png      # Icono 48x48
-    └── icon128.png     # Icono 128x128
-```
-
-## 🎨 Características Técnicas
-
-### Optimizaciones de Rendimiento
-
-- **Cache de descripciones**: Evita re-fetch de videos ya cargados (30 min)
-- **Debouncing**: Reduce ejecuciones innecesarias del observer
-- **Límite de concurrencia**: Máximo 3 fetches simultáneos
-- **Retry logic**: 2 intentos en caso de fallo
-- **Observer optimizado**: Solo observa cambios relevantes
-
-### Diseño CSS
-
-- **Layout horizontal**: Miniatura izquierda + info derecha
-- **Responsive**: Ajusta tamaños según ancho de pantalla
-- **Hover effects**: Feedback visual al pasar el mouse
-- **Typography**: Tamaños fieles a YouTube original
-- **Dark mode**: Optimizado para tema oscuro de YouTube
-
-## 🔧 Configuración Avanzada
-
-Puedes modificar la configuración en `content.js`:
-
-```javascript
-const CONFIG = {
-    maxConcurrentFetches: 3,      // Fetches simultáneos
-    debounceDelay: 300,            // Delay del debounce (ms)
-    retryAttempts: 2,              // Reintentos en fallo
-    cacheExpiration: 1000 * 60 * 30 // Expiración cache (30 min)
-};
-```
-
-### Comportamiento con Shorts
-
-Los **Shorts** mantienen su diseño original en grid horizontal y **NO** se les aplica:
-- ❌ Vista LIST horizontal
-- ❌ Inyección de descripciones
-- ❌ Estilos de hover
-
-Esto asegura que los Shorts se vean correctamente en formato vertical como están diseñados.
-
-## 📝 Notas Importantes
-
-### Permisos
-
-La extensión requiere:
-- `storage`: Para guardar preferencias (futuro)
-- `host_permissions`: Para hacer fetch de descripciones de YouTube
-
-### Compatibilidad
-
-- ✅ Chrome 88+
-- ✅ Edge 88+
-- ✅ Brave
-- ✅ Opera
-- ❌ Firefox (requiere adaptación del manifest a v2)
-
-## 🐛 Solución de Problemas
-
-### La vista no se aplica
-
-1. Asegúrate de estar en `/feed/subscriptions`
-2. Recarga la página (F5)
-3. Verifica que la extensión esté activada en `chrome://extensions/`
-
-### Las descripciones no cargan
-
-1. Verifica tu conexión a internet
-2. YouTube puede estar limitando peticiones (espera unos minutos)
-3. Abre la consola (F12) y verifica errores
-
-### La extensión está lenta
-
-1. Reduce `maxConcurrentFetches` en la configuración
-2. Aumenta `debounceDelay` a 500ms
-3. Limpia el cache del navegador
-
-## 🔄 Actualizaciones Futuras
-
-Ideas para próximas versiones:
-- [ ] Opción para toggle ON/OFF desde el popup
-- [ ] Personalización de número de líneas de descripción
-- [ ] Soporte para otras páginas de YouTube
-- [ ] Modo compacto/expandido
-- [ ] Exportar/importar configuración
-
-## 📄 Licencia
-
-Este proyecto es de código abierto. Siéntete libre de modificarlo y mejorarlo.
-
-## 🤝 Contribuciones
-
-Las contribuciones son bienvenidas. Si encuentras bugs o tienes ideas:
-1. Reporta issues
-2. Propón mejoras
-3. Envía pull requests
+- **JavaScript (ES6+)**: Core logic and DOM manipulation.
+- **CSS3**: Advanced grid layouts, custom properties (variables), and animations.
+- **Chrome Extension API (Manifest V3)**: Storage and content script management.
+- **Intl.Segmenter**: For smart, multi-language sentence summarizing.
 
 ---
 
-**Creado con ❤️ para recuperar la vista LIST de YouTube**
+*Made with ❤️ to make your YouTube browsing better.*
