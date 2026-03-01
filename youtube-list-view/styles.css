@@ -159,11 +159,16 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   padding-bottom: 0 !important;
 }
 
-/* Specific fix for the container that usually follows the shorts shelf - Extremely aggressive */
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) + *,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short) + * {
-  margin-top: -24px !important; /* Very aggressive negative margin to pull content up */
+/* Specific fix for the container that usually follows the shorts shelf - Only when NOT hidden */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short):not(.yslv-shorts-hidden) + *,
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short):not(.yslv-shorts-hidden) + * {
+  margin-top: -24px !important; /* Only pull up if the shorts are actually there */
   padding-top: 0 !important;
+}
+
+/* Ensure that when hidden, the negative margin is neutralized */
+html[data-yslv-subs-view="list"] .yslv-shorts-hidden + * {
+  margin-top: 0 !important;
 }
 /* Clean spacing for headers */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #rich-shelf-header,
