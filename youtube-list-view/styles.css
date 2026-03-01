@@ -92,13 +92,16 @@ html[data-yslv-subs-view="list"] ytd-rich-section-renderer.yslv-section-hidden {
   display: none !important;
 }
 
-/* Specific class to hide Shorts sections */
-.yslv-shorts-hidden {
+/* Specific class to hide Shorts sections - Extremely specific to override all layout rules */
+html[data-yslv-subs-view] .yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-reel-shelf-renderer.yslv-shorts-hidden {
   display: none !important;
-}
-
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer.yslv-shorts-hidden {
-  display: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
+  visibility: hidden !important;
 }
 
 /* Align ALL rich sections and their internal content to the left */
@@ -120,9 +123,10 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shel
 
 /* Correct positioning for the entire Shorts section (Icon + Title + Videos) */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) {
-  margin-top: 24px !important;
-  margin-bottom: 0 !important; /* Eliminated bottom margin */
-  padding-bottom: 0 !important; /* Eliminated bottom padding */
+  margin-top: 48px !important; /* Increased to move it further down */
+  margin-bottom: 0 !important;
+  padding-bottom: 0 !important;
+  padding-top: 12px !important; /* Extra padding for centering */
   display: block !important;
 }
 
@@ -155,10 +159,10 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   padding-bottom: 0 !important;
 }
 
-/* Specific fix for the container that usually follows the shorts shelf */
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short) + ytd-rich-item-renderer {
-  margin-top: 0 !important;
+/* Specific fix for the container that usually follows the shorts shelf - Extremely aggressive */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) + *,
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short) + * {
+  margin-top: -24px !important; /* Very aggressive negative margin to pull content up */
   padding-top: 0 !important;
 }
 /* Clean spacing for headers */
