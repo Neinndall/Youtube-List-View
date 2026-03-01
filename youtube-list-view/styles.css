@@ -97,8 +97,7 @@ html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer #content,
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer #contents,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer {
   margin-left: 0 !important;
   margin-inline-start: 0 !important;
   padding-left: 0 !important;
@@ -108,6 +107,34 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shel
   width: 100% !important;
   max-width: 100% !important;
   box-sizing: border-box !important;
+}
+
+/* Correct positioning for the entire Shorts section (Icon + Title + Videos) */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) {
+  margin-top: 24px !important;
+  margin-bottom: 24px !important;
+  display: block !important;
+}
+
+/* Restore native Shorts grid behavior - Clean and compatible */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
+  column-gap: 16px !important; /* Spacing between shorts */
+  row-gap: 20px !important; /* Spacing between rows when expanded */
+  margin-top: 16px !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
+  display: block !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Initially hide shorts after the 9th one to keep the layout clean, matching your request */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short):not([is-expanded]) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer:nth-child(n+10) {
+  display: none !important;
 }
 
 /* Clean spacing for headers */

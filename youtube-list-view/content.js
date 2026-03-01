@@ -279,8 +279,22 @@
     DESC_STORE.saveT = setTimeout(() => {
       DESC_STORE.saveT = 0
       if (!DESC_STORE.dirty) return
-      DESC_STORE.dirty = false
-      chrome.storage.local.set({ [CFG.descStore.key]: DESC_STORE.obj || {} })
+
+      // Safety check: ensure chrome.storage.local is still accessible
+      if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local || !chrome.runtime?.id) {
+        return
+      }
+
+      try {
+        DESC_STORE.dirty = false
+        chrome.storage.local.set({ [CFG.descStore.key]: DESC_STORE.obj || {} }, () => {
+          if (chrome.runtime.lastError) {
+            console.warn("[YSLV] Storage error:", chrome.runtime.lastError.message)
+          }
+        })
+      } catch (e) {
+        console.warn("[YSLV] Failed to save storage:", e)
+      }
     }, Math.max(0, Number(CFG.descStore.saveDebounceMs) || 250))
   }
 
