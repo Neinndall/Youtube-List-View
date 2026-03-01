@@ -132,6 +132,7 @@
     lastPageSig: "",
 
     hideMostRelevant: false,
+    hideShorts: false,
   }
 
   const SHIMMER = {
@@ -1149,6 +1150,7 @@
     STATE.mo = new MutationObserver(muts => {
       if (!STATE.active) return
       processMostRelevantSection()
+      processShortsSection()
       if (STATE.view !== "list") return
       for (const m of muts) {
         for (const node of m.addedNodes) enqueue(node)
@@ -1166,6 +1168,7 @@
     STATE.pmMo = new MutationObserver(() => {
       if (!STATE.active) return
       processMostRelevantSection()
+      processShortsSection()
       attachObserver()
       ensureToggleMountLoop()
       if (STATE.view === "list") {
@@ -1248,6 +1251,34 @@
     })
   }
 
+  function processShortsSection() {
+    if (!STATE.active) return
+
+    if (!STATE.hideShorts) {
+      document.querySelectorAll(".yslv-shorts-hidden").forEach(s => {
+        s.classList.remove("yslv-shorts-hidden")
+      })
+      return
+    }
+
+    // Detect Shorts shelves by looking for Shorts-specific components or titles
+    const selectors = 'ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-reel-shelf-renderer, ytd-rich-section-renderer'
+    const containers = document.querySelectorAll(selectors)
+    
+    containers.forEach(el => {
+      // Avoid processing if already hidden
+      if (el.classList.contains("yslv-shorts-hidden")) return
+
+      const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, ytd-rich-item-renderer[is-shorts]')
+      const hasShortsTitle = el.querySelector('#title, #title-text, .title')?.textContent?.toLowerCase().includes("shorts")
+      const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8c0.1-0.3,0.1-0.7,0-1"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
+
+      if (hasShortsContent || hasShortsTitle || hasShortsIcon) {
+        el.classList.add("yslv-shorts-hidden")
+      }
+    })
+  }
+
   function teardown() {
     stopShimmer()
     if (STATE.view === "list") cleanupListArtifacts()
@@ -1277,9 +1308,11 @@
 
   function apply() {
     ensureDescStoreLoaded()
-    chrome.storage.local.get(["hideMostRelevant"], result => {
+    chrome.storage.local.get(["hideMostRelevant", "hideShorts"], result => {
       STATE.hideMostRelevant = result.hideMostRelevant || false
+      STATE.hideShorts = result.hideShorts || false
       processMostRelevantSection()
+      processShortsSection()
     })
     pruneDescStore()
     ensureToggleMountLoop()
@@ -1335,9 +1368,15 @@
     syncActive(true)
 
     chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === "local" && changes.hideMostRelevant) {
-        STATE.hideMostRelevant = changes.hideMostRelevant.newValue
-        processMostRelevantSection()
+      if (area === "local") {
+        if (changes.hideMostRelevant) {
+          STATE.hideMostRelevant = changes.hideMostRelevant.newValue
+          processMostRelevantSection()
+        }
+        if (changes.hideShorts) {
+          STATE.hideShorts = changes.hideShorts.newValue
+          processShortsSection()
+        }
       }
     })
 
