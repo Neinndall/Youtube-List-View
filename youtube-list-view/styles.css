@@ -5,6 +5,7 @@
   align-items: center;
   gap: 10px;
   margin-left: 12px;
+  margin-right: 12px; /* Add margin to shift buttons leftwards towards alignment with dots */
   position: relative;
 }
 
@@ -57,6 +58,8 @@ ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-r
   display: flex !important;
   align-items: center !important;
   position: relative !important;
+  padding-bottom: 0 !important;
+  margin-bottom: -4px !important; /* Slightly negative margin to push content up towards the title */
 }
 
 ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader #title-container #spacer,
@@ -79,16 +82,54 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer {
   margin: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer {
-  --ytd-rich-grid-item-max-width: 100% !important;
+/* Specific class to hide sections from JS without CSS conflicts */
+.yslv-section-hidden {
+  display: none !important;
+}
+
+/* Specific class to hide sections - more specific to override alignment rules */
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer.yslv-section-hidden {
+  display: none !important;
+}
+
+/* Align ALL rich sections and their internal content to the left */
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer #content,
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
+  margin-left: 0 !important;
+  margin-inline-start: 0 !important;
+  padding-left: 0 !important;
+  padding-inline-start: 0 !important;
+  transform: none !important;
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* Clean spacing for headers */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #rich-shelf-header,
+html[data-yslv-subs-view="list"] #rich-shelf-header.ytd-rich-shelf-renderer {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  margin-left: 0 !important;
+  margin-bottom: 20px !important; /* Slightly tighter for a more compact, professional look */
+  width: 100% !important;
+  padding-right: 24px !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
   display: block !important;
-  max-width: 95% !important;
-  margin: 0 auto !important;
+  max-width: 100% !important;
+  margin: 0 !important;
   width: 100% !important;
-  padding: 0 24px !important;
+  padding: 0 0 0 56px !important;
+  box-sizing: border-box !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
@@ -120,7 +161,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
-  margin: 0 0 20px 0 !important;
+  margin: 0 0 14px 0 !important; /* Set to 14px for a perfectly balanced look */
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar {
@@ -344,7 +385,7 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short img.ytCore
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #dismissible {
-  margin-top: 2rem !important;
+  margin-top: 0 !important; /* Eliminated margin to push content up */
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short > #content {
@@ -370,5 +411,6 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-l
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-shelf-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
+  margin-top: 0 !important; /* Eliminated margin to push content up */
   margin-bottom: 1rem !important;
 }

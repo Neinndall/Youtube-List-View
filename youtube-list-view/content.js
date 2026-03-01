@@ -35,7 +35,7 @@
       rowHead: {
         enabled: true,
         gap: 12,
-        marginBottom: 20,
+        marginBottom: 14, // Updated to 14 for perfect balance
         avatarSize: 32,
       },
 
@@ -130,6 +130,8 @@
     lastQueueSig: "",
 
     lastPageSig: "",
+
+    hideMostRelevant: false,
   }
 
   const SHIMMER = {
@@ -1131,7 +1133,9 @@
     STATE.observedTarget = target
 
     STATE.mo = new MutationObserver(muts => {
-      if (!STATE.active || STATE.view !== "list") return
+      if (!STATE.active) return
+      processMostRelevantSection()
+      if (STATE.view !== "list") return
       for (const m of muts) {
         for (const node of m.addedNodes) enqueue(node)
       }
@@ -1147,6 +1151,7 @@
 
     STATE.pmMo = new MutationObserver(() => {
       if (!STATE.active) return
+      processMostRelevantSection()
       attachObserver()
       ensureToggleMountLoop()
       if (STATE.view === "list") {
@@ -1205,6 +1210,30 @@
     STATE.observedTarget = null
   }
 
+  function processMostRelevantSection() {
+    if (!STATE.active) return
+
+    if (!STATE.hideMostRelevant) {
+      document.querySelectorAll(".yslv-section-hidden").forEach(s => {
+        s.classList.remove("yslv-section-hidden")
+      })
+      return
+    }
+
+    const titles = document.querySelectorAll("ytd-rich-section-renderer #title, ytd-rich-section-renderer span#title")
+    const targets = ["most relevant", "más relevantes", "más relevante", "relevantes"]
+
+    titles.forEach(title => {
+      const txt = (title.textContent || "").trim().toLowerCase()
+      if (targets.some(t => txt.includes(t))) {
+        const section = title.closest("ytd-rich-section-renderer")
+        if (section && !section.classList.contains("yslv-section-hidden")) {
+          section.classList.add("yslv-section-hidden")
+        }
+      }
+    })
+  }
+
   function teardown() {
     stopShimmer()
     if (STATE.view === "list") cleanupListArtifacts()
@@ -1234,6 +1263,10 @@
 
   function apply() {
     ensureDescStoreLoaded()
+    chrome.storage.local.get(["hideMostRelevant"], result => {
+      STATE.hideMostRelevant = result.hideMostRelevant || false
+      processMostRelevantSection()
+    })
     pruneDescStore()
     ensureToggleMountLoop()
     attachObserver()
@@ -1286,6 +1319,13 @@
 
   function init() {
     syncActive(true)
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === "local" && changes.hideMostRelevant) {
+        STATE.hideMostRelevant = changes.hideMostRelevant.newValue
+        processMostRelevantSection()
+      }
+    })
 
     window.addEventListener(
       "yt-navigate-finish",

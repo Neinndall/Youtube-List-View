@@ -154,6 +154,93 @@
       font-size: 16px;
     }
     
+    .settings {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .settings-title {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .settings-title::before {
+      content: "⚙️";
+      font-size: 16px;
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .setting-label {
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    /* Toggle Switch Style */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 40px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.2);
+      transition: .4s;
+      border-radius: 20px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .slider {
+      background-color: #4caf50;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #4caf50;
+    }
+
+    input:checked + .slider:before {
+      transform: translateX(20px);
+    }
+    
     .feature-item {
       display: flex;
       align-items: flex-start;
@@ -224,6 +311,17 @@
       </div>
     </div>
     
+    <div class="settings">
+      <div class="settings-title">Ajustes</div>
+      <div class="setting-item">
+        <div class="setting-label">Ocultar sección "Más relevantes"</div>
+        <label class="switch">
+          <input type="checkbox" id="hideMostRelevant">
+          <span class="slider"></span>
+        </label>
+      </div>
+    </div>
+    
     <div class="features">
       <div class="features-title">Características</div>
       <div class="feature-item">
@@ -248,5 +346,6 @@
   <div class="footer">
     Desarrollado con ❤️ para mejorar tu experiencia en YouTube
   </div>
+  <script src="popup.js"></script>
 </body>
 </html>
