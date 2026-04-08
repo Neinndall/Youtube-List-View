@@ -188,7 +188,7 @@ html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title-container {
 /* Aire superior para que no se peguen a la línea divisoria anterior */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer {
-  margin-top: 20px !important; 
+  margin-top: 18px !important; 
   margin-bottom: 0 !important;
   display: block !important;
 }
@@ -269,8 +269,8 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model.yt-lockup-view-model--ver
   display: grid !important;
   grid-template-columns: 240px minmax(0, 1fr) auto !important;
   grid-template-rows: auto auto !important;
-  column-gap: 18px !important;
-  row-gap: 10px !important;
+  column-gap: 24px !important; /* Increased space from thumbnail */
+  row-gap: 12px !important; /* Slightly more vertical gap */
   align-items: start !important;
 }
 
@@ -333,7 +333,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-mrow {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  margin-top: 6px !important;
+  margin-top: 8px !important; /* Slightly more air from title */
   min-width: 0 !important;
 }
 
@@ -377,7 +377,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-mrt {
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-desc {
-  margin-top: 10px !important;
+  margin-top: 12px !important; /* More space between metadata and description */
   font-size: 12px !important;
   line-height: 1.45 !important;
   color: var(--yt-spec-text-secondary) !important;
@@ -459,6 +459,15 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short img.ytCore
   object-fit: cover !important;
   border-radius: 14px !important;
   display: block !important;
+  }
+
+/* Ensure horizontal alignment for the title and icon in the Shorts header */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #title-container,
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title-container {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #dismissible {

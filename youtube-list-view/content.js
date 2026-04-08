@@ -1243,28 +1243,37 @@
   function processMostRelevantSection() {
     if (!STATE.active) return
 
-    // Buscar títulos en toda la página pero actuar solo en secciones de suscripciones
-    const titles = document.querySelectorAll("#title, #title-text, .title, yt-formatted-string, ytd-rich-section-renderer #title, ytd-rich-shelf-renderer #title")
-    const targets = ["most relevant", "más relevantes", "más relevante", "relevantes", "más recientes", "más reciente"]
-
+    // 1. Renombrado de títulos (siempre activo para limpiar la UI)
+    const titles = document.querySelectorAll("#title, #title-text, .title, h2, h3, yt-formatted-string")
     titles.forEach(title => {
       const rawTxt = (title.textContent || "").trim()
-      
-      // Renombrado (siempre activo para limpiar la UI)
       if (/^Más(\.\.\.|\u2026)?$/i.test(rawTxt) || rawTxt === "Más") {
         title.textContent = "Más recientes"
       }
+    })
 
-      const txt = title.textContent.trim().toLowerCase()
-      const isTarget = targets.some(t => txt.includes(t))
-      
-      // Buscar el contenedor de sección más cercano (incluyendo item-section)
-      const section = title.closest("ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-item-section-renderer")
-      
-      if (section) {
-        if (STATE.hideMostRelevant && isTarget) {
+    // 2. Ocultar secciones si la opción está activa
+    const shelfSelectors = 'ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-item-section-renderer'
+    const containers = document.querySelectorAll(shelfSelectors)
+    
+    // Objetivos extendidos para capturar tanto "Más relevantes" como "Más recientes" y similares
+    const hideTargets = [
+      "most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance", 
+      "most recent", "más recientes", "más reciente", "recientes", "reciente",
+      "novedades", "new for you", "nuevos para ti", "news", "latest"
+    ]
+
+    containers.forEach(section => {
+      const titleEl = section.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')
+      if (!titleEl) return
+
+      const txt = titleEl.textContent.trim().toLowerCase()
+      const isTarget = hideTargets.some(t => txt.includes(t))
+
+      if (isTarget) {
+        if (STATE.hideMostRelevant) {
           section.classList.add("yslv-section-hidden")
-        } else if (isTarget) {
+        } else {
           section.classList.remove("yslv-section-hidden")
         }
       }
