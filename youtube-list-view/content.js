@@ -1251,7 +1251,7 @@
     }
 
     const titles = document.querySelectorAll("ytd-rich-section-renderer #title, ytd-rich-section-renderer span#title")
-    const targets = ["most relevant", "más relevantes", "más relevante", "relevantes"]
+    const targets = ["most relevant", "más relevantes", "más relevante", "relevantes", "más", "more"]
 
     titles.forEach(title => {
       const txt = (title.textContent || "").trim().toLowerCase()

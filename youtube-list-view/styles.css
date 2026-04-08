@@ -293,6 +293,11 @@ html[data-yslv-subs-view="list"] .yt-content-metadata-view-model__metadata-row {
   text-align: left !important;
 }
 
+html[data-yslv-subs-view="list"] ytd-rich-grid-renderer > #contents > ytd-continuation-item-renderer:first-child,
+html[data-yslv-subs-view="list"] ytd-rich-grid-renderer > #contents > ytd-button-renderer:first-child {
+  display: none !important;
+}
+
 /* Ocultar avatar original dentro de la metadata del lockup */
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar,
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-view-model__avatar,
