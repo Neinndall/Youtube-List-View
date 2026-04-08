@@ -1243,23 +1243,30 @@
   function processMostRelevantSection() {
     if (!STATE.active) return
 
-    if (!STATE.hideMostRelevant) {
-      document.querySelectorAll(".yslv-section-hidden").forEach(s => {
-        s.classList.remove("yslv-section-hidden")
-      })
-      return
-    }
+    const browse = getActiveSubsBrowse()
+    if (!browse) return
 
-    const titles = document.querySelectorAll("ytd-rich-section-renderer #title, ytd-rich-section-renderer span#title")
-    const targets = ["most relevant", "más relevantes", "más relevante", "relevantes", "más", "more"]
+    // Escaneo profundo SOLO DENTRO del área de suscripciones
+    const titles = browse.querySelectorAll("#title, #title-text, .title, yt-formatted-string, ytd-rich-section-renderer #title, ytd-rich-shelf-renderer #title")
+    const targets = ["most relevant", "más relevantes", "más relevante", "relevantes"]
 
     titles.forEach(title => {
-      const txt = (title.textContent || "").trim().toLowerCase()
-      if (targets.some(t => txt.includes(t))) {
-        const section = title.closest("ytd-rich-section-renderer")
+      const rawTxt = (title.textContent || "").trim()
+      
+      // Capturar "Más", "Más..." o cualquier variante con puntos invisibles
+      if (/^Más(\.\.\.|\u2026)?$/i.test(rawTxt) || rawTxt === "Más") {
+        title.textContent = "Más recientes"
+      }
+
+      const txt = title.textContent.trim().toLowerCase()
+      if (STATE.hideMostRelevant && targets.some(t => txt.includes(t))) {
+        const section = title.closest("ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer")
         if (section && !section.classList.contains("yslv-section-hidden")) {
           section.classList.add("yslv-section-hidden")
         }
+      } else {
+        const section = title.closest("ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer")
+        if (section) section.classList.remove("yslv-section-hidden")
       }
     })
   }
