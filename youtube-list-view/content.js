@@ -1243,30 +1243,30 @@
   function processMostRelevantSection() {
     if (!STATE.active) return
 
-    const browse = getActiveSubsBrowse()
-    if (!browse) return
-
-    // Escaneo profundo SOLO DENTRO del área de suscripciones
-    const titles = browse.querySelectorAll("#title, #title-text, .title, yt-formatted-string, ytd-rich-section-renderer #title, ytd-rich-shelf-renderer #title")
-    const targets = ["most relevant", "más relevantes", "más relevante", "relevantes"]
+    // Buscar títulos en toda la página pero actuar solo en secciones de suscripciones
+    const titles = document.querySelectorAll("#title, #title-text, .title, yt-formatted-string, ytd-rich-section-renderer #title, ytd-rich-shelf-renderer #title")
+    const targets = ["most relevant", "más relevantes", "más relevante", "relevantes", "más recientes", "más reciente"]
 
     titles.forEach(title => {
       const rawTxt = (title.textContent || "").trim()
       
-      // Capturar "Más", "Más..." o cualquier variante con puntos invisibles
+      // Renombrado (siempre activo para limpiar la UI)
       if (/^Más(\.\.\.|\u2026)?$/i.test(rawTxt) || rawTxt === "Más") {
         title.textContent = "Más recientes"
       }
 
       const txt = title.textContent.trim().toLowerCase()
-      if (STATE.hideMostRelevant && targets.some(t => txt.includes(t))) {
-        const section = title.closest("ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer")
-        if (section && !section.classList.contains("yslv-section-hidden")) {
+      const isTarget = targets.some(t => txt.includes(t))
+      
+      // Buscar el contenedor de sección más cercano (incluyendo item-section)
+      const section = title.closest("ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-item-section-renderer")
+      
+      if (section) {
+        if (STATE.hideMostRelevant && isTarget) {
           section.classList.add("yslv-section-hidden")
+        } else if (isTarget) {
+          section.classList.remove("yslv-section-hidden")
         }
-      } else {
-        const section = title.closest("ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer")
-        if (section) section.classList.remove("yslv-section-hidden")
       }
     })
   }

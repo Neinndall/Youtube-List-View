@@ -82,13 +82,22 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer {
   margin: 0 !important;
 }
 
-/* Specific class to hide sections from JS without CSS conflicts */
-.yslv-section-hidden {
+/* PRIORIDAD MÁXIMA: OCULTACIÓN DE SECCIONES */
+.yslv-section-hidden,
+html[data-yslv-subs-view] .yslv-section-hidden,
+ytd-rich-section-renderer.yslv-section-hidden,
+ytd-rich-shelf-renderer.yslv-section-hidden,
+ytd-shelf-renderer.yslv-section-hidden {
   display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
 }
 
-/* Specific class to hide sections - more specific to override alignment rules */
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer.yslv-section-hidden {
+/* Specific class to hide sections from JS without CSS conflicts */
+.yslv-section-hidden {
   display: none !important;
 }
 
