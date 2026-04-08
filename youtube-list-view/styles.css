@@ -221,7 +221,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
-  margin: 0 0 14px 0 !important; /* Set to 14px for a perfectly balanced look */
+  margin: 0 0 14px 0 !important; /* Restaurado a la izquierda */
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
@@ -257,48 +257,40 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model.yt-lockup-view-model--ver
   display: grid !important;
   grid-template-columns: 240px minmax(0, 1fr) auto !important;
   grid-template-rows: auto auto !important;
-  column-gap: 18px !important;
-  row-gap: 10px !important;
+  column-gap: 20px !important; /* Espacio equilibrado (20px) */
+  row-gap: 4px !important;
   align-items: start !important;
 }
 
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image {
-  grid-column: 1 !important;
-  grid-row: 1 / span 2 !important;
-  width: 240px !important;
-  min-width: 240px !important;
-  max-width: 240px !important;
+/* Limpieza total de contenedores de texto de YouTube */
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata,
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__text-container,
+html[data-yslv-subs-view="list"] yt-lockup-metadata-view-model,
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__metadata,
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__content,
+html[data-yslv-subs-view="list"] .yt-content-metadata-view-model,
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title-container {
+  padding-left: 0 !important;
+  margin-left: 0 !important;
+  border-left: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
 }
 
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image img {
+/* Alineación de elementos individuales */
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
+html[data-yslv-subs-view="list"] #video-title,
+html[data-yslv-subs-view="list"] #video-title-link,
+html[data-yslv-subs-view="list"] .yslv-subs-mrow,
+html[data-yslv-subs-view="list"] .yslv-subs-desc,
+html[data-yslv-subs-view="list"] yt-formatted-string,
+html[data-yslv-subs-view="list"] .yt-content-metadata-view-model__metadata-row {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  text-indent: 0 !important;
   width: 100% !important;
-  height: auto !important;
-  border-radius: 14px !important;
-  object-fit: cover !important;
-  display: block !important;
-}
-
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata {
-  grid-column: 2 !important;
-  grid-row: 1 / span 2 !important;
-  min-width: 0 !important;
-}
-
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__menu-button {
-  grid-column: 3 !important;
-  grid-row: 1 !important;
-  justify-self: end !important;
-  align-self: start !important;
-}
-
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title {
-  display: -webkit-box !important;
-  -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
-  overflow: hidden !important;
-  white-space: normal !important;
-  line-height: 1.35 !important;
-  font-weight: 600 !important;
+  text-align: left !important;
 }
 
 /* Ocultar avatar original dentro de la metadata del lockup */
