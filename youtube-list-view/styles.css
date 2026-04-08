@@ -298,6 +298,22 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer > #contents > ytd-button
   display: none !important;
 }
 
+html[data-yslv-subs-view="list"] ytd-rich-grid-renderer > #contents > ytd-rich-section-renderer {
+  margin-top: 20px !important;
+  margin-bottom: 12px !important;
+  display: block !important;
+  width: 100% !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title,
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer span#title {
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--yt-spec-text-primary) !important;
+  margin-bottom: 16px !important;
+  display: block !important;
+}
+
 /* Ocultar avatar original dentro de la metadata del lockup */
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar,
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-view-model__avatar,
