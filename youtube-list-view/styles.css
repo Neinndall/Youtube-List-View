@@ -123,10 +123,10 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shel
 
 /* Correct positioning for the entire Shorts section (Icon + Title + Videos) */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) {
-  margin-top: 0 !important; /* Eliminado para subirlo al máximo */
+  margin-top: -12px !important; /* Margen negativo para pegarlo más arriba y que quede ordenado */
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
-  padding-top: 0 !important; /* Eliminado relleno superior */
+  padding-top: 0 !important; 
   display: block !important;
 }
 
@@ -136,7 +136,7 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
   column-gap: 16px !important; /* Spacing between shorts */
   row-gap: 20px !important; /* Spacing between rows when expanded */
-  margin-top: 24px !important; /* Añadido relleno inferior para que el texto no esté pegado a los vídeos */
+  margin-top: 16px !important; /* Reducido para que estén un pelín más cerca del título */
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
@@ -198,7 +198,7 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents {
 /* Aire superior para que no se peguen a la línea divisoria anterior */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer {
-  margin-top: 18px !important; 
+  margin-top: 14px !important; 
   margin-bottom: 0 !important;
   display: block !important;
 }
@@ -486,9 +486,9 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   align-items: center !important;
   justify-content: center !important;
   vertical-align: middle !important;
-  transform: translateY(-3px) !important; /* Mantenemos la elevación para alineación horizontal */
-  width: 24px !important; /* Restauramos tamaño estándar */
-  height: 24px !important;
+  transform: translateY(-5px) !important; /* Subido un píxel más para que quede clavado */
+  width: 32px !important; /* Más grande como pediste */
+  height: 32px !important;
   line-height: 1 !important;
 }
 
