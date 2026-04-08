@@ -198,7 +198,7 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents {
 /* Aire superior para que no se peguen a la línea divisoria anterior */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer {
-  margin-top: 14px !important; 
+  margin-top: 16px !important; 
   margin-bottom: 0 !important;
   display: block !important;
 }
