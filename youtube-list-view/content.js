@@ -753,6 +753,8 @@
       lockup.querySelector('a[href^="/shorts/"].reel-item-endpoint') ||
       lockup.querySelector('a[href^="/watch"]') ||
       lockup.querySelector('a[href^="/shorts/"]') ||
+      lockup.querySelector('a#video-title-link') ||
+      lockup.querySelector('a#video-title') ||
       null
     )
   }
@@ -1071,12 +1073,17 @@
 
     item.classList.remove(CFG.cls.isShort)
 
-    const lockup = item.querySelector("yt-lockup-view-model")
+    const lockup = 
+      item.querySelector("yt-lockup-view-model") || 
+      item.querySelector(".yt-lockup-view-model") ||
+      item.querySelector("ytd-video-renderer")
     if (!lockup) return
 
     const textContainer =
       lockup.querySelector(".yt-lockup-metadata-view-model__text-container") ||
-      lockup.querySelector("yt-lockup-metadata-view-model")
+      lockup.querySelector(".yt-lockup-view-model__metadata") ||
+      lockup.querySelector("yt-lockup-metadata-view-model") ||
+      lockup.querySelector(".metadata")
     if (!textContainer) return
 
     STATE.processedItems.add(item)
