@@ -170,16 +170,15 @@ html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-ren
 html[data-yslv-subs-view="list"] .yslv-shorts-hidden + * {
   margin-top: 0 !important;
 }
-/* Clean spacing for headers */
+/* Clean spacing for headers (Only for rich shelves like Shorts) */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #rich-shelf-header,
-html[data-yslv-subs-view="list"] #rich-shelf-header.ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title-container {
+html[data-yslv-subs-view="list"] #rich-shelf-header.ytd-rich-shelf-renderer {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
   margin-left: 0 !important;
-  margin-bottom: 16px !important; /* Más aire inferior para que no sea compacto */
+  margin-bottom: 16px !important; 
   width: 100% !important;
   padding-right: 24px !important;
   padding-left: 0 !important;
@@ -462,12 +461,22 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short img.ytCore
   }
 
 /* Ensure horizontal alignment for the title and icon in the Shorts header */
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #title-container,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title-container {
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-container {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   gap: 8px !important;
+}
+
+/* Forzar centrado del icono de Shorts y quitar márgenes residuales */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-annotation-container-outer,
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) yt-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  vertical-align: middle !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #dismissible {
