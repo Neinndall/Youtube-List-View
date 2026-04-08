@@ -82,22 +82,13 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer {
   margin: 0 !important;
 }
 
-/* PRIORIDAD MÁXIMA: OCULTACIÓN DE SECCIONES */
-.yslv-section-hidden,
-html[data-yslv-subs-view] .yslv-section-hidden,
-ytd-rich-section-renderer.yslv-section-hidden,
-ytd-rich-shelf-renderer.yslv-section-hidden,
-ytd-shelf-renderer.yslv-section-hidden {
-  display: none !important;
-  visibility: hidden !important;
-  height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden !important;
-}
-
 /* Specific class to hide sections from JS without CSS conflicts */
 .yslv-section-hidden {
+  display: none !important;
+}
+
+/* Specific class to hide sections - more specific to override alignment rules */
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer.yslv-section-hidden {
   display: none !important;
 }
 
@@ -181,15 +172,17 @@ html[data-yslv-subs-view="list"] .yslv-shorts-hidden + * {
 }
 /* Clean spacing for headers */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #rich-shelf-header,
-html[data-yslv-subs-view="list"] #rich-shelf-header.ytd-rich-shelf-renderer {
+html[data-yslv-subs-view="list"] #rich-shelf-header.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title-container {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
   margin-left: 0 !important;
-  margin-bottom: 20px !important; /* Slightly tighter for a more compact, professional look */
+  margin-bottom: 12px !important; /* Espacio igualado */
   width: 100% !important;
   padding-right: 24px !important;
+  padding-left: 0 !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
@@ -206,7 +199,12 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
   width: 100% !important;
   padding: 22px 0 !important;
   margin: 0 !important;
-  border-bottom: 1px solid var(--yt-spec-10-percent-layer, var(--yslv-sep, rgba(0, 0, 0, 0.1))) !important;
+  border-bottom: 1px solid var(--yt-spec-10-percent-layer, var(--yslv-sep, rgba(0, 0, 0, 0.1))) !important;    
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-item-renderer:first-of-type {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short {
@@ -230,13 +228,10 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
-  margin: 0 0 14px 0 !important; /* Restaurado a la izquierda */
+  margin: 0 0 14px 0 !important; /* Set to 14px for a perfectly balanced look */
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-view-model__avatar,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape {
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar {
   display: flex !important;
   width: 32px !important;
   height: 32px !important;
@@ -245,9 +240,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape {
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar img,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-view-model__avatar img {
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape {
   width: 32px !important;
   height: 32px !important;
 }
@@ -266,92 +259,55 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model.yt-lockup-view-model--ver
   display: grid !important;
   grid-template-columns: 240px minmax(0, 1fr) auto !important;
   grid-template-rows: auto auto !important;
-  column-gap: 20px !important; /* Espacio equilibrado (20px) */
-  row-gap: 4px !important;
+  column-gap: 18px !important;
+  row-gap: 10px !important;
   align-items: start !important;
 }
 
-/* Limpieza total de contenedores de texto de YouTube */
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__text-container,
-html[data-yslv-subs-view="list"] yt-lockup-metadata-view-model,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__metadata,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__content,
-html[data-yslv-subs-view="list"] .yt-content-metadata-view-model,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title-container {
-  padding-left: 0 !important;
-  margin-left: 0 !important;
-  border-left: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  align-items: flex-start !important;
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image {
+  grid-column: 1 !important;
+  grid-row: 1 / span 2 !important;
+  width: 240px !important;
+  min-width: 240px !important;
+  max-width: 240px !important;
 }
 
-/* Alineación de elementos individuales */
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
-html[data-yslv-subs-view="list"] #video-title,
-html[data-yslv-subs-view="list"] #video-title-link,
-html[data-yslv-subs-view="list"] .yslv-subs-mrow,
-html[data-yslv-subs-view="list"] .yslv-subs-desc,
-html[data-yslv-subs-view="list"] yt-formatted-string,
-html[data-yslv-subs-view="list"] .yt-content-metadata-view-model__metadata-row {
-  margin-left: 0 !important;
-  padding-left: 0 !important;
-  text-indent: 0 !important;
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image img {
   width: 100% !important;
-  text-align: left !important;
-}
-
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer > #contents > ytd-continuation-item-renderer:first-child,
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer > #contents > ytd-button-renderer:first-child {
-  display: none !important;
-}
-
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer > #contents > ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #content,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #contents {
-  margin-top: 20px !important;
-  margin-bottom: 0px !important;
-  padding-top: 0px !important;
-  padding-bottom: 0px !important;
+  height: auto !important;
+  border-radius: 14px !important;
+  object-fit: cover !important;
   display: block !important;
 }
 
-/* Forzar tamaño de títulos de sección SOLO en el área de videos */
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #title,
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer .title,
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #title-text,
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer yt-formatted-string[has-link-only_],
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #title {
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  line-height: 1.2 !important;
-  color: var(--yt-spec-text-primary) !important;
-  display: block !important;
-  margin-bottom: 8px !important; /* Espacio de 8px para que esté más pegado */
-  white-space: nowrap !important;
-  width: auto !important;
-  max-width: none !important;
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  min-width: 0 !important;
 }
 
-/* Asegurar que el primer vídeo tras CUALQUIER sección tenga la misma distancia */
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer > #contents > ytd-rich-item-renderer:first-of-type {
-  padding-top: 0px !important;
-  margin-top: -4px !important; /* Pequeña compensación para igualar visualmente */
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__menu-button {
+  grid-column: 3 !important;
+  grid-row: 1 !important;
+  justify-self: end !important;
+  align-self: start !important;
 }
 
-/* Ocultar avatar original dentro de la metadata del lockup */
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar,
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-view-model__avatar,
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata yt-avatar-shape,
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-spec-avatar-shape {
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: 2 !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  line-height: 1.35 !important;
+  font-weight: 600 !important;
+}
+
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar {      
   display: none !important;
 }
 
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__metadata yt-content-metadata-view-model {
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__metadata yt-content-metadata-view-model {     
   display: block !important;
   position: absolute !important;
   left: -99999px !important;
