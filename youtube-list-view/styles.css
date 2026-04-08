@@ -224,7 +224,10 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead {
   margin: 0 0 14px 0 !important; /* Set to 14px for a perfectly balanced look */
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar {
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-view-model__avatar,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape {
   display: flex !important;
   width: 32px !important;
   height: 32px !important;
@@ -233,7 +236,9 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-mod
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape {
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar img,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-view-model__avatar img {
   width: 32px !important;
   height: 32px !important;
 }
@@ -296,7 +301,11 @@ html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title {
   font-weight: 600 !important;
 }
 
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar {
+/* Ocultar avatar original dentro de la metadata del lockup */
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-view-model__avatar,
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata yt-avatar-shape,
+html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-spec-avatar-shape {
   display: none !important;
 }
 

@@ -606,7 +606,13 @@
     if (!item || !lockup || !head) return null
     if (STATE.movedAvatars.has(item)) return STATE.movedAvatars.get(item)?.avatarEl || null
 
-    const avatarEl = lockup.querySelector(".yt-lockup-metadata-view-model__avatar")
+    // Robust avatar selector: tries metadata-specific, general lockup, and standard YT avatar shapes
+    const avatarEl =
+      lockup.querySelector(".yt-lockup-metadata-view-model__avatar") ||
+      lockup.querySelector(".yt-lockup-view-model__avatar") ||
+      lockup.querySelector("yt-avatar-shape") ||
+      lockup.querySelector(".yt-spec-avatar-shape")
+    
     if (!avatarEl || !avatarEl.parentNode) return null
 
     const parent = avatarEl.parentNode
