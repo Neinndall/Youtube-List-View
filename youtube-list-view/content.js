@@ -1281,30 +1281,27 @@
       return
     }
 
-    // Detect Shorts shelves by looking for Shorts-specific components or titles
-    const selectors = 'ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-reel-shelf-renderer, ytd-rich-section-renderer, ytd-reel-shelf-renderer'
-    const containers = document.querySelectorAll(selectors)
+    // 1. Buscar estantes de Shorts por componentes o títulos
+    const shelfSelectors = 'ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-reel-shelf-renderer, ytd-rich-section-renderer'
+    const containers = document.querySelectorAll(shelfSelectors)
     
     containers.forEach(el => {
-      // Avoid processing if already hidden
-      if (el.classList.contains("yslv-shorts-hidden")) return
-
-      const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, ytd-rich-item-renderer[is-shorts]')
-      const hasShortsTitle = el.querySelector('#title, #title-text, .title, #title-container, h2, h3')?.textContent?.toLowerCase().includes("shorts")
-      const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8c0.1-0.3,0.1-0.7,0-1"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
+      const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]')
+      const hasShortsTitle = el.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')?.textContent?.toLowerCase().includes("shorts")
+      const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
 
       if (hasShortsContent || hasShortsTitle || hasShortsIcon) {
-        el.classList.add("yslv-shorts-hidden")
+        if (!el.classList.contains("yslv-shorts-hidden")) {
+          el.classList.add("yslv-shorts-hidden")
+        }
       }
     })
 
-    // Fallback: check all headings for the word "Shorts"
-    document.querySelectorAll("#title, #title-text, .title, h2, h3").forEach(t => {
-      if (t.textContent?.toLowerCase().includes("shorts")) {
-        const shelf = t.closest('ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-reel-shelf-renderer, ytd-rich-section-renderer')
-        if (shelf && !shelf.classList.contains("yslv-shorts-hidden")) {
-          shelf.classList.add("yslv-shorts-hidden")
-        }
+    // 2. Fallback: buscar ítems individuales que sean Shorts
+    document.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
+      const isShort = item.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer') || item.hasAttribute("is-shorts")
+      if (isShort) {
+        item.classList.add("yslv-shorts-hidden")
       }
     })
   }
