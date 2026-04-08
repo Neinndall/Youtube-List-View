@@ -385,6 +385,12 @@ html[data-yslv-subs-view="list"] .yslv-subs-mch a {
   display: inline-flex !important;
   align-items: center !important;
   min-width: 0 !important;
+  transition: color 0.15s ease !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-mch a:hover {
+  color: var(--yt-spec-text-primary) !important;
+  text-decoration: none !important;
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-mch a > span {
@@ -401,7 +407,6 @@ html[data-yslv-subs-view="list"] .yslv-subs-mrt {
   font-size: 12px !important;
   line-height: 1.35 !important;
   white-space: nowrap !important;
-  opacity: 0.95 !important;
   flex: 0 0 auto !important;
 }
 
