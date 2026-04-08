@@ -304,6 +304,21 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata {
   grid-column: 2 !important;
   grid-row: 1 / span 2 !important;
   min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__text-container,
+html[data-yslv-subs-view="list"] yt-lockup-metadata-view-model {
+  padding: 0 !important;
+  margin: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: flex-start !important;
+  width: 100% !important;
 }
 
 html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__menu-button {
@@ -311,6 +326,7 @@ html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__menu-button {
   grid-row: 1 !important;
   justify-self: end !important;
   align-self: start !important;
+  margin-top: -4px !important; /* Align better with the title top */
 }
 
 html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title {
@@ -321,6 +337,9 @@ html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title {
   white-space: normal !important;
   line-height: 1.35 !important;
   font-weight: 600 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
 }
 
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar {      
