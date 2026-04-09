@@ -132,7 +132,6 @@
     lastPageSig: "",
 
     hideMostRelevant: false,
-    hideMostRecent: false,
     hideShorts: false,
   }
 
@@ -1287,19 +1286,9 @@
       
       // Detección robusta antes de renombrar
       const isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => txt.includes(t))
-      const isRecent = ["most recent", "más recientes", "más reciente", "recientes", "reciente", "novedades", "new for you", "nuevos para ti", "news", "latest", /^más(\.\.\.|\u2026)?$/i.test(txt)].some(t => {
-        if (t instanceof RegExp) return t.test(txt)
-        return txt.includes(t)
-      })
 
       if (isRelevant) {
         if (STATE.hideMostRelevant) {
-          section.classList.add("yslv-section-hidden")
-        } else {
-          section.classList.remove("yslv-section-hidden")
-        }
-      } else if (isRecent) {
-        if (STATE.hideMostRecent) {
           section.classList.add("yslv-section-hidden")
         } else {
           section.classList.remove("yslv-section-hidden")
@@ -1382,10 +1371,9 @@
   function apply() {
     if (!isContextValid()) return
     ensureDescStoreLoaded()
-    chrome.storage.local.get(["hideMostRelevant", "hideMostRecent", "hideShorts"], result => {
+    chrome.storage.local.get(["hideMostRelevant", "hideShorts"], result => {
       if (chrome.runtime.lastError || !isContextValid()) return
       STATE.hideMostRelevant = result.hideMostRelevant || false
-      STATE.hideMostRecent = result.hideMostRecent || false
       STATE.hideShorts = result.hideShorts || false
       processMostRelevantSection()
       processShortsSection()
@@ -1449,10 +1437,6 @@
         if (area === "local") {
           if (changes.hideMostRelevant) {
             STATE.hideMostRelevant = changes.hideMostRelevant.newValue
-            processMostRelevantSection()
-          }
-          if (changes.hideMostRecent) {
-            STATE.hideMostRecent = changes.hideMostRecent.newValue
             processMostRelevantSection()
           }
           if (changes.hideShorts) {

@@ -82,35 +82,56 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer {
   margin: 0 !important;
 }
 
-/* Hide sections preserving our toggle buttons */
+/* Hide sections preserving our toggle buttons and native Manage button */
 html[data-yslv-subs-view] .yslv-section-hidden #title-text,
 html[data-yslv-subs-view] .yslv-section-hidden #title-annotation-container-outer,
-html[data-yslv-subs-view] .yslv-section-hidden #title-container > :not(#yslv-subs-toggle):not(#spacer),
+html[data-yslv-subs-view] .yslv-section-hidden #title-container > :not(#yslv-subs-toggle):not(#spacer):not(#subscribe-button):not(ytd-button-renderer),
 html[data-yslv-subs-view] .yslv-section-hidden .grid-subheader > :not(#title-container),
-html[data-yslv-subs-view] .yslv-section-hidden ytd-button-renderer:not(:has(#yslv-subs-toggle)) {
+html[data-yslv-subs-view] .yslv-section-hidden ytd-button-renderer:not(:has(#yslv-subs-toggle)):not(#subscribe-button):not(.ytd-subscribe-button-renderer) {
   display: none !important;
 }
 
-/* Ensure the header container itself is not hidden if it contains our toggle */
+/* Ensure the header container itself is not hidden and stays ABOVE the rising content */
 html[data-yslv-subs-view] .yslv-section-hidden #title-container,
 html[data-yslv-subs-view] .yslv-section-hidden .grid-subheader {
   display: flex !important;
   visibility: visible !important;
-  min-height: 0 !important;
+  position: relative !important;
+  z-index: 50 !important; /* Capa superior absoluta */
+  min-height: 32px !important;
   margin-top: 0 !important;
-  margin-bottom: 0 !important; /* Tighten up when hidden */
+  margin-bottom: 0 !important; 
   padding-top: 0 !important;
   padding-bottom: 0 !important;
 }
 
-/* Specific rule for hidden sections: keep top margin but remove internal header space */
+/* Explicitly hide the videos/content inside the hidden section to collapse it */
+html[data-yslv-subs-view] .yslv-section-hidden #content,
+html[data-yslv-subs-view] .yslv-section-hidden #contents,
+html[data-yslv-subs-view] .yslv-section-hidden ytd-rich-shelf-renderer #contents,
+html[data-yslv-subs-view] .yslv-section-hidden ytd-shelf-renderer #contents,
+html[data-yslv-subs-view] .yslv-section-hidden #show-more-button {
+  display: none !important;
+}
+
+/* Specific rule for hidden sections: stable top margin + pull up next content */
 html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden {
-  margin-top: 16px !important; /* Ajustado a 16px según petición final */
-  margin-bottom: 0 !important;
+  margin-top: 24px !important; 
+  margin-bottom: -18px !important; /* Pull next content up safely without covering buttons */
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+/* Cleanup old negative margins that caused overlapping/disappearing */
+html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-item-renderer {
+  margin-top: 24px !important; /* Reset to standard to let the negative margin-bottom do the work */
 }
 
 html[data-yslv-subs-view] .yslv-shorts-hidden,
