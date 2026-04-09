@@ -103,11 +103,11 @@ html[data-yslv-subs-view] .yslv-section-hidden .grid-subheader {
   padding-bottom: 0 !important;
 }
 
-/* Specific rule for the section that usually holds the toggle to avoid blank space but keep buttons */
+/* Specific rule for hidden sections: keep top margin but remove internal header space */
 html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden {
-  margin-top: 0 !important;
+  margin-top: 16px !important; /* Ajustado a 16px según petición final */
   margin-bottom: 0 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
@@ -254,7 +254,7 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer:first-of-type,
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer + ytd-rich-item-renderer,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer + ytd-rich-item-renderer,
 html[data-yslv-subs-view="list"] ytd-shelf-renderer + ytd-rich-item-renderer {
-  padding-top: 28px !important;
+  padding-top: 32px !important; /* Regirse como todos: unificado a 32px */
   margin-top: 0 !important;
 }
 
@@ -436,6 +436,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-mch {
   flex: 0 1 auto !important;
   display: flex !important;
   align-items: center !important;
+  min-width: 0 !important;
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-mch a {
@@ -601,5 +602,5 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-shelf-
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
   margin-top: 0 !important;
-  margin-bottom: 1rem !important;
+  margin-bottom: 4px !important; /* Unificado a 4px para que coincida con Relevantes */
 }
