@@ -181,7 +181,7 @@ html[data-yslv-subs-view="list"] ytd-shelf-renderer #title-container {
   align-items: center !important;
   justify-content: space-between !important;
   margin-left: 0 !important;
-  margin-bottom: 16px !important;
+  margin-bottom: 4px !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
   width: 100% !important;
@@ -203,7 +203,7 @@ html[data-yslv-subs-view="list"] ytd-shelf-renderer #contents {
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer,
 html[data-yslv-subs-view="list"] ytd-shelf-renderer {
-  margin-top: 16px !important; 
+  margin-top: 24px !important; 
   margin-bottom: 0 !important;
   display: block !important;
 }
@@ -241,10 +241,6 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short {
   margin: 0 !important;
   border-bottom: 0 !important;
   vertical-align: top !important;
-}
-
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer:first-child {
-  padding-top: 0 !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer:last-child {
@@ -579,6 +575,11 @@ html[data-yslv-subs-view="list"] ytd-counterfactual-renderer.ytd-rich-section-re
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-list-header-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-shelf-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
+  margin-top: 0 !important;
+  margin-bottom: 1rem !important;
+}
+er,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
   margin-top: 0 !important;
   margin-bottom: 1rem !important;
