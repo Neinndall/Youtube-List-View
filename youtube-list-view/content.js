@@ -132,6 +132,7 @@
     lastPageSig: "",
 
     hideMostRelevant: false,
+    hideMostRecent: false,
     hideShorts: false,
   }
 
@@ -171,6 +172,10 @@
     if (!dest) return
     clearChildren(dest)
     dest.textContent = normalizeText(txt)
+  }
+
+  function isContextValid() {
+    return typeof chrome !== "undefined" && chrome.runtime && chrome.runtime.id
   }
 
   function isSubsPage() {
@@ -261,6 +266,10 @@
 
   function ensureDescStoreLoaded() {
     if (DESC_STORE.obj) return
+    if (!isContextValid()) {
+      DESC_STORE.obj = {}
+      return
+    }
     return new Promise((resolve) => {
       chrome.storage.local.get([CFG.descStore.key], (result) => {
         let obj = {}
@@ -280,11 +289,7 @@
     DESC_STORE.saveT = setTimeout(() => {
       DESC_STORE.saveT = 0
       if (!DESC_STORE.dirty) return
-
-      // Safety check: ensure chrome.storage.local is still accessible
-      if (typeof chrome === "undefined" || !chrome.storage || !chrome.storage.local || !chrome.runtime?.id) {
-        return
-      }
+      if (!isContextValid()) return
 
       try {
         DESC_STORE.dirty = false
@@ -1270,41 +1275,44 @@
   function processMostRelevantSection() {
     if (!STATE.active) return
 
-    // 1. Renombrado de títulos (siempre activo para limpiar la UI)
-    const titles = document.querySelectorAll("#title, #title-text, .title, h2, h3, yt-formatted-string")
-    titles.forEach(title => {
-      const rawTxt = (title.textContent || "").trim()
-      if (/^Más(\.\.\.|\u2026)?$/i.test(rawTxt) || rawTxt === "Más") {
-        title.textContent = "Más recientes"
-      }
-    })
-
-    // 2. Ocultar secciones si la opción está activa
+    // 1. Ocultar secciones si la opción está activa (HACER ESTO PRIMERO)
     const shelfSelectors = 'ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-item-section-renderer'
     const containers = document.querySelectorAll(shelfSelectors)
     
-    // Objetivos extendidos para capturar tanto "Más relevantes" como "Más recientes" y similares
-    const hideTargets = [
-      "most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance", 
-      "most recent", "más recientes", "más reciente", "recientes", "reciente",
-      "novedades", "new for you", "nuevos para ti", "news", "latest"
-    ]
-
     containers.forEach(section => {
       const titleEl = section.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')
       if (!titleEl) return
 
       const txt = titleEl.textContent.trim().toLowerCase()
-      const isTarget = hideTargets.some(t => txt.includes(t))
+      
+      // Detección robusta antes de renombrar
+      const isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => txt.includes(t))
+      const isRecent = ["most recent", "más recientes", "más reciente", "recientes", "reciente", "novedades", "new for you", "nuevos para ti", "news", "latest", /^más(\.\.\.|\u2026)?$/i.test(txt)].some(t => {
+        if (t instanceof RegExp) return t.test(txt)
+        return txt.includes(t)
+      })
 
-      if (isTarget) {
-        // En lugar de ocultar TODA la sección, aplicamos una clase que oculta el texto y botones nativos
-        // pero permite que nuestro #yslv-subs-toggle (si existe ahí) siga siendo visible.
+      if (isRelevant) {
         if (STATE.hideMostRelevant) {
           section.classList.add("yslv-section-hidden")
         } else {
           section.classList.remove("yslv-section-hidden")
         }
+      } else if (isRecent) {
+        if (STATE.hideMostRecent) {
+          section.classList.add("yslv-section-hidden")
+        } else {
+          section.classList.remove("yslv-section-hidden")
+        }
+      }
+    })
+
+    // 2. Renombrado de títulos (solo para los que siguen visibles)
+    const titles = document.querySelectorAll("#title, #title-text, .title, h2, h3, yt-formatted-string")
+    titles.forEach(title => {
+      const rawTxt = (title.textContent || "").trim()
+      if (/^Más(\.\.\.|\u2026)?$/i.test(rawTxt) || rawTxt === "Más") {
+        title.textContent = "Más recientes"
       }
     })
   }
@@ -1372,9 +1380,12 @@
   }
 
   function apply() {
+    if (!isContextValid()) return
     ensureDescStoreLoaded()
-    chrome.storage.local.get(["hideMostRelevant", "hideShorts"], result => {
+    chrome.storage.local.get(["hideMostRelevant", "hideMostRecent", "hideShorts"], result => {
+      if (chrome.runtime.lastError || !isContextValid()) return
       STATE.hideMostRelevant = result.hideMostRelevant || false
+      STATE.hideMostRecent = result.hideMostRecent || false
       STATE.hideShorts = result.hideShorts || false
       processMostRelevantSection()
       processShortsSection()
@@ -1432,18 +1443,25 @@
   function init() {
     syncActive(true)
 
-    chrome.storage.onChanged.addListener((changes, area) => {
-      if (area === "local") {
-        if (changes.hideMostRelevant) {
-          STATE.hideMostRelevant = changes.hideMostRelevant.newValue
-          processMostRelevantSection()
+    if (isContextValid()) {
+      chrome.storage.onChanged.addListener((changes, area) => {
+        if (!isContextValid()) return
+        if (area === "local") {
+          if (changes.hideMostRelevant) {
+            STATE.hideMostRelevant = changes.hideMostRelevant.newValue
+            processMostRelevantSection()
+          }
+          if (changes.hideMostRecent) {
+            STATE.hideMostRecent = changes.hideMostRecent.newValue
+            processMostRelevantSection()
+          }
+          if (changes.hideShorts) {
+            STATE.hideShorts = changes.hideShorts.newValue
+            processShortsSection()
+          }
         }
-        if (changes.hideShorts) {
-          STATE.hideShorts = changes.hideShorts.newValue
-          processShortsSection()
-        }
-      }
-    })
+      })
+    }
 
     window.addEventListener(
       "yt-navigate-finish",

@@ -97,13 +97,20 @@ html[data-yslv-subs-view] .yslv-section-hidden .grid-subheader {
   display: flex !important;
   visibility: visible !important;
   min-height: 0 !important;
+  margin-top: 0 !important;
   margin-bottom: 0 !important; /* Tighten up when hidden */
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 /* Specific rule for the section that usually holds the toggle to avoid blank space but keep buttons */
+html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 html[data-yslv-subs-view] .yslv-shorts-hidden,
@@ -560,7 +567,7 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   align-items: center !important;
   justify-content: center !important;
   vertical-align: middle !important;
-  transform: translateY(-2px) !important; /* Bajado de -5px a -2px para alinear con el texto */
+  transform: translateY(-2px) !important;
   width: 32px !important;
   height: 32px !important;
   line-height: 1 !important;
@@ -592,11 +599,6 @@ html[data-yslv-subs-view="list"] ytd-counterfactual-renderer.ytd-rich-section-re
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-list-header-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-shelf-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
-  margin-top: 0 !important;
-  margin-bottom: 1rem !important;
-}
-er,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
   margin-top: 0 !important;
   margin-bottom: 1rem !important;
