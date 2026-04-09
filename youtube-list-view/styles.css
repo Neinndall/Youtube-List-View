@@ -5,7 +5,7 @@
   align-items: center;
   gap: 10px;
   margin-left: 12px;
-  margin-right: 0 !important; /* Removed margin to align perfectly with the dots below */
+  margin-right: 0 !important;
   position: relative;
 }
 
@@ -59,7 +59,7 @@ ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-r
   align-items: center !important;
   position: relative !important;
   padding-bottom: 0 !important;
-  margin-bottom: -4px !important; /* Slightly negative margin to push content up towards the title */
+  margin-bottom: -4px !important;
 }
 
 ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader #title-container #spacer,
@@ -82,17 +82,14 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer {
   margin: 0 !important;
 }
 
-/* Specific class to hide sections from JS without CSS conflicts */
 .yslv-section-hidden {
   display: none !important;
 }
 
-/* Specific class to hide sections - more specific to override alignment rules */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer.yslv-section-hidden {
   display: none !important;
 }
 
-/* Specific class to hide Shorts sections - Extremely specific to override all layout rules */
 html[data-yslv-subs-view] .yslv-shorts-hidden,
 html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-shorts-hidden,
 html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-shorts-hidden,
@@ -104,16 +101,23 @@ html[data-yslv-subs-view] ytd-reel-shelf-renderer.yslv-shorts-hidden {
   visibility: hidden !important;
 }
 
-/* Align ALL rich sections and their internal content to the left */
+/* Align ALL rich sections and their internal content to the left and clear padding-right */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer #content,
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer #contents,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer {
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer #content,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-item-section-renderer,
+html[data-yslv-subs-view="list"] ytd-item-section-renderer #contents {
   margin-left: 0 !important;
   margin-inline-start: 0 !important;
   padding-left: 0 !important;
   padding-inline-start: 0 !important;
+  padding-right: 0 !important;
+  padding-inline-end: 0 !important;
   transform: none !important;
   display: block !important;
   width: 100% !important;
@@ -121,22 +125,20 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shel
   box-sizing: border-box !important;
 }
 
-/* Correct positioning for the entire Shorts section (Icon + Title + Videos) */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) {
-  margin-top: -12px !important; /* Margen negativo para pegarlo más arriba y que quede ordenado */
+  margin-top: -12px !important;
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
   padding-top: 0 !important; 
   display: block !important;
 }
 
-/* Restore native Shorts grid behavior - Clean and compatible */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-  column-gap: 16px !important; /* Spacing between shorts */
-  row-gap: 20px !important; /* Spacing between rows when expanded */
-  margin-top: 16px !important; /* Reducido para que estén un pelín más cerca del título */
+  column-gap: 16px !important;
+  row-gap: 20px !important;
+  margin-top: 16px !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
@@ -146,7 +148,6 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   padding: 0 !important;
 }
 
-/* Initially hide shorts after the 9th one to keep the layout clean, matching your request */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short):not([is-expanded]) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer:nth-child(n+10) {
   display: none !important;
 }
@@ -159,45 +160,49 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   padding-bottom: 0 !important;
 }
 
-/* Specific fix for the container that usually follows the shorts shelf - Only when NOT hidden */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short):not(.yslv-shorts-hidden) + *,
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short):not(.yslv-shorts-hidden) + * {
-  margin-top: -24px !important; /* Only pull up if the shorts are actually there */
+  margin-top: -24px !important;
   padding-top: 0 !important;
 }
 
-/* Ensure that when hidden, the negative margin is neutralized */
 html[data-yslv-subs-view="list"] .yslv-shorts-hidden + * {
   margin-top: 0 !important;
 }
+
 /* Clean spacing for headers (Unificado para Más relevantes, Más recientes y Shorts) */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title-container,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #rich-shelf-header,
-html[data-yslv-subs-view="list"] #rich-shelf-header.ytd-rich-shelf-renderer {
+html[data-yslv-subs-view="list"] #rich-shelf-header.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer .grid-subheader,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer #title-container {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
   margin-left: 0 !important;
-  margin-bottom: 16px !important; /* Espacio idéntico bajo el título */
+  margin-bottom: 16px !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
   width: 100% !important;
-  padding-right: 24px !important;
+  padding-right: 0 !important;
   padding-left: 0 !important;
 }
 
 /* Reset de contenedores intermedios para garantizar que el espaciado sea idéntico */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer #content,
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer #contents,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents {
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer #contents {
   margin-top: 0 !important;
   padding-top: 0 !important;
+  padding-right: 0 !important;
 }
 
 /* Aire superior para que no se peguen a la línea divisoria anterior */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer {
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer {
   margin-top: 16px !important; 
   margin-bottom: 0 !important;
   display: block !important;
@@ -209,7 +214,7 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
   max-width: 100% !important;
   margin: 0 !important;
   width: 100% !important;
-  padding: 0 24px 0 56px !important; /* Added 24px right padding for alignment */
+  padding: 0 24px 0 56px !important;
   box-sizing: border-box !important;
 }
 
@@ -223,8 +228,9 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
 
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer:first-of-type,
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer + ytd-rich-item-renderer {
-  padding-top: 28px !important; /* Aumentado para que no esté pegado al texto de la sección */
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer + ytd-rich-item-renderer {
+  padding-top: 28px !important;
   margin-top: 0 !important;
 }
 
@@ -249,7 +255,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
-  margin: 0 0 14px 0 !important; /* Set to 14px for a perfectly balanced look */
+  margin: 0 0 14px 0 !important;
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
@@ -371,7 +377,6 @@ html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle {
 
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-metadata-view-model__avatar,
 html[data-yslv-subs-view="list"] .ytLockupViewModelMetadata .ytLockupViewModelAvatar,
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata .yt-lockup-view-model__avatar,
 html[data-yslv-subs-view="list"] yt-lockup-view-model .yt-lockup-view-model__avatar,
 html[data-yslv-subs-view="list"] .yt-lockup-view-model .yt-lockup-metadata-view-model__avatar {      
   display: none !important;
@@ -396,7 +401,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-mrow {
   display: flex !important;
   align-items: center !important;
   gap: 8px !important;
-  margin-top: 8px !important; /* Slightly more air from title */
+  margin-top: 8px !important;
   min-width: 0 !important;
 }
 
@@ -445,7 +450,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-mrt {
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-desc {
-  margin-top: 12px !important; /* More space between metadata and description */
+  margin-top: 12px !important;
   font-size: 12px !important;
   line-height: 1.45 !important;
   color: var(--yt-spec-text-secondary) !important;
@@ -527,9 +532,8 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short img.ytCore
   object-fit: cover !important;
   border-radius: 14px !important;
   display: block !important;
-  }
+}
 
-/* Ensure horizontal alignment for the title and icon in the Shorts header */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-container {
   display: flex !important;
   flex-direction: row !important;
@@ -537,21 +541,20 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   gap: 8px !important;
 }
 
-/* Forzar centrado del icono de Shorts y quitar márgenes residuales */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-annotation-container-outer,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) yt-icon {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   vertical-align: middle !important;
-  transform: translateY(-5px) !important; /* Subido un píxel más para que quede clavado */
-  width: 32px !important; /* Más grande como pediste */
+  transform: translateY(-5px) !important;
+  width: 32px !important;
   height: 32px !important;
   line-height: 1 !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #dismissible {
-  margin-top: 0 !important; /* Eliminated margin to push content up */
+  margin-top: 0 !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short > #content {
@@ -577,6 +580,6 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-l
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-shelf-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
-  margin-top: 0 !important; /* Eliminated margin to push content up */
+  margin-top: 0 !important;
   margin-bottom: 1rem !important;
 }
