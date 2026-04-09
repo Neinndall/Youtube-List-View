@@ -1298,6 +1298,8 @@
       const isTarget = hideTargets.some(t => txt.includes(t))
 
       if (isTarget) {
+        // En lugar de ocultar TODA la sección, aplicamos una clase que oculta el texto y botones nativos
+        // pero permite que nuestro #yslv-subs-toggle (si existe ahí) siga siendo visible.
         if (STATE.hideMostRelevant) {
           section.classList.add("yslv-section-hidden")
         } else {

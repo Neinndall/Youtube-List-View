@@ -82,12 +82,28 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer {
   margin: 0 !important;
 }
 
-.yslv-section-hidden {
+/* Hide sections preserving our toggle buttons */
+html[data-yslv-subs-view] .yslv-section-hidden #title-text,
+html[data-yslv-subs-view] .yslv-section-hidden #title-annotation-container-outer,
+html[data-yslv-subs-view] .yslv-section-hidden #title-container > :not(#yslv-subs-toggle):not(#spacer),
+html[data-yslv-subs-view] .yslv-section-hidden .grid-subheader > :not(#title-container),
+html[data-yslv-subs-view] .yslv-section-hidden ytd-button-renderer:not(:has(#yslv-subs-toggle)) {
   display: none !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer.yslv-section-hidden {
-  display: none !important;
+/* Ensure the header container itself is not hidden if it contains our toggle */
+html[data-yslv-subs-view] .yslv-section-hidden #title-container,
+html[data-yslv-subs-view] .yslv-section-hidden .grid-subheader {
+  display: flex !important;
+  visibility: visible !important;
+  min-height: 0 !important;
+  margin-bottom: 0 !important; /* Tighten up when hidden */
+}
+
+/* Specific rule for the section that usually holds the toggle to avoid blank space but keep buttons */
+html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 html[data-yslv-subs-view] .yslv-shorts-hidden,
@@ -125,8 +141,9 @@ html[data-yslv-subs-view="list"] ytd-item-section-renderer #contents {
   box-sizing: border-box !important;
 }
 
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short),
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) {
-  margin-top: -12px !important;
+  margin-top: 18px !important; /* Ajustado para estar pegado a la línea sin pisarla */
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
   padding-top: 0 !important; 
@@ -138,7 +155,7 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
   column-gap: 16px !important;
   row-gap: 20px !important;
-  margin-top: 16px !important;
+  margin-top: 24px !important; /* Aumentado a 16px para que respire bajo el título */
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
@@ -543,7 +560,7 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   align-items: center !important;
   justify-content: center !important;
   vertical-align: middle !important;
-  transform: translateY(-5px) !important;
+  transform: translateY(-2px) !important; /* Bajado de -5px a -2px para alinear con el texto */
   width: 32px !important;
   height: 32px !important;
   line-height: 1 !important;
