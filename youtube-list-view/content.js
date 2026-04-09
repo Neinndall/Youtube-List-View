@@ -610,6 +610,7 @@
     const avatarEl =
       lockup.querySelector(".yt-lockup-metadata-view-model__avatar") ||
       lockup.querySelector(".yt-lockup-view-model__avatar") ||
+      lockup.querySelector(".ytLockupViewModelAvatar") ||
       lockup.querySelector("yt-avatar-shape") ||
       lockup.querySelector(".yt-spec-avatar-shape")
     
@@ -652,7 +653,12 @@
   function getRightMetaRowsText(lockup) {
     const chName = getChannelName(lockup)
     const rows = Array.from(
-      lockup.querySelectorAll("yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row")
+      lockup.querySelectorAll(
+        "yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row, " +
+        "yt-content-metadata-view-model .ytContentMetadataViewModelMetadataRow, " +
+        ".yt-lockup-metadata-view-model__metadata-row, " +
+        ".ytLockupMetadataViewModelMetadataRow"
+      )
     )
       .map(r => normalizeText(r.textContent || ""))
       .filter(Boolean)
@@ -685,7 +691,9 @@
       row.className = CFG.cls.metaRow
 
       const heading =
-        textContainer.querySelector(".yt-lockup-metadata-view-model__heading-reset") || textContainer.querySelector("h3")
+        textContainer.querySelector(".yt-lockup-metadata-view-model__heading-reset") || 
+        textContainer.querySelector(".ytLockupMetadataViewModelHeading") || 
+        textContainer.querySelector("h3")
       if (heading && heading.parentNode) heading.parentNode.insertBefore(row, heading.nextSibling)
       else textContainer.appendChild(row)
     }
@@ -748,6 +756,8 @@
     return (
       lockup.querySelector('a.yt-lockup-view-model__content-image[href^="/watch"]') ||
       lockup.querySelector('a.yt-lockup-view-model__content-image[href^="/shorts/"]') ||
+      lockup.querySelector('a.ytLockupViewModelContentImage[href^="/watch"]') ||
+      lockup.querySelector('a.ytLockupViewModelContentImage[href^="/shorts/"]') ||
       lockup.querySelector('a[href^="/watch"][id="thumbnail"]') ||
       lockup.querySelector('a[href^="/shorts/"][id="thumbnail"]') ||
       lockup.querySelector('a[href^="/shorts/"].reel-item-endpoint') ||
@@ -1081,12 +1091,29 @@
 
     const textContainer =
       lockup.querySelector(".yt-lockup-metadata-view-model__text-container") ||
+      lockup.querySelector(".ytLockupViewModelMetadata") ||
       lockup.querySelector(".yt-lockup-view-model__metadata") ||
       lockup.querySelector("yt-lockup-metadata-view-model") ||
       lockup.querySelector(".metadata")
     if (!textContainer) return
 
     STATE.processedItems.add(item)
+
+    // Move menu button to be a direct child of lockup for grid placement
+    const menuBtn = 
+      lockup.querySelector(".yt-lockup-metadata-view-model__menu-button") || 
+      lockup.querySelector(".ytLockupMetadataViewModelMenu") ||
+      lockup.querySelector("#menu-container.ytd-rich-grid-media") ||
+      lockup.querySelector("#menu")
+    
+    if (menuBtn) {
+      const wrapper = lockup.querySelector(":scope > div")
+      if (wrapper && menuBtn.parentNode !== wrapper) {
+        wrapper.appendChild(menuBtn)
+      } else if (!wrapper && menuBtn.parentNode !== lockup) {
+        lockup.appendChild(menuBtn)
+      }
+    }
 
     ensureRowHeader(item, lockup)
     ensureInlineMeta(textContainer, lockup)
