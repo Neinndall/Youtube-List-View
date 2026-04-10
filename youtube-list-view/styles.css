@@ -234,7 +234,7 @@ html[data-yslv-subs-view="list"] ytd-shelf-renderer #title-container {
   margin-top: 0 !important;
   padding-top: 0 !important;
   width: 100% !important;
-  padding-right: 0 !important;
+  padding-right: 24px !important; /* Restaurado a 24px para devolver los botones de arriba a su sitio */
   padding-left: 0 !important;
   min-height: 32px !important;
   position: relative !important;
@@ -244,6 +244,7 @@ html[data-yslv-subs-view="list"] ytd-shelf-renderer #title-container {
 /* Fix específico para evitar que el contenido de Más relevantes se meta debajo del título */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents,
 html[data-yslv-subs-view="list"] ytd-shelf-renderer #contents {
+  padding-top: 16px !important; /* Espacio real de 16px que empuja el contenido hacia abajo */
   margin-top: 0 !important;
   position: relative !important;
 }
@@ -284,7 +285,7 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
   max-width: 100% !important;
   margin: 0 !important;
   width: 100% !important;
-  padding: 0 24px 0 56px !important;
+  padding: 0 56px !important; /* Simetría de 56px para alejar los 3 puntitos del borde */
   box-sizing: border-box !important;
 }
 
@@ -398,7 +399,7 @@ html[data-yslv-subs-view="list"] .ytLockupViewModelMetadata {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
-  padding: 0 !important;
+  padding: 0 24px 0 0 !important; /* Añadido padding derecho específico para alinear el menú con los botones de arriba */
   margin: 0 !important;
   overflow: visible !important;
 }
@@ -426,6 +427,7 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model #menu {
   align-self: start !important;
   margin-top: 0 !important;
   margin-left: 16px !important;
+  margin-right: 12px !important; /* Añadido margen derecho para que el hover circular no se corte */
   display: block !important;
 }
 
