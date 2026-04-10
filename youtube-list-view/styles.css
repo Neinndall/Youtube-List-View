@@ -119,8 +119,8 @@ html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-item-section-renderer.yslv-section-hidden {
-  margin-top: 24px !important; 
-  margin-bottom: -24px !important; /* Pull next content up safely without covering buttons */
+  margin-top: 12px !important; 
+  margin-bottom: -12px !important; /* Ajustado para que con los 28px de padding del video sumen 16px exactos */
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   height: auto !important;
@@ -285,7 +285,7 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
   max-width: 100% !important;
   margin: 0 !important;
   width: 100% !important;
-  padding: 0 56px !important; /* Simetría de 56px para alejar los 3 puntitos del borde */
+  padding: 0 56px 0 56px !important; /* Restaurado el padding para alejar los 3 puntitos del borde */
   box-sizing: border-box !important;
 }
 
@@ -299,10 +299,9 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
 
 /* Pegado absoluto del primer video al título para eliminar cualquier gap */
 html[data-yslv-subs-view="list"] #contents > ytd-rich-item-renderer:first-child,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] #contents > ytd-rich-grid-media:first-child {
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer {
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
