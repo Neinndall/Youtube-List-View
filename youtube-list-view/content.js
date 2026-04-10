@@ -680,12 +680,7 @@
     }
 
     if (!out.length) return ""
-    if (out.length === 1) {
-      if (chName && out[0] === chName) return ""
-      return out[0]
-    }
-
-    return out.slice(1).join(" • ")
+    return out.join(" • ")
   }
 
   function ensureInlineMeta(textContainer, lockup) {
