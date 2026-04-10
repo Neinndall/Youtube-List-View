@@ -117,9 +117,10 @@ html[data-yslv-subs-view] .yslv-section-hidden #show-more-button {
 /* Specific rule for hidden sections: stable top margin + pull up next content */
 html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-section-hidden,
-html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden {
+html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-item-section-renderer.yslv-section-hidden {
   margin-top: 24px !important; 
-  margin-bottom: -18px !important; /* Pull next content up safely without covering buttons */
+  margin-bottom: -24px !important; /* Pull next content up safely without covering buttons */
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   height: auto !important;
@@ -129,9 +130,12 @@ html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden {
 /* Cleanup old negative margins that caused overlapping/disappearing */
 html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-section-renderer,
 html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-shelf-renderer,
-html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-item-renderer {
+html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-shelf-renderer {
   margin-top: 24px !important; /* Reset to standard to let the negative margin-bottom do the work */
+}
+
+html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-item-renderer {
+  margin-top: 0 !important;
 }
 
 html[data-yslv-subs-view] .yslv-shorts-hidden,
