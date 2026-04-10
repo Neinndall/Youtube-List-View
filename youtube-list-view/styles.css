@@ -187,7 +187,7 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
   column-gap: 16px !important;
   row-gap: 20px !important;
-  margin-top: 24px !important; /* Aumentado a 16px para que respire bajo el título */
+  margin-top: 0 !important; /* Eliminado el margen de 24px para que herede los 16px unificados */
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
@@ -618,7 +618,7 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   align-items: center !important;
   justify-content: center !important;
   vertical-align: middle !important;
-  transform: translateY(-2px) !important;
+  transform: translateY(-6px) !important;
   width: 32px !important;
   height: 32px !important;
   line-height: 1 !important;
