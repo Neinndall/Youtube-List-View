@@ -120,7 +120,7 @@ html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-item-section-renderer.yslv-section-hidden {
   margin-top: 12px !important; 
-  margin-bottom: -12px !important; /* Ajustado para que con los 28px de padding del video sumen 16px exactos */
+  margin-bottom: -10px !important; /* Ajustado a -10px para que con los 26px de padding del video sumen 16px exactos */
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   height: auto !important;
