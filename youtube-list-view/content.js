@@ -1295,15 +1295,6 @@
         }
       }
     })
-
-    // 2. Renombrado de títulos (solo para los que siguen visibles)
-    const titles = document.querySelectorAll("#title, #title-text, .title, h2, h3, yt-formatted-string")
-    titles.forEach(title => {
-      const rawTxt = (title.textContent || "").trim()
-      if (/^Más(\.\.\.|\u2026)?$/i.test(rawTxt) || rawTxt === "Más") {
-        title.textContent = "Más recientes"
-      }
-    })
   }
 
   function processShortsSection() {
