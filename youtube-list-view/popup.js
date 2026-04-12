@@ -1,5 +1,8 @@
 document.addEventListener('DOMContentLoaded', () => {
   const body = document.getElementById('body');
+  const viewWrapper = document.getElementById('viewWrapper');
+  const viewMain = document.getElementById('viewMain');
+  const viewSettings = document.getElementById('viewSettings');
   const toggleSettingsBtn = document.getElementById('toggleSettings');
   const resetDefaultsBtn = document.getElementById('resetDefaults');
 
@@ -30,10 +33,20 @@ document.addEventListener('DOMContentLoaded', () => {
     shortsGap: 14
   };
 
+  // Dynamic Height adjustment
+  function syncHeight() {
+    // Small delay to ensure DOM is ready or classes applied
+    setTimeout(() => {
+      const activeView = body.classList.contains('settings-active') ? viewSettings : viewMain;
+      viewWrapper.style.height = activeView.offsetHeight + 'px';
+    }, 10);
+  }
+
   // Switch View
   toggleSettingsBtn.addEventListener('click', () => {
     body.classList.toggle('settings-active');
     toggleSettingsBtn.textContent = body.classList.contains('settings-active') ? '🏠' : '⚙️';
+    syncHeight();
   });
 
   // Load Settings
@@ -46,6 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
       sliders[key].el.value = val;
       sliders[key].val.textContent = val + sliders[key].unit;
     });
+    
+    // Initial height sync
+    syncHeight();
   });
 
   // Save Toggles
@@ -76,6 +92,7 @@ document.addEventListener('DOMContentLoaded', () => {
         sliders[key].el.value = DEFAULTS[key];
         sliders[key].val.textContent = DEFAULTS[key] + sliders[key].unit;
       });
+      syncHeight();
     });
   });
 });
