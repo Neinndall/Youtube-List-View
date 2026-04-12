@@ -138,9 +138,10 @@
     thumbW: 260,
     rowPadY: 26,
     containerW: 100,
+    channelSize: 20,
     titleSize: 16,
-    shortsW: 170,
-    shortsGap: 16,
+    shortsW: 160,
+    shortsGap: 14,
   }
 
   const SHIMMER = {
@@ -1355,6 +1356,7 @@
     if (settings.thumbW != null) root.style.setProperty("--yslv-thumb-w", settings.thumbW + "px")
     if (settings.rowPadY != null) root.style.setProperty("--yslv-row-pad-y", settings.rowPadY + "px")
     if (settings.containerW != null) root.style.setProperty("--yslv-container-w", settings.containerW + "%")
+    if (settings.channelSize != null) root.style.setProperty("--yslv-channel-size", settings.channelSize + "px")
     if (settings.titleSize != null) root.style.setProperty("--yslv-title-size", settings.titleSize + "px")
     if (settings.shortsW != null) root.style.setProperty("--yslv-shorts-w", settings.shortsW + "px")
     if (settings.shortsGap != null) root.style.setProperty("--yslv-shorts-gap", settings.shortsGap + "px")
@@ -1364,7 +1366,7 @@
     if (!isContextValid()) return
     ensureDescStoreLoaded()
     
-    const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "containerW", "titleSize", "shortsW", "shortsGap"]
+    const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
     chrome.storage.local.get(keys, result => {
       if (chrome.runtime.lastError || !isContextValid()) return
       
@@ -1373,6 +1375,7 @@
       STATE.thumbW = result.thumbW ?? 260
       STATE.rowPadY = result.rowPadY ?? 26
       STATE.containerW = result.containerW ?? 100
+      STATE.channelSize = result.channelSize ?? 20
       STATE.titleSize = result.titleSize ?? 16
       STATE.shortsW = result.shortsW ?? 170
       STATE.shortsGap = result.shortsGap ?? 16
@@ -1438,7 +1441,7 @@
       chrome.storage.onChanged.addListener((changes, area) => {
         if (!isContextValid()) return
         if (area === "local") {
-          const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "shortsW", "shortsGap"]
+          const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
           let needsSectionUpdate = false
           let needsDynamicUpdate = false
 

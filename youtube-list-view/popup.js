@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     thumbW: { el: document.getElementById('thumbW'), val: document.getElementById('valThumbW'), unit: 'px' },
     rowPadY: { el: document.getElementById('rowPadY'), val: document.getElementById('valRowPadY'), unit: 'px' },
     containerW: { el: document.getElementById('containerW'), val: document.getElementById('valContainerW'), unit: '%' },
+    channelSize: { el: document.getElementById('channelSize'), val: document.getElementById('valChannelSize'), unit: 'px' },
     titleSize: { el: document.getElementById('titleSize'), val: document.getElementById('valTitleSize'), unit: 'px' },
     shortsW: { el: document.getElementById('shortsW'), val: document.getElementById('valShortsW'), unit: 'px' },
     shortsGap: { el: document.getElementById('shortsGap'), val: document.getElementById('valShortsGap'), unit: 'px' }
@@ -23,9 +24,10 @@ document.addEventListener('DOMContentLoaded', () => {
     thumbW: 260,
     rowPadY: 26,
     containerW: 100,
+    channelSize: 20,
     titleSize: 16,
-    shortsW: 170,
-    shortsGap: 16
+    shortsW: 160,
+    shortsGap: 14
   };
 
   // Switch View

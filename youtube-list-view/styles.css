@@ -262,8 +262,8 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
   display: flex !important;
   flex-direction: column !important;
   max-width: 100% !important;
-  margin: 0 !important;
-  width: 100% !important;
+  margin: 0 auto !important; /* Centrado automático para anchos menores al 100% */
+  width: var(--yslv-container-w, 100%) !important;
   padding: 0 56px 0 56px !important; /* Restaurado el padding para alejar los 3 puntitos del borde */
   box-sizing: border-box !important;
 }
@@ -327,10 +327,10 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead-name {
   color: var(--yt-spec-text-primary) !important;
   text-decoration: none !important;
   font-weight: 700 !important;
-  font-size: 20px !important;
+  font-size: var(--yslv-channel-size, 20px) !important;
   line-height: 1.15 !important;
   display: inline-flex !important;
-  align-items: center !important;
+  align-items: center;
 }
 
 html[data-yslv-subs-view="list"] yt-lockup-view-model,
@@ -392,6 +392,48 @@ html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model {
   align-items: flex-start !important;
   width: 100% !important;
   overflow: visible !important;
+}
+
+/* --- FLEX ORDER FOR PROFESSIONAL HIERARCHY --- */
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
+html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle {
+  order: 1 !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-mrow {
+  order: 2 !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-desc {
+  order: 3 !important;
+}
+
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost {
+  order: 4 !important;
+  width: fit-content !important;
+  margin-top: 14px !important;
+  display: block !important;
+}
+
+/* Professional style for "Notify Me" / "Recibir Aviso" button */
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost ytd-button-renderer {
+  background-color: var(--yt-spec-badge-chip-background, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 0 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost ytd-button-renderer:hover {
+  background-color: var(--yt-spec-badge-chip-background-hover, rgba(255, 255, 255, 0.15)) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost yt-button-shape button {
+  padding: 0 16px !important;
+  height: 32px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
 }
 
 html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__menu-button,
@@ -633,6 +675,4 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-s
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
   margin-top: 0 !important;
   margin-bottom: 4px !important; /* Unificado a 4px para que coincida con Relevantes */
-}
-; /* Unificado a 4px para que coincida con Relevantes */
 }
