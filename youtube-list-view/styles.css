@@ -114,28 +114,17 @@ html[data-yslv-subs-view] .yslv-section-hidden #show-more-button {
   display: none !important;
 }
 
-/* Specific rule for hidden sections: stable top margin + pull up next content */
+/* Specific rule for hidden sections: stable top margin and full collapse */
 html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden,
 html[data-yslv-subs-view] ytd-item-section-renderer.yslv-section-hidden {
-  margin-top: 12px !important; 
-  margin-bottom: -10px !important; /* Ajustado a -10px para que con los 26px de padding del video sumen 16px exactos */
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   height: auto !important;
   min-height: 0 !important;
-}
-
-/* Cleanup old negative margins that caused overlapping/disappearing */
-html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-shelf-renderer {
-  margin-top: 24px !important; /* Reset to standard to let the negative margin-bottom do the work */
-}
-
-html[data-yslv-subs-view="list"] .yslv-section-hidden + ytd-rich-item-renderer {
-  margin-top: 0 !important;
 }
 
 html[data-yslv-subs-view] .yslv-shorts-hidden,
@@ -175,7 +164,7 @@ html[data-yslv-subs-view="list"] ytd-item-section-renderer #contents {
 
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short),
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) {
-  margin-top: 18px !important; /* Ajustado para estar pegado a la línea sin pisarla */
+  margin-top: 24px !important;
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
   padding-top: 0 !important; 
@@ -184,10 +173,10 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-  column-gap: 16px !important;
+  grid-template-columns: repeat(auto-fill, minmax(var(--yslv-shorts-w, 170px), 1fr)) !important;
+  column-gap: var(--yslv-shorts-gap, 16px) !important;
   row-gap: 20px !important;
-  margin-top: 0 !important; /* Eliminado el margen de 24px para que herede los 16px unificados */
+  margin-top: 0 !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
@@ -209,16 +198,6 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   padding-bottom: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short):not(.yslv-shorts-hidden) + *,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short):not(.yslv-shorts-hidden) + * {
-  margin-top: -24px !important;
-  padding-top: 0 !important;
-}
-
-html[data-yslv-subs-view="list"] .yslv-shorts-hidden + * {
-  margin-top: 0 !important;
-}
-
 /* Clean spacing for headers (Unificado para Más relevantes, Más recientes y Shorts) */
 html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title-container,
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #rich-shelf-header,
@@ -230,21 +209,21 @@ html[data-yslv-subs-view="list"] ytd-shelf-renderer #title-container {
   align-items: center !important;
   justify-content: space-between !important;
   margin-left: 0 !important;
-  margin-bottom: 16px !important; /* Aplicamos los 16px finales tras corregir el solapamiento */
+  margin-bottom: 16px !important;
   margin-top: 0 !important;
   padding-top: 0 !important;
   width: 100% !important;
-  padding-right: 24px !important; /* Restaurado a 24px para devolver los botones de arriba a su sitio */
+  padding-right: 24px !important;
   padding-left: 0 !important;
   min-height: 32px !important;
   position: relative !important;
   z-index: 10 !important;
 }
 
-/* Fix específico para evitar que el contenido de Más relevantes se meta debajo del título */
+/* Correct gap between header and content without using negative margins */
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents,
 html[data-yslv-subs-view="list"] ytd-shelf-renderer #contents {
-  padding-top: 16px !important; /* Espacio real de 16px que empuja el contenido hacia abajo */
+  padding-top: 0 !important;
   margin-top: 0 !important;
   position: relative !important;
 }
@@ -283,8 +262,8 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
   display: flex !important;
   flex-direction: column !important;
   max-width: 100% !important;
-  margin: 0 !important;
-  width: 100% !important;
+  margin: 0 auto !important; /* Centrado automático para anchos menores al 100% */
+  width: var(--yslv-container-w, 100%) !important;
   padding: 0 56px 0 56px !important; /* Restaurado el padding para alejar los 3 puntitos del borde */
   box-sizing: border-box !important;
 }
@@ -292,7 +271,7 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
   display: block !important;
   width: 100% !important;
-  padding: 26px 0 !important;
+  padding: var(--yslv-row-pad-y, 26px) 0 !important;
   margin: 0 !important;
   border-bottom: 1px solid var(--yt-spec-10-percent-layer, var(--yslv-sep, rgba(0, 0, 0, 0.1))) !important;    
 }
@@ -348,10 +327,10 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead-name {
   color: var(--yt-spec-text-primary) !important;
   text-decoration: none !important;
   font-weight: 700 !important;
-  font-size: 20px !important;
+  font-size: var(--yslv-channel-size, 20px) !important;
   line-height: 1.15 !important;
   display: inline-flex !important;
-  align-items: center !important;
+  align-items: center;
 }
 
 html[data-yslv-subs-view="list"] yt-lockup-view-model,
@@ -375,10 +354,10 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model > div {
 
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image,
 html[data-yslv-subs-view="list"] .ytLockupViewModelContentImage {
-  width: 260px !important;
-  min-width: 260px !important;
-  max-width: 260px !important;
-  flex: 0 0 260px !important;
+  width: var(--yslv-thumb-w, 260px) !important;
+  min-width: var(--yslv-thumb-w, 260px) !important;
+  max-width: var(--yslv-thumb-w, 260px) !important;
+  flex: 0 0 var(--yslv-thumb-w, 260px) !important;
 }
 
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image img,
@@ -415,6 +394,48 @@ html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model {
   overflow: visible !important;
 }
 
+/* --- FLEX ORDER FOR PROFESSIONAL HIERARCHY --- */
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
+html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle {
+  order: 1 !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-mrow {
+  order: 2 !important;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-desc {
+  order: 3 !important;
+}
+
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost {
+  order: 4 !important;
+  width: fit-content !important;
+  margin-top: 14px !important;
+  display: block !important;
+}
+
+/* Professional style for "Notify Me" / "Recibir Aviso" button */
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost ytd-button-renderer {
+  background-color: var(--yt-spec-badge-chip-background, rgba(255, 255, 255, 0.08)) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  padding: 0 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost ytd-button-renderer:hover {
+  background-color: var(--yt-spec-badge-chip-background-hover, rgba(255, 255, 255, 0.15)) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+}
+
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost yt-button-shape button {
+  padding: 0 16px !important;
+  height: 32px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+}
+
 html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__menu-button,
 html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelMenu,
 html[data-yslv-subs-view="list"] #menu-container.ytd-rich-grid-media,
@@ -432,13 +453,14 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model #menu {
 
 html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
 html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle {
-  display: block !important;
-  max-height: none !important;
-  overflow: visible !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: var(--yslv-title-clamp, 2) !important;
+  overflow: hidden !important;
   white-space: normal !important;
   line-height: 1.4 !important;
   font-weight: 600 !important;
-  font-size: 16px !important;
+  font-size: var(--yslv-title-size, 16px) !important;
   margin: 0 0 4px 0 !important;
   padding: 0 !important;
   width: 100% !important;
@@ -527,7 +549,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-desc {
   color: var(--yt-spec-text-secondary) !important;
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
+  -webkit-line-clamp: var(--yslv-desc-clamp, 2) !important;
   overflow: hidden !important;
   white-space: normal !important;
 }
