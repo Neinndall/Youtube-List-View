@@ -133,6 +133,7 @@
 
     hideMostRelevant: false,
     hideShorts: false,
+    sectionTimer: 0,
   }
 
   const SHIMMER = {
@@ -413,6 +414,7 @@
       applyViewAttr(mode)
       attachObserver()
       ensureDescQueueLoop()
+      triggerReflow()
       if (mode === "list") {
         enqueueAllOnce()
         startShimmer()
@@ -1178,9 +1180,55 @@
     for (const it of items) enqueue(it)
   }
 
+  function processSections() {
+    if (!STATE.active) return
+
+    const shelfSelectors = 'ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-item-section-renderer, ytd-reel-shelf-renderer'
+    const containers = document.querySelectorAll(shelfSelectors)
+    
+    containers.forEach(el => {
+      const titleEl = el.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')
+      
+      // 1. "Most Relevant"
+      if (titleEl) {
+        const txt = titleEl.textContent.trim().toLowerCase()
+        const isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => txt.includes(t))
+        if (isRelevant) {
+          if (STATE.hideMostRelevant) el.classList.add("yslv-section-hidden")
+          else el.classList.remove("yslv-section-hidden")
+        }
+      }
+
+      // 2. "Shorts"
+      if (STATE.hideShorts) {
+        const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]')
+        const hasShortsTitle = titleEl?.textContent?.toLowerCase().includes("shorts")
+        const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
+
+        if (hasShortsContent || hasShortsTitle || hasShortsIcon) {
+          el.classList.add("yslv-shorts-hidden")
+        }
+      } else {
+        el.classList.remove("yslv-shorts-hidden")
+      }
+    })
+
+    // 3. Fallback for individual Shorts items
+    if (STATE.hideShorts) {
+      document.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
+        const isShort = item.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer') || item.hasAttribute("is-shorts")
+        if (isShort) item.classList.add("yslv-shorts-hidden")
+      })
+    }
+  }
+
+  function triggerReflow() {
+    window.dispatchEvent(new Event('resize'))
+  }
+
   function attachObserver() {
     if (!STATE.active) return
-    const target = getActiveSubsRoot() || document.documentElement
+    const target = document.body
     if (STATE.observedTarget === target && STATE.mo) return
 
     if (STATE.mo) STATE.mo.disconnect()
@@ -1188,8 +1236,10 @@
 
     STATE.mo = new MutationObserver(muts => {
       if (!STATE.active) return
-      processMostRelevantSection()
-      processShortsSection()
+      
+      clearTimeout(STATE.sectionTimer)
+      STATE.sectionTimer = setTimeout(processSections, 150)
+
       if (STATE.view !== "list") return
       for (const m of muts) {
         for (const node of m.addedNodes) enqueue(node)
@@ -1206,19 +1256,19 @@
 
     STATE.pmMo = new MutationObserver(() => {
       if (!STATE.active) return
-      processMostRelevantSection()
-      processShortsSection()
+      processSections()
       attachObserver()
       ensureToggleMountLoop()
       if (STATE.view === "list") {
         setTimeout(() => {
           if (!STATE.active || STATE.view !== "list") return
           enqueueAllOnce()
-        }, 60)
+          triggerReflow()
+        }, 100)
       }
     })
 
-    STATE.pmMo.observe(pm, { childList: true, subtree: true })
+    STATE.pmMo.observe(pm, { childList: true, subtree: false })
   }
 
   function restoreMovedAvatars() {
@@ -1266,67 +1316,6 @@
     STATE.observedTarget = null
   }
 
-  function processMostRelevantSection() {
-    if (!STATE.active) return
-
-    // 1. Ocultar secciones si la opción está activa (HACER ESTO PRIMERO)
-    const shelfSelectors = 'ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-item-section-renderer'
-    const containers = document.querySelectorAll(shelfSelectors)
-    
-    containers.forEach(section => {
-      const titleEl = section.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')
-      if (!titleEl) return
-
-      const txt = titleEl.textContent.trim().toLowerCase()
-      
-      // Detección robusta antes de renombrar
-      const isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => txt.includes(t))
-
-      if (isRelevant) {
-        if (STATE.hideMostRelevant) {
-          section.classList.add("yslv-section-hidden")
-        } else {
-          section.classList.remove("yslv-section-hidden")
-        }
-      }
-    })
-  }
-
-  function processShortsSection() {
-    if (!STATE.active) return
-
-    if (!STATE.hideShorts) {
-      document.querySelectorAll(".yslv-shorts-hidden").forEach(s => {
-        s.classList.remove("yslv-shorts-hidden")
-      })
-      return
-    }
-
-    // 1. Buscar estantes de Shorts por componentes o títulos
-    const shelfSelectors = 'ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-reel-shelf-renderer, ytd-rich-section-renderer'
-    const containers = document.querySelectorAll(shelfSelectors)
-    
-    containers.forEach(el => {
-      const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]')
-      const hasShortsTitle = el.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')?.textContent?.toLowerCase().includes("shorts")
-      const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
-
-      if (hasShortsContent || hasShortsTitle || hasShortsIcon) {
-        if (!el.classList.contains("yslv-shorts-hidden")) {
-          el.classList.add("yslv-shorts-hidden")
-        }
-      }
-    })
-
-    // 2. Fallback: buscar ítems individuales que sean Shorts
-    document.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
-      const isShort = item.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer') || item.hasAttribute("is-shorts")
-      if (isShort) {
-        item.classList.add("yslv-shorts-hidden")
-      }
-    })
-  }
-
   function teardown() {
     stopShimmer()
     if (STATE.view === "list") cleanupListArtifacts()
@@ -1361,8 +1350,7 @@
       if (chrome.runtime.lastError || !isContextValid()) return
       STATE.hideMostRelevant = result.hideMostRelevant || false
       STATE.hideShorts = result.hideShorts || false
-      processMostRelevantSection()
-      processShortsSection()
+      processSections()
     })
     pruneDescStore()
     ensureToggleMountLoop()
@@ -1423,11 +1411,11 @@
         if (area === "local") {
           if (changes.hideMostRelevant) {
             STATE.hideMostRelevant = changes.hideMostRelevant.newValue
-            processMostRelevantSection()
+            processSections()
           }
           if (changes.hideShorts) {
             STATE.hideShorts = changes.hideShorts.newValue
-            processShortsSection()
+            processSections()
           }
         }
       })
