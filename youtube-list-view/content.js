@@ -134,6 +134,13 @@
     hideMostRelevant: false,
     hideShorts: false,
     sectionTimer: 0,
+
+    thumbW: 260,
+    rowPadY: 26,
+    containerW: 100,
+    titleSize: 16,
+    shortsW: 170,
+    shortsGap: 16,
   }
 
   const SHIMMER = {
@@ -1343,15 +1350,37 @@
     return `${location.pathname}|${location.search}|${document.querySelector("ytd-page-manager") ? "pm" : "nopm"}`
   }
 
+  function applyDynamicSettings(settings) {
+    const root = document.documentElement
+    if (settings.thumbW != null) root.style.setProperty("--yslv-thumb-w", settings.thumbW + "px")
+    if (settings.rowPadY != null) root.style.setProperty("--yslv-row-pad-y", settings.rowPadY + "px")
+    if (settings.containerW != null) root.style.setProperty("--yslv-container-w", settings.containerW + "%")
+    if (settings.titleSize != null) root.style.setProperty("--yslv-title-size", settings.titleSize + "px")
+    if (settings.shortsW != null) root.style.setProperty("--yslv-shorts-w", settings.shortsW + "px")
+    if (settings.shortsGap != null) root.style.setProperty("--yslv-shorts-gap", settings.shortsGap + "px")
+  }
+
   function apply() {
     if (!isContextValid()) return
     ensureDescStoreLoaded()
-    chrome.storage.local.get(["hideMostRelevant", "hideShorts"], result => {
+    
+    const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "containerW", "titleSize", "shortsW", "shortsGap"]
+    chrome.storage.local.get(keys, result => {
       if (chrome.runtime.lastError || !isContextValid()) return
-      STATE.hideMostRelevant = result.hideMostRelevant || false
-      STATE.hideShorts = result.hideShorts || false
+      
+      STATE.hideMostRelevant = result.hideMostRelevant ?? false
+      STATE.hideShorts = result.hideShorts ?? false
+      STATE.thumbW = result.thumbW ?? 260
+      STATE.rowPadY = result.rowPadY ?? 26
+      STATE.containerW = result.containerW ?? 100
+      STATE.titleSize = result.titleSize ?? 16
+      STATE.shortsW = result.shortsW ?? 170
+      STATE.shortsGap = result.shortsGap ?? 16
+
       processSections()
+      applyDynamicSettings(STATE)
     })
+
     pruneDescStore()
     ensureToggleMountLoop()
     attachObserver()
@@ -1409,14 +1438,20 @@
       chrome.storage.onChanged.addListener((changes, area) => {
         if (!isContextValid()) return
         if (area === "local") {
-          if (changes.hideMostRelevant) {
-            STATE.hideMostRelevant = changes.hideMostRelevant.newValue
-            processSections()
-          }
-          if (changes.hideShorts) {
-            STATE.hideShorts = changes.hideShorts.newValue
-            processSections()
-          }
+          const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "shortsW", "shortsGap"]
+          let needsSectionUpdate = false
+          let needsDynamicUpdate = false
+
+          keys.forEach(k => {
+            if (changes[k]) {
+              STATE[k] = changes[k].newValue
+              if (k.startsWith("hide")) needsSectionUpdate = true
+              else needsDynamicUpdate = true
+            }
+          })
+
+          if (needsSectionUpdate) processSections()
+          if (needsDynamicUpdate) applyDynamicSettings(STATE)
         }
       })
     }

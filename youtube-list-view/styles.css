@@ -173,8 +173,8 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)) !important;
-  column-gap: 16px !important;
+  grid-template-columns: repeat(auto-fill, minmax(var(--yslv-shorts-w, 170px), 1fr)) !important;
+  column-gap: var(--yslv-shorts-gap, 16px) !important;
   row-gap: 20px !important;
   margin-top: 0 !important;
 }
@@ -271,7 +271,7 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
   display: block !important;
   width: 100% !important;
-  padding: 26px 0 !important;
+  padding: var(--yslv-row-pad-y, 26px) 0 !important;
   margin: 0 !important;
   border-bottom: 1px solid var(--yt-spec-10-percent-layer, var(--yslv-sep, rgba(0, 0, 0, 0.1))) !important;    
 }
@@ -354,10 +354,10 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model > div {
 
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image,
 html[data-yslv-subs-view="list"] .ytLockupViewModelContentImage {
-  width: 260px !important;
-  min-width: 260px !important;
-  max-width: 260px !important;
-  flex: 0 0 260px !important;
+  width: var(--yslv-thumb-w, 260px) !important;
+  min-width: var(--yslv-thumb-w, 260px) !important;
+  max-width: var(--yslv-thumb-w, 260px) !important;
+  flex: 0 0 var(--yslv-thumb-w, 260px) !important;
 }
 
 html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image img,
@@ -411,13 +411,14 @@ html[data-yslv-subs-view="list"] .yt-lockup-view-model #menu {
 
 html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
 html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle {
-  display: block !important;
-  max-height: none !important;
-  overflow: visible !important;
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: var(--yslv-title-clamp, 2) !important;
+  overflow: hidden !important;
   white-space: normal !important;
   line-height: 1.4 !important;
   font-weight: 600 !important;
-  font-size: 16px !important;
+  font-size: var(--yslv-title-size, 16px) !important;
   margin: 0 0 4px 0 !important;
   padding: 0 !important;
   width: 100% !important;
@@ -506,7 +507,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-desc {
   color: var(--yt-spec-text-secondary) !important;
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
-  -webkit-line-clamp: 2 !important;
+  -webkit-line-clamp: var(--yslv-desc-clamp, 2) !important;
   overflow: hidden !important;
   white-space: normal !important;
 }
@@ -632,4 +633,6 @@ html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-s
 html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
   margin-top: 0 !important;
   margin-bottom: 4px !important; /* Unificado a 4px para que coincida con Relevantes */
+}
+; /* Unificado a 4px para que coincida con Relevantes */
 }
