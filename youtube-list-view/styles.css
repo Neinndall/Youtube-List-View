@@ -403,6 +403,22 @@ html[data-yslv-subs-view="list"] .ytContentMetadataViewModelHost {
   min-height: 0 !important;
 }
 
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
+html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle {
+  display: -webkit-box !important;
+  -webkit-box-orient: vertical !important;
+  -webkit-line-clamp: var(--yslv-title-clamp, 2) !important;
+  overflow: hidden !important;
+  white-space: normal !important;
+  line-height: 1.4 !important;
+  font-weight: 600 !important;
+  font-size: var(--yslv-title-size, 16px) !important;
+  margin: 0 0 4px 0 !important;
+  padding: 0 !important;
+  width: 100% !important;
+  order: 1 !important;
+}
+
 html[data-yslv-subs-view="list"] .yslv-subs-mrow {
   display: flex !important;
   flex-direction: column !important;
