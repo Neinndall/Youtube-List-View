@@ -1248,6 +1248,8 @@
         const isShort = item.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer') || item.hasAttribute("is-shorts")
         if (isShort) item.classList.add("yslv-shorts-hidden")
       })
+    } else {
+      document.querySelectorAll(".yslv-shorts-hidden").forEach(el => el.classList.remove("yslv-shorts-hidden"))
     }
   }
 
