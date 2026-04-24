@@ -454,6 +454,8 @@
     const a =
       lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/@"]') ||
       lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/channel/"]') ||
+      lockup.querySelector('.ytContentMetadataViewModelMetadataRow a[href^="/@"]') ||
+      lockup.querySelector('.ytContentMetadataViewModelMetadataRow a[href^="/channel/"]') ||
       lockup.querySelector('a[href^="/@"]') ||
       lockup.querySelector('a[href^="/channel/"]') ||
       null
@@ -463,16 +465,18 @@
     return (
       lockup.querySelector(
         'yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row span.yt-content-metadata-view-model__metadata-text'
-      ) || null
+      ) || 
+      lockup.querySelector('.ytContentMetadataViewModelMetadataRow .yt-content-metadata-view-model__metadata-text') ||
+      null
     )
   }
 
   function pickChannelAnchor(lockup) {
     return (
       lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/@"]') ||
-      lockup.querySelector(
-        'yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/channel/"]'
-      ) ||
+      lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/channel/"]') ||
+      lockup.querySelector('.ytContentMetadataViewModelMetadataRow a[href^="/@"]') ||
+      lockup.querySelector('.ytContentMetadataViewModelMetadataRow a[href^="/channel/"]') ||
       lockup.querySelector('a[href^="/@"]') ||
       lockup.querySelector('a[href^="/channel/"]') ||
       null
@@ -670,6 +674,8 @@
       lockup.querySelectorAll(
         "yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row, " +
         "yt-content-metadata-view-model .ytContentMetadataViewModelMetadataRow, " +
+        ".yt-content-metadata-view-model__metadata-row, " +
+        ".ytContentMetadataViewModelMetadataRow, " +
         ".yt-lockup-metadata-view-model__metadata-row, " +
         ".ytLockupMetadataViewModelMetadataRow"
       )
@@ -809,12 +815,16 @@
     }
   }
 
-  function ensureDesc(textContainer, lockup) {
+  function ensureDesc(textContainer, lockup, mRow) {
     let desc = textContainer.querySelector(`.${CFG.cls.desc}`)
     if (!desc) {
       desc = document.createElement("div")
       desc.className = CFG.cls.desc
-      textContainer.appendChild(desc)
+      if (mRow && mRow.parentNode === textContainer) {
+        textContainer.insertBefore(desc, mRow.nextSibling)
+      } else {
+        textContainer.appendChild(desc)
+      }
     }
 
     const vLink = pickPrimaryVideoAnchor(lockup)
@@ -1095,16 +1105,27 @@
     const lockup = 
       item.querySelector("yt-lockup-view-model") || 
       item.querySelector(".yt-lockup-view-model") ||
-      item.querySelector("ytd-video-renderer")
+      item.querySelector(".ytLockupViewModelWrapper") ||
+      item.querySelector(".ytLockupViewModelHost") ||
+      item.querySelector("ytd-video-renderer") ||
+      item.querySelector("ytd-rich-grid-media")
     if (!lockup) return
 
-    const textContainer =
-      lockup.querySelector(".yt-lockup-metadata-view-model__text-container") ||
-      lockup.querySelector(".ytLockupViewModelMetadata") ||
+    ensureRowHeader(item, lockup)
+
+    const metadataColumn =
       lockup.querySelector(".yt-lockup-view-model__metadata") ||
+      lockup.querySelector(".ytLockupViewModelMetadata") ||
       lockup.querySelector("yt-lockup-metadata-view-model") ||
-      lockup.querySelector(".metadata")
-    if (!textContainer) return
+      lockup.querySelector(".yt-lockup-metadata-view-model") ||
+      lockup.querySelector(".metadata") ||
+      lockup.querySelector("#metadata") ||
+      lockup
+    
+    const textContainer =
+      metadataColumn.querySelector(".yt-lockup-metadata-view-model__text-container") ||
+      metadataColumn.querySelector(".ytContentMetadataViewModelHost") ||
+      metadataColumn
 
     STATE.processedItems.add(item)
 
@@ -1125,8 +1146,8 @@
     }
 
     ensureRowHeader(item, lockup)
-    ensureInlineMeta(textContainer, lockup)
-    ensureDesc(textContainer, lockup)
+    const mRow = ensureInlineMeta(textContainer, lockup)
+    ensureDesc(textContainer, lockup, mRow)
   }
 
   function enqueue(node) {
