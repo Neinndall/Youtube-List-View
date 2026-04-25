@@ -451,6 +451,27 @@
   }
 
   function pickChannelDisplaySource(lockup) {
+    // Try to find a metadata row that might contain multiple collaborators
+    const metaRow =
+      lockup.querySelector("yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row") ||
+      lockup.querySelector(".ytContentMetadataViewModelMetadataRow") ||
+      lockup.querySelector(".yt-lockup-metadata-view-model__metadata-row") ||
+      lockup.querySelector(".ytLockupMetadataViewModelMetadataRow")
+
+    if (metaRow) {
+      const links = metaRow.querySelectorAll('a[href^="/@"], a[href^="/channel/"]')
+      // If it has multiple channel links or indicators of "more", return the whole row for full text
+      if (
+        links.length > 1 ||
+        metaRow.textContent.includes(" y ") ||
+        metaRow.textContent.includes(" and ") ||
+        metaRow.textContent.includes(" más") ||
+        metaRow.textContent.includes(" more")
+      ) {
+        return metaRow
+      }
+    }
+
     const a =
       lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/@"]') ||
       lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/channel/"]') ||
@@ -464,9 +485,9 @@
 
     return (
       lockup.querySelector(
-        'yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row span.yt-content-metadata-view-model__metadata-text'
-      ) || 
-      lockup.querySelector('.ytContentMetadataViewModelMetadataRow .yt-content-metadata-view-model__metadata-text') ||
+        "yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row span.yt-content-metadata-view-model__metadata-text"
+      ) ||
+      lockup.querySelector(".ytContentMetadataViewModelMetadataRow .yt-content-metadata-view-model__metadata-text") ||
       null
     )
   }
@@ -624,25 +645,33 @@
     if (!item || !lockup || !head) return null
     if (STATE.movedAvatars.has(item)) return STATE.movedAvatars.get(item)?.avatarEl || null
 
-    // Robust avatar selector: tries metadata-specific, general lockup, and standard YT avatar shapes
+    // Robust avatar selector: tries multi-avatar containers first, then specific view models, then general classes
     const avatarEl =
+      lockup.querySelector("yt-avatar-stack-view-model") ||
+      lockup.querySelector("yt-decorated-avatar-view-model") ||
+      lockup.querySelector(".ytLockupMetadataViewModelAvatar") ||
+      lockup.querySelector(".yt-lockup-view-model__avatar-container") ||
       lockup.querySelector(".yt-lockup-metadata-view-model__avatar") ||
       lockup.querySelector(".yt-lockup-view-model__avatar") ||
       lockup.querySelector(".ytLockupViewModelAvatar") ||
       lockup.querySelector("yt-avatar-shape") ||
       lockup.querySelector(".yt-spec-avatar-shape")
-    
+
     if (!avatarEl || !avatarEl.parentNode) return null
 
-    const parent = avatarEl.parentNode
-    const nextSibling = avatarEl.nextSibling
-    STATE.movedAvatars.set(item, { avatarEl, parent, nextSibling })
+    // If we found a single avatar shape but it's inside a decorated/stack container we missed, move the container instead
+    const decorated = avatarEl.closest("yt-decorated-avatar-view-model, yt-avatar-stack-view-model, .ytLockupMetadataViewModelAvatar")
+    const finalEl = decorated || avatarEl
+
+    const parent = finalEl.parentNode
+    const nextSibling = finalEl.nextSibling
+    STATE.movedAvatars.set(item, { avatarEl: finalEl, parent, nextSibling })
 
     try {
-      head.insertBefore(avatarEl, head.firstChild)
+      head.insertBefore(finalEl, head.firstChild)
     } catch {}
 
-    return avatarEl
+    return finalEl
   }
 
   function ensureRowHeader(item, lockup) {
