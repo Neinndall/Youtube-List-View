@@ -312,7 +312,6 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupMetadataViewModelAv
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape,
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-collaboration-avatar-view-model,
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-stack-view-model {
   display: flex !important;
   width: 32px !important;
@@ -324,7 +323,6 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-stack-view-model {
 
 /* Multi-avatar grid for collaborators */
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-collaboration-avatar-view-model,
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar:has(yt-avatar-stack-view-model) {
   display: grid !important;
   grid-template-columns: repeat(2, 16px) !important;
@@ -334,8 +332,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupMetadataViewModelAv
   justify-content: center !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model yt-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-collaboration-avatar-view-model yt-avatar-shape {
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model yt-avatar-shape {
   width: 15px !important;
   height: 15px !important;
 }
