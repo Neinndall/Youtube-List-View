@@ -1444,6 +1444,7 @@
     if (STATE.view === "list") {
       enqueueAllOnce()
       startShimmer()
+      triggerReflow()
     } else {
       stopShimmer()
     }
@@ -1453,14 +1454,24 @@
     const shouldBeActive = isSubsPage()
     const sig = pageSig()
 
+    // 1. Force the view attribute on HTML tag whenever on Subscriptions
+    // This combats YouTube's SPA resetting attributes on navigation
+    if (shouldBeActive) {
+      const savedView = loadView()
+      if (document.documentElement.getAttribute(CFG.attr.view) !== savedView) {
+        applyViewAttr(savedView)
+      }
+    }
+
+    // 2. Initial activation (Navigation from other page or Reload)
     if (shouldBeActive && !STATE.active) {
       STATE.active = true
       STATE.lastPageSig = sig
-      applyViewAttr(loadView())
       apply()
       return
     }
 
+    // 3. Deactivation (Navigation to other page)
     if (!shouldBeActive && STATE.active) {
       STATE.active = false
       STATE.lastPageSig = sig
@@ -1468,20 +1479,26 @@
       return
     }
 
+    // 4. Maintenance (Already active, but URL/Content changed)
     if (shouldBeActive && STATE.active) {
       ensureToggleMountLoop()
       paintToggle()
       attachObserver()
 
-      if (STATE.view === "list") {
-        if (isNavFinish && sig !== STATE.lastPageSig) {
-          STATE.lastPageSig = sig
+      // If we finished navigation (even to the same URL), ensure content is processed
+      if (isNavFinish) {
+        const sigChanged = sig !== STATE.lastPageSig
+        STATE.lastPageSig = sig
+
+        if (STATE.view === "list") {
+          // If signature changed or it's a forced finish (click on same link), re-process
           resetNavState()
           enqueueAllOnce()
           startShimmer()
+          triggerReflow()
+        } else {
+          stopShimmer()
         }
-      } else {
-        stopShimmer()
       }
     }
   }
@@ -1515,6 +1532,15 @@
       "yt-navigate-finish",
       () => {
         syncActive(true)
+      },
+      { passive: true }
+    )
+
+    window.addEventListener(
+      "yt-page-data-updated",
+      () => {
+        // Handle SPA internal updates without full navigation
+        syncActive(false)
       },
       { passive: true }
     )
