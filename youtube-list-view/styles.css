@@ -412,8 +412,37 @@ html[data-yslv-subs-view="list"] .ytContentMetadataViewModelHost {
 
 /* Surgically hide ONLY native metadata rows, not the entire host */
 html[data-yslv-subs-view="list"] yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row,
-html[data-yslv-subs-view="list"] .ytContentMetadataViewModelMetadataRow {
+html[data-yslv-subs-view="list"] .ytContentMetadataViewModelMetadataRow,
+html[data-yslv-subs-view="list"] ytd-rich-grid-media .video-meta,
+html[data-yslv-subs-view="list"] ytd-video-meta-block {
   display: none !important;
+}
+
+/* Hide the original avatar in its original position to prevent jumping */
+html[data-yslv-subs-view="list"] yt-lockup-view-model .yt-lockup-view-model__avatar-container,
+html[data-yslv-subs-view="list"] yt-lockup-view-model .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] yt-lockup-view-model .ytLockupMetadataViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-rich-grid-media #avatar-link {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Show the avatar only when it has been moved to our custom header */
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-view-model__avatar-container,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-stack-view-model {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+  visibility: visible !important;
+}
+
+/* Prevent the row header from taking space or showing text before script finishes */
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead:not(:has(a.yslv-subs-rowhead-name:not(:empty))) {
+  visibility: hidden !important;
 }
 
 /* Ensure the host itself is visible but takes no space if it's just a wrapper we use */
