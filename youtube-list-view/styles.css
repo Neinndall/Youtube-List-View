@@ -475,7 +475,6 @@ html[data-yslv-subs-view="list"] .yslv-subs-mrow {
   gap: 2px !important;
   margin-top: 2px !important;
   min-width: 0 !important;
-  order: 2 !important;
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-mch {
@@ -656,16 +655,8 @@ html:not([dark])[data-yslv-subs-view="list"] {
   --spec-text-secondary: #606060;
 }
 
-html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__buttons,
-html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelButtons,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__text-container > ytd-button-renderer,
-html[data-yslv-subs-view="list"] .ytContentMetadataViewModelHost > ytd-button-renderer,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__text-container > yt-button-view-model,
-html[data-yslv-subs-view="list"] .ytContentMetadataViewModelHost > yt-button-view-model {
+html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost {
   width: fit-content !important;
-  order: 4 !important;
-  margin-top: 10px !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-counterfactual-renderer.ytd-rich-section-renderer,
