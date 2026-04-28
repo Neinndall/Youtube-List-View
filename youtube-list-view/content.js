@@ -1177,6 +1177,17 @@
     ensureRowHeader(item, lockup)
     const mRow = ensureInlineMeta(textContainer, lockup)
     ensureDesc(textContainer, lockup, mRow)
+
+    // Move attachments (e.g. "Recibir Aviso" / Set Reminder button) into textContainer for ordering
+    const attachments =
+      lockup.querySelector("yt-lockup-attachments-view-model") ||
+      lockup.querySelector(".yt-lockup-view-model__attachments") ||
+      lockup.querySelector(".yt-lockup-metadata-view-model__attachments") ||
+      lockup.querySelector(".ytLockupAttachmentsViewModelHost")
+    
+    if (attachments && attachments.parentNode !== textContainer) {
+      textContainer.appendChild(attachments)
+    }
   }
 
   function enqueue(node) {
