@@ -179,13 +179,18 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) #show-more-button,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) .ytd-rich-shelf-renderer #show-more-button,
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) ytd-button-renderer,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) #show-more-button,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) .ytd-rich-shelf-renderer #show-more-button,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) ytd-button-renderer {
-  margin-top: var(--yslv-row-pad-y, 16px) !important;
-  margin-bottom: 0 !important;
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) .ytd-rich-shelf-renderer #show-more-button {
+  margin-top: calc(var(--yslv-row-pad-y, 16px) - 18px) !important;
+  margin-bottom: -18px !important;
   padding-bottom: 0 !important;
+  padding-top: 0 !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) #show-more-button ytd-button-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) #show-more-button ytd-button-renderer {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Clean spacing for chronological headers (Más recientes) */
@@ -284,8 +289,11 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-item-section-renderer,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #content.ytd-rich-section-renderer {
   margin-top: 0 !important;
+  margin-bottom: 0 !important;
   padding-top: 0 !important;
+  padding-bottom: 0 !important;
   border-top: none !important;
+  border-bottom: none !important;
 }
 
 /* The chronological header */
@@ -807,12 +815,14 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer #dismissible,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer #dismissible {
   margin-top: 0 !important;
+  margin-bottom: 0 !important;
   padding-top: 0 !important;
+  padding-bottom: 0 !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short > #content,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short > #content {
-  padding-bottom: 3rem !important;
+  padding-bottom: 0 !important;
 }
 
 html[dark][data-yslv-subs-view="list"] {
