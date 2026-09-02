@@ -136,6 +136,7 @@
         thumbW: Number(settings.thumbW) || 260,
         rowPadY: Number(settings.rowPadY) || 16,
         channelVideoGap: Number(settings.channelVideoGap) || 18,
+        headerGap: settings.headerGap !== undefined && !isNaN(settings.headerGap) ? Number(settings.headerGap) : 6,
         containerW: Number(settings.containerW) || 100,
         channelSize: Number(settings.channelSize) || 20,
         titleSize: Number(settings.titleSize) || 16,
@@ -154,6 +155,7 @@
     if (_cached.thumbW !== undefined) STATE.thumbW = Number(_cached.thumbW)
     if (_cached.rowPadY !== undefined) STATE.rowPadY = Number(_cached.rowPadY)
     if (_cached.channelVideoGap !== undefined) STATE.channelVideoGap = Number(_cached.channelVideoGap)
+    if (_cached.headerGap !== undefined) STATE.headerGap = Number(_cached.headerGap)
     if (_cached.containerW !== undefined) STATE.containerW = Number(_cached.containerW)
     if (_cached.channelSize !== undefined) STATE.channelSize = Number(_cached.channelSize)
     if (_cached.titleSize !== undefined) STATE.titleSize = Number(_cached.titleSize)
@@ -1600,6 +1602,7 @@
     if (settings.thumbW != null) root.style.setProperty("--yslv-thumb-w", settings.thumbW + "px")
     if (settings.rowPadY != null) root.style.setProperty("--yslv-row-pad-y", settings.rowPadY + "px")
     if (settings.channelVideoGap != null) root.style.setProperty("--yslv-channel-video-gap", settings.channelVideoGap + "px")
+    if (settings.headerGap != null) root.style.setProperty("--yslv-header-gap", settings.headerGap + "px")
     if (settings.containerW != null) root.style.setProperty("--yslv-container-w", settings.containerW + "%")
     if (settings.channelSize != null) root.style.setProperty("--yslv-channel-size", settings.channelSize + "px")
     if (settings.titleSize != null) root.style.setProperty("--yslv-title-size", settings.titleSize + "px")
@@ -1618,7 +1621,7 @@
     await ensureDescStoreLoaded()
     if (!STATE.active || !isContextValid()) return
     
-    const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "channelVideoGap", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
+    const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "channelVideoGap", "headerGap", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
     chrome.storage.local.get(keys, result => {
       if (chrome.runtime.lastError || !isContextValid()) return
       
@@ -1627,6 +1630,7 @@
       STATE.thumbW = result.thumbW ?? STATE.thumbW
       STATE.rowPadY = result.rowPadY ?? STATE.rowPadY
       STATE.channelVideoGap = result.channelVideoGap ?? STATE.channelVideoGap
+      STATE.headerGap = result.headerGap ?? STATE.headerGap
       STATE.containerW = result.containerW ?? STATE.containerW
       STATE.channelSize = result.channelSize ?? STATE.channelSize
       STATE.titleSize = result.titleSize ?? STATE.titleSize
@@ -1722,7 +1726,7 @@
       chrome.storage.onChanged.addListener((changes, area) => {
         if (!isContextValid()) return
         if (area === "local") {
-          const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "channelVideoGap", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
+          const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "channelVideoGap", "headerGap", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
           let needsSectionUpdate = false
           let needsDynamicUpdate = false
 
