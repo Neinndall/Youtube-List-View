@@ -215,6 +215,15 @@
     )
   }
 
+  function isSubscriptionsCard(item) {
+    if (!item || item.nodeType !== 1) return false
+    const browse = item.closest?.('ytd-browse[page-subtype="subscriptions"], ytd-two-column-browse-results-renderer[page-subtype="subscriptions"]')
+    if (browse) return true
+    const active = getActiveSubsBrowse()
+    if (active && active.contains(item)) return true
+    return false
+  }
+
   function getActiveSubsRoot() {
     const b = getActiveSubsBrowse()
     if (!b) return null
@@ -222,7 +231,7 @@
   }
 
   function getActiveSubsDoc() {
-    return getActiveSubsBrowse() || document
+    return getActiveSubsBrowse()
   }
 
   function normalizeText(s) {
@@ -386,16 +395,50 @@
     scheduleDescStoreSave()
   }
 
+  function findToggleMountAnchor() {
+    const browse = getActiveSubsBrowse()
+    if (!browse) return null
+
+    const candidates = [
+      browse.querySelector('ytd-rich-section-renderer:not(.yslv-section-hidden) #subscribe-button'),
+      browse.querySelector('ytd-rich-shelf-renderer:not(.yslv-section-hidden) #subscribe-button'),
+      browse.querySelector('ytd-shelf-renderer:not(.yslv-section-hidden) #subscribe-button'),
+      browse.querySelector('ytd-item-section-renderer:not(.yslv-section-hidden) #subscribe-button'),
+      browse.querySelector('ytd-rich-grid-renderer :not(.yslv-section-hidden) #subscribe-button'),
+      browse.querySelector(':not(.yslv-section-hidden) #subscribe-button'),
+      browse.querySelector('ytd-rich-section-renderer:not(.yslv-section-hidden) #title-container ytd-button-renderer'),
+      browse.querySelector('ytd-rich-shelf-renderer:not(.yslv-section-hidden) #title-container ytd-button-renderer'),
+      browse.querySelector(':not(.yslv-section-hidden) #title-container ytd-button-renderer'),
+      browse.querySelector('ytd-rich-section-renderer:not(.yslv-section-hidden) #title-container'),
+      browse.querySelector('ytd-rich-shelf-renderer:not(.yslv-section-hidden) #title-container'),
+      browse.querySelector('ytd-shelf-renderer:not(.yslv-section-hidden) .grid-subheader'),
+      browse.querySelector('ytd-rich-grid-renderer :not(.yslv-section-hidden) #title-container'),
+      browse.querySelector(':not(.yslv-section-hidden) #title-container'),
+      browse.querySelector('#subscribe-button'),
+      browse.querySelector('#title-container')
+    ]
+
+    for (const el of candidates) {
+      if (el && el.isConnected && !el.closest('.yslv-section-hidden') && !el.closest('.yslv-shorts-hidden')) {
+        return el
+      }
+    }
+
+    return null
+  }
+
   function ensureToggle() {
     const existing = document.getElementById(CFG.ids.toggle)
     if (existing && existing.isConnected) {
-      paintToggle()
-      return
+      if (!existing.closest('.yslv-section-hidden') && !existing.closest('.yslv-shorts-hidden')) {
+        paintToggle()
+        return
+      }
+      existing.remove()
     }
 
-    const subscribeBtn = getActiveSubsDoc().querySelector(CFG.toggleMountSelector)
-    const titleContainer = subscribeBtn?.closest?.("#title-container") || null
-    if (!subscribeBtn || !titleContainer) return
+    const mountAnchor = findToggleMountAnchor()
+    if (!mountAnchor) return
 
     document.querySelectorAll(`#${CFG.ids.toggle}`).forEach(n => n.remove())
 
@@ -448,7 +491,11 @@
       }
     })
 
-    subscribeBtn.insertAdjacentElement("afterend", root)
+    if (mountAnchor.id === "title-container" || mountAnchor.classList?.contains("grid-subheader") || mountAnchor.id === "rich-shelf-header") {
+      mountAnchor.appendChild(root)
+    } else {
+      mountAnchor.insertAdjacentElement("afterend", root)
+    }
     paintToggle()
   }
 
@@ -1078,8 +1125,8 @@
   function buildDescQueueFromDom() {
     if (!STATE.active || STATE.view !== "list") return
     const root = getActiveSubsRoot()
-    const scope = root && root.querySelectorAll ? root : document
-    const descs = scope.querySelectorAll(`.${CFG.cls.desc}[data-yslv-vid]`)
+    if (!root) return
+    const descs = root.querySelectorAll(`.${CFG.cls.desc}[data-yslv-vid]`)
     if (!descs.length) return
 
     let sig = ""
@@ -1142,7 +1189,9 @@
   }
 
   function hasSkeletons() {
-    return !!document.querySelector(`.${CFG.cls.desc}.${CFG.cls.descSkel}`)
+    const root = getActiveSubsRoot()
+    if (!root) return false
+    return !!root.querySelector(`.${CFG.cls.desc}.${CFG.cls.descSkel}`)
   }
 
   function stopShimmer() {
@@ -1194,6 +1243,8 @@
     if (!STATE.active || STATE.view !== "list") return
     if (!item || item.nodeType !== 1) return
     if (item.tagName !== "YTD-RICH-ITEM-RENDERER") return
+    if (!isSubscriptionsCard(item)) return // STRICT GUARD: Never touch non-subscription cards!
+
     const shortsLockup = item.querySelector("ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model")
     if (shortsLockup && CFG.list.shorts.enabled) {
       item.classList.add(CFG.cls.isShort)
@@ -1273,6 +1324,9 @@
     if (!STATE.active || STATE.view !== "list") return
     if (!node || node.nodeType !== 1) return
 
+    // Ensure node belongs to subscriptions browse only
+    if (!isSubscriptionsCard(node) && !getActiveSubsBrowse()?.contains(node)) return
+
     // Ignore mutations produced by our own generated UI to avoid feedback loops.
     if (
       node.matches?.(`.${CFG.cls.rowHead}, .${CFG.cls.metaRow}, .${CFG.cls.desc}, .yslv-channel-badge`) ||
@@ -1280,14 +1334,14 @@
     ) return
 
     // YouTube often hydrates an already-connected card by adding descendants.
-    // Requeue its owning card so late titles/channel metadata are not missed.
     const owner = node.closest?.("ytd-rich-item-renderer")
     if (owner && owner !== node) {
-      enqueue(owner)
+      if (isSubscriptionsCard(owner)) enqueue(owner)
       return
     }
 
     if (node.tagName === "YTD-RICH-ITEM-RENDERER") {
+      if (!isSubscriptionsCard(node)) return
       if (STATE.qSet.has(node)) return
       STATE.qSet.add(node)
       STATE.q.push(node)
@@ -1295,9 +1349,15 @@
       return
     }
 
-    const found = node.querySelectorAll ? node.querySelectorAll("ytd-rich-item-renderer") : []
+    const subsBrowse = getActiveSubsBrowse()
+    if (!subsBrowse) return
+
+    const targetRoot = subsBrowse.contains(node) ? node : subsBrowse
+    const found = targetRoot.querySelectorAll ? targetRoot.querySelectorAll("ytd-rich-item-renderer") : []
     if (found && found.length) {
-      for (const it of found) enqueue(it)
+      for (const it of found) {
+        if (isSubscriptionsCard(it)) enqueue(it)
+      }
     }
   }
 
@@ -1336,16 +1396,20 @@
   function enqueueAllOnce() {
     if (!STATE.active || STATE.view !== "list") return
     const root = getActiveSubsRoot()
-    const scope = root && root.querySelectorAll ? root : document
-    const items = scope.querySelectorAll ? scope.querySelectorAll("ytd-rich-item-renderer") : []
-    for (const it of items) enqueue(it)
+    if (!root) return
+    const items = root.querySelectorAll ? root.querySelectorAll("ytd-rich-item-renderer") : []
+    for (const it of items) {
+      if (isSubscriptionsCard(it)) enqueue(it)
+    }
   }
 
   function processSections() {
     if (!STATE.active) return
+    const subsBrowse = getActiveSubsBrowse()
+    if (!subsBrowse) return
 
     const shelfSelectors = 'ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-item-section-renderer, ytd-reel-shelf-renderer'
-    const containers = document.querySelectorAll(shelfSelectors)
+    const containers = subsBrowse.querySelectorAll(shelfSelectors)
     
     containers.forEach(el => {
       const titleEl = el.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')
@@ -1382,14 +1446,14 @@
       }
     })
 
-    // 3. Fallback for individual Shorts items
+    // 3. Fallback for individual Shorts items inside subscriptions
     if (STATE.hideShorts) {
-      document.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
+      subsBrowse.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
         const isShort = item.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer') || item.hasAttribute("is-shorts")
         if (isShort) item.classList.add("yslv-shorts-hidden")
       })
     } else {
-      document.querySelectorAll(".yslv-shorts-hidden").forEach(el => el.classList.remove("yslv-shorts-hidden"))
+      subsBrowse.querySelectorAll(".yslv-shorts-hidden").forEach(el => el.classList.remove("yslv-shorts-hidden"))
     }
   }
 
@@ -1399,7 +1463,8 @@
 
   function attachObserver() {
     if (!STATE.active) return
-    const target = document.documentElement || document.body
+    const subsBrowse = getActiveSubsBrowse()
+    const target = subsBrowse || document.documentElement || document.body
     if (!target) return
     if (STATE.observedTarget === target && STATE.mo) return
 
@@ -1413,7 +1478,9 @@
 
       if (STATE.view !== "list") return
       for (const m of muts) {
-        for (const node of m.addedNodes) enqueue(node)
+        for (const node of m.addedNodes) {
+          if (node.nodeType === 1) enqueue(node)
+        }
       }
     })
 
@@ -1505,7 +1572,6 @@
 
   function teardown() {
     stopShimmer()
-    if (STATE.view === "list") cleanupListArtifacts()
     if (STATE.mo) {
       STATE.mo.disconnect()
       STATE.mo = null
@@ -1516,8 +1582,6 @@
       STATE.descTimer = 0
     }
     resetNavState()
-    removeToggle()
-    clearViewAttr()
   }
 
   function ensureToggleMountLoop() {
@@ -1592,8 +1656,7 @@
     const shouldBeActive = isSubsPage()
     const sig = pageSig()
 
-    // 1. Force the view attribute on HTML tag whenever on Subscriptions
-    // This combats YouTube's SPA resetting attributes on navigation
+    // 1. Maintain view and dynamic settings
     if (shouldBeActive) {
       const savedView = loadView()
       if (document.documentElement.getAttribute(CFG.attr.view) !== savedView) {
@@ -1678,6 +1741,18 @@
         }
       })
     }
+
+    window.addEventListener(
+      "yt-navigate-start",
+      () => {
+        if (isSubsPage()) {
+          const savedView = loadView()
+          applyViewAttr(savedView)
+          applyDynamicSettings(STATE)
+        }
+      },
+      { passive: true }
+    )
 
     window.addEventListener(
       "yt-navigate-finish",

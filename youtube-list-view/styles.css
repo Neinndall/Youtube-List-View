@@ -54,6 +54,8 @@
 }
 
 ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader #title-container,
+ytd-browse[page-subtype="subscriptions"] #rich-shelf-header #title-container,
+ytd-browse[page-subtype="subscriptions"] #title-container,
 ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader #title-container {
   display: flex !important;
   align-items: center !important;
@@ -78,64 +80,48 @@ ytd-masthead {
   z-index: 1 !important;
 }
 
-html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #content.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #content.ytd-rich-section-renderer {
   margin: 0 !important;
 }
 
-/* Hide sections preserving our toggle buttons and native Manage button */
-html[data-yslv-subs-view] .yslv-section-hidden #title-text,
-html[data-yslv-subs-view] .yslv-section-hidden #title-annotation-container-outer,
-html[data-yslv-subs-view] .yslv-section-hidden #title-container > :not(#yslv-subs-toggle):not(#spacer):not(#subscribe-button):not(ytd-button-renderer),
-html[data-yslv-subs-view] .yslv-section-hidden .grid-subheader > :not(#title-container),
-html[data-yslv-subs-view] .yslv-section-hidden ytd-button-renderer:not(:has(#yslv-subs-toggle)):not(#subscribe-button):not(.ytd-subscribe-button-renderer) {
+/* Fully collapse and hide sections (e.g. Más relevantes) */
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] .yslv-section-hidden,
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-section-hidden,
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer.yslv-section-hidden,
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-item-section-renderer.yslv-section-hidden {
   display: none !important;
-}
-
-/* Ensure the header container itself is not hidden and stays ABOVE the rising content */
-html[data-yslv-subs-view] .yslv-section-hidden #title-container,
-html[data-yslv-subs-view] .yslv-section-hidden .grid-subheader {
-  display: flex !important;
-  visibility: visible !important;
-  position: relative !important;
-  z-index: 50 !important; /* Capa superior absoluta */
-  min-height: 32px !important;
-  margin-top: 0 !important;
-  margin-bottom: 0 !important; 
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-}
-
-/* Explicitly hide the videos/content inside the hidden section to collapse it */
-html[data-yslv-subs-view] .yslv-section-hidden #content,
-html[data-yslv-subs-view] .yslv-section-hidden #contents,
-html[data-yslv-subs-view] .yslv-section-hidden ytd-rich-shelf-renderer #contents,
-html[data-yslv-subs-view] .yslv-section-hidden ytd-shelf-renderer #contents,
-html[data-yslv-subs-view] .yslv-section-hidden #show-more-button {
-  display: none !important;
-}
-
-/* Specific rule for hidden sections: stable top margin and full collapse */
-html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-section-hidden,
-html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-section-hidden,
-html[data-yslv-subs-view] ytd-shelf-renderer.yslv-section-hidden,
-html[data-yslv-subs-view] ytd-item-section-renderer.yslv-section-hidden {
-  margin-top: 0 !important;
-  margin-bottom: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  height: auto !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  height: 0 !important;
   min-height: 0 !important;
+  visibility: hidden !important;
 }
 
-html[data-yslv-subs-view] .yslv-shorts-hidden,
-html[data-yslv-subs-view] ytd-rich-shelf-renderer.yslv-shorts-hidden,
-html[data-yslv-subs-view] ytd-rich-section-renderer.yslv-shorts-hidden,
-html[data-yslv-subs-view] ytd-reel-shelf-renderer.yslv-shorts-hidden,
-html[data-yslv-hide-shorts="true"] ytd-rich-section-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]),
-html[data-yslv-hide-shorts="true"] ytd-rich-shelf-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]),
-html[data-yslv-hide-shorts="true"] ytd-reel-shelf-renderer,
-html[data-yslv-hide-shorts="true"] ytd-rich-item-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]),
-html[data-yslv-hide-shorts="true"] ytd-rich-item-renderer[is-shorts] {
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] .yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer.yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer.yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-browse[page-subtype="subscriptions"] ytd-reel-shelf-renderer.yslv-shorts-hidden,
+html[data-yslv-hide-shorts="true"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]),
+html[data-yslv-hide-shorts="true"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]),
+html[data-yslv-hide-shorts="true"] ytd-browse[page-subtype="subscriptions"] ytd-reel-shelf-renderer,
+html[data-yslv-hide-shorts="true"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]),
+html[data-yslv-hide-shorts="true"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer[is-shorts],
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer.yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer.yslv-shorts-hidden,
+html[data-yslv-subs-view] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-reel-shelf-renderer.yslv-shorts-hidden,
+html[data-yslv-hide-shorts="true"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]),
+html[data-yslv-hide-shorts="true"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]),
+html[data-yslv-hide-shorts="true"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-reel-shelf-renderer,
+html[data-yslv-hide-shorts="true"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer:has(ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]),
+html[data-yslv-hide-shorts="true"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer[is-shorts] {
   display: none !important;
   margin: 0 !important;
   padding: 0 !important;
@@ -144,16 +130,26 @@ html[data-yslv-hide-shorts="true"] ytd-rich-item-renderer[is-shorts] {
 }
 
 /* Align ALL rich sections and their internal content to the left and clear padding-right */
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #content,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #contents,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer #content,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer #contents,
-html[data-yslv-subs-view="list"] ytd-item-section-renderer,
-html[data-yslv-subs-view="list"] ytd-item-section-renderer #contents {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer #content,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #content,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer #content,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer #contents.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer #content,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-item-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-item-section-renderer #contents {
   margin-left: 0 !important;
   margin-inline-start: 0 !important;
   padding-left: 0 !important;
@@ -167,8 +163,10 @@ html[data-yslv-subs-view="list"] ytd-item-section-renderer #contents {
   box-sizing: border-box !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short),
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short),
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) {
   margin-top: 24px !important;
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
@@ -176,7 +174,8 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   display: block !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer {
   display: grid !important;
   grid-template-columns: repeat(auto-fill, minmax(120px, var(--yslv-shorts-w, 160px))) !important;
   column-gap: var(--yslv-shorts-gap, 14px) !important;
@@ -186,27 +185,36 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   margin-top: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer {
   display: block !important;
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #show-more-button,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) .ytd-rich-shelf-renderer #show-more-button,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) ytd-button-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #show-more-button,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) .ytd-rich-shelf-renderer #show-more-button,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) ytd-button-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #show-more-button,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) .ytd-rich-shelf-renderer #show-more-button,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) ytd-button-renderer {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
 }
 
 /* Clean spacing for headers (Unificado para Más relevantes, Más recientes y Shorts) */
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #title-container,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #rich-shelf-header,
-html[data-yslv-subs-view="list"] #rich-shelf-header.ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer .grid-subheader,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer #title-container {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer #title-container,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer #rich-shelf-header,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #rich-shelf-header.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #title-container,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer #title-container,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer #rich-shelf-header,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #rich-shelf-header.ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer #title-container {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
@@ -224,26 +232,40 @@ html[data-yslv-subs-view="list"] ytd-shelf-renderer #title-container {
 }
 
 /* Correct gap between header and content without using negative margins */
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer #contents {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer #contents {
   padding-top: 0 !important;
   margin-top: 0 !important;
   position: relative !important;
 }
 
 /* Reset agresivo de todos los posibles contenedores de YouTube para eliminar cualquier pixel oculto */
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #content,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer #contents,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #contents,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer #content,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer #contents,
-html[data-yslv-subs-view="list"] ytd-item-section-renderer,
-html[data-yslv-subs-view="list"] ytd-item-section-renderer #contents,
-html[data-yslv-subs-view="list"] #contents.ytd-rich-grid-renderer,
-html[data-yslv-subs-view="list"] #contents.ytd-shelf-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer #content,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #content,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #contents.ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer #content,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer #content,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-item-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-item-section-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #contents.ytd-shelf-renderer {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   padding-top: 0 !important;
@@ -253,17 +275,21 @@ html[data-yslv-subs-view="list"] #contents.ytd-shelf-renderer {
 }
 
 /* Aire superior para que no se peguen a la línea divisoria anterior */
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer,
-html[data-yslv-subs-view="list"] ytd-item-section-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-item-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-item-section-renderer {
   margin-top: 24px !important; 
   display: block !important;
 }
 
-/* The chronological header is a structural section, not a content shelf. Keep
-   it close to the first card even when YouTube wraps it in a new renderer. */
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) {
+/* The chronological header */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) {
   margin-top: 0 !important;
   margin-bottom: 0 !important;
   padding: 0 !important;
@@ -271,10 +297,14 @@ html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-list-hea
   height: auto !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) #title-container,
-html[data-yslv-subs-view="list"] ytd-rich-list-header-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-list-header-renderer #content,
-html[data-yslv-subs-view="list"] ytd-rich-list-header-renderer #title-container {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) #title-container,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-list-header-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-list-header-renderer #content,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-list-header-renderer #title-container,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) #title-container,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-list-header-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-list-header-renderer #content,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-list-header-renderer #title-container {
   margin-top: 0 !important;
   margin-bottom: 2px !important;
   padding-top: 0 !important;
@@ -283,23 +313,27 @@ html[data-yslv-subs-view="list"] ytd-rich-list-header-renderer #title-container 
   height: auto !important;
 }
 
-html[data-yslv-subs-view="list"] #contents.ytd-rich-grid-renderer > ytd-rich-item-renderer:first-of-type,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) + ytd-rich-item-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer > ytd-rich-item-renderer:first-of-type,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #contents.ytd-rich-grid-renderer > ytd-rich-item-renderer:first-of-type,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) + ytd-rich-item-renderer {
   padding-top: 2px !important;
   margin-top: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-grid-renderer #contents {
   display: flex !important;
   flex-direction: column !important;
   max-width: 100% !important;
-  margin: 0 auto !important; /* Centrado automático para anchos menores al 100% */
+  margin: 0 auto !important;
   width: var(--yslv-container-w, 100%) !important;
-  padding: 0 56px 0 56px !important; /* Restaurado el padding para alejar los 3 puntitos del borde */
+  padding: 0 56px 0 56px !important;
   box-sizing: border-box !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer {
   display: block !important;
   width: 100% !important;
   padding: var(--yslv-row-pad-y, 16px) 0 !important;
@@ -308,15 +342,20 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
 }
 
 /* Pegado absoluto del primer video al título para eliminar cualquier gap */
-html[data-yslv-subs-view="list"] #contents > ytd-rich-item-renderer:first-child,
-html[data-yslv-subs-view="list"] ytd-rich-section-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #contents > ytd-rich-item-renderer:first-child,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #contents > ytd-rich-item-renderer:first-child,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer {
   padding-top: 0 !important;
   margin-top: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short {
   display: inline-block !important;
   width: auto !important;
   padding: 0 10px 0 0 !important;
@@ -325,25 +364,35 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short {
   vertical-align: top !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer:last-child {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer:last-child,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer:last-child {
   border-bottom: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
   margin: 0 0 var(--yslv-channel-video-gap, 18px) 0 !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-view-model__avatar,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupViewModelAvatar,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-stack-view-model {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-lockup-view-model__avatar,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .ytLockupViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-spec-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-stack-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-lockup-view-model__avatar,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .ytLockupViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-spec-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-stack-view-model {
   display: flex !important;
   width: 32px !important;
   height: 32px !important;
@@ -353,8 +402,10 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-stack-view-model {
 }
 
 /* Multi-avatar grid for collaborators */
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar:has(yt-avatar-stack-view-model) {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar:has(yt-avatar-stack-view-model),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar:has(yt-avatar-stack-view-model) {
   display: grid !important;
   grid-template-columns: repeat(2, 16px) !important;
   grid-template-rows: repeat(2, 16px) !important;
@@ -363,18 +414,22 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupMetadataViewModelAv
   justify-content: center !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model yt-avatar-shape {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-decorated-avatar-view-model yt-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-decorated-avatar-view-model yt-avatar-shape {
   width: 15px !important;
   height: 15px !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-spec-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-spec-avatar-shape {
   width: 32px !important;
   height: 32px !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead-name {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead-name,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead-name {
   color: var(--spec-text-primary, var(--yt-spec-text-primary)) !important;
   text-decoration: none !important;
   font-weight: 700 !important;
@@ -384,25 +439,34 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead-name {
   align-items: center;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead-name .yslv-channel-badge {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead-name .yslv-channel-badge,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead-name .yslv-channel-badge {
   display: inline-flex !important;
   align-items: center !important;
   margin-left: 4px !important;
 }
 
-html[data-yslv-subs-view="list"] yt-lockup-view-model,
-html[data-yslv-subs-view="list"] .yt-lockup-view-model,
-html[data-yslv-subs-view="list"] .ytLockupViewModelWrapper,
-html[data-yslv-subs-view="list"] .ytLockupViewModelHost {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupViewModelWrapper,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupViewModelHost,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupViewModelWrapper,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupViewModelHost {
   display: block !important;
   width: 100% !important;
   overflow: visible !important;
 }
 
-html[data-yslv-subs-view="list"] yt-lockup-view-model > div,
-html[data-yslv-subs-view="list"] .yt-lockup-view-model > div,
-html[data-yslv-subs-view="list"] .ytLockupViewModelWrapper > div,
-html[data-yslv-subs-view="list"] .ytLockupViewModelHost > div {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model > div,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model > div,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupViewModelWrapper > div,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupViewModelHost > div,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-view-model > div,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-view-model > div,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupViewModelWrapper > div,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupViewModelHost > div {
   display: flex !important;
   flex-direction: row !important;
   align-items: flex-start !important;
@@ -413,16 +477,20 @@ html[data-yslv-subs-view="list"] .ytLockupViewModelHost > div {
   column-gap: 32px !important;
 }
 
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image,
-html[data-yslv-subs-view="list"] .ytLockupViewModelContentImage {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__content-image,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupViewModelContentImage,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-view-model__content-image,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupViewModelContentImage {
   width: var(--yslv-thumb-w, 260px) !important;
   min-width: var(--yslv-thumb-w, 260px) !important;
   max-width: var(--yslv-thumb-w, 260px) !important;
   flex: 0 0 var(--yslv-thumb-w, 260px) !important;
 }
 
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__content-image img,
-html[data-yslv-subs-view="list"] .ytLockupViewModelContentImage img {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__content-image img,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupViewModelContentImage img,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-view-model__content-image img,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupViewModelContentImage img {
   width: 100% !important;
   height: auto !important;
   aspect-ratio: 16/9 !important;
@@ -431,12 +499,18 @@ html[data-yslv-subs-view="list"] .ytLockupViewModelContentImage img {
   display: block !important;
 }
 
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__metadata,
-html[data-yslv-subs-view="list"] .ytLockupViewModelMetadata,
-html[data-yslv-subs-view="list"] yt-lockup-metadata-view-model,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__text-container,
-html[data-yslv-subs-view="list"] .ytContentMetadataViewModelHost {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__metadata,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupViewModelMetadata,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-metadata-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__text-container,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytContentMetadataViewModelHost,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-view-model__metadata,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupViewModelMetadata,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-metadata-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-metadata-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__text-container,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytContentMetadataViewModelHost {
   min-width: 0 !important;
   flex: 1 1 auto !important;
   display: flex !important;
@@ -447,55 +521,79 @@ html[data-yslv-subs-view="list"] .ytContentMetadataViewModelHost {
   overflow: visible !important;
 }
 
-/* Surgically hide ONLY native metadata rows, not the entire host */
-html[data-yslv-subs-view="list"] yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row,
-html[data-yslv-subs-view="list"] .ytContentMetadataViewModelMetadataRow,
-html[data-yslv-subs-view="list"] ytd-rich-grid-media .video-meta,
-html[data-yslv-subs-view="list"] ytd-video-meta-block {
+/* Surgically hide ONLY native metadata rows on subscriptions, not other pages */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytContentMetadataViewModelMetadataRow,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-media .video-meta,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-video-meta-block,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytContentMetadataViewModelMetadataRow,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-grid-media .video-meta,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-video-meta-block {
   display: none !important;
 }
 
-/* Hide the original avatar in its original position to prevent jumping */
-html[data-yslv-subs-view="list"] yt-lockup-view-model .yt-lockup-view-model__avatar-container,
-html[data-yslv-subs-view="list"] yt-lockup-view-model .yt-lockup-metadata-view-model__avatar,
-html[data-yslv-subs-view="list"] yt-lockup-view-model .ytLockupMetadataViewModelAvatar,
-html[data-yslv-subs-view="list"] ytd-rich-grid-media #avatar-link {
+/* Hide original avatar ONLY in subscriptions */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model .yt-lockup-view-model__avatar-container,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model .ytLockupMetadataViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-media #avatar-link,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-view-model .yt-lockup-view-model__avatar-container,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-view-model .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-view-model .ytLockupMetadataViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-grid-media #avatar-link {
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
-/* Show the avatar only when it has been moved to our custom header */
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-view-model__avatar-container,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-spec-avatar-shape,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-stack-view-model {
+/* Show avatar in our row header */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-lockup-view-model__avatar-container,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-spec-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-stack-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-lockup-view-model__avatar-container,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .ytLockupMetadataViewModelAvatar,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead .yt-spec-avatar-shape,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-decorated-avatar-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead yt-avatar-stack-view-model {
   opacity: 1 !important;
   pointer-events: auto !important;
   visibility: visible !important;
 }
 
 /* Prevent the row header from taking space or showing text before script finishes */
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead:has(a.yslv-subs-rowhead-name[data-yslv-has-name="false"]) {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead:has(a.yslv-subs-rowhead-name[data-yslv-has-name="false"]),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead:has(a.yslv-subs-rowhead-name[data-yslv-has-name="false"]) {
   visibility: hidden !important;
 }
 
-/* Ensure the host itself is visible but takes no space if it's just a wrapper we use */
-html[data-yslv-subs-view="list"] yt-content-metadata-view-model,
-html[data-yslv-subs-view="list"] .ytContentMetadataViewModelHost {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-content-metadata-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytContentMetadataViewModelHost,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-content-metadata-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytContentMetadataViewModelHost {
   display: block !important;
   min-height: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
-html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__heading-reset,
-html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelHeading,
-html[data-yslv-subs-view="list"] ytd-rich-grid-media #video-title,
-html[data-yslv-subs-view="list"] ytd-rich-grid-media #video-title-link,
-html[data-yslv-subs-view="list"] ytd-rich-grid-media h3 {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__title,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupMetadataViewModelTitle,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__heading-reset,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupMetadataViewModelHeading,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-media #video-title,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-media #video-title-link,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-grid-media h3,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__title,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupMetadataViewModelTitle,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__heading-reset,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupMetadataViewModelHeading,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-grid-media #video-title,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-grid-media #video-title-link,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-grid-media h3 {
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: var(--yslv-title-clamp, 2) !important;
@@ -510,7 +608,8 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-media h3 {
   order: 1 !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-mrow {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mrow,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mrow {
   display: flex !important;
   flex-direction: column !important;
   align-items: flex-start !important;
@@ -519,7 +618,8 @@ html[data-yslv-subs-view="list"] .yslv-subs-mrow {
   min-width: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-mch {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch {
   min-width: 0 !important;
   color: var(--spec-text-secondary, var(--yt-spec-text-secondary)) !important;
   font-size: 13px !important;
@@ -530,10 +630,10 @@ html[data-yslv-subs-view="list"] .yslv-subs-mch {
   flex: 0 1 auto !important;
   display: flex !important;
   align-items: center !important;
-  min-width: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-mch a {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch a,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch a {
   color: inherit !important;
   text-decoration: none !important;
   display: inline-flex !important;
@@ -542,21 +642,25 @@ html[data-yslv-subs-view="list"] .yslv-subs-mch a {
   transition: color 0.15s ease !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-mch a:hover {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch a:hover,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch a:hover {
   color: var(--spec-text-primary, var(--yt-spec-text-primary)) !important;
   text-decoration: none !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-mch a > span {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch a > span,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch a > span {
   display: inline-flex !important;
   align-items: center !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-mch .yt-icon-shape.ytSpecIconShapeHost {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch .yt-icon-shape.ytSpecIconShapeHost,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch .yt-icon-shape.ytSpecIconShapeHost {
   margin-right: 2px !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-mrt {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mrt,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mrt {
   color: var(--spec-text-secondary, var(--yt-spec-text-secondary)) !important;
   font-size: 13px !important;
   line-height: 1.4 !important;
@@ -564,7 +668,8 @@ html[data-yslv-subs-view="list"] .yslv-subs-mrt {
   flex: 0 0 auto !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-desc {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-desc,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-desc {
   display: block !important;
   width: 100% !important;
   margin-top: 10px !important;
@@ -577,13 +682,15 @@ html[data-yslv-subs-view="list"] .yslv-subs-desc {
   order: 3 !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-desc:not(.yslv-subs-desc-skel) {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-desc:not(.yslv-subs-desc-skel),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-desc:not(.yslv-subs-desc-skel) {
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: var(--yslv-desc-clamp, 2) !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel {
   display: block !important;
   -webkit-line-clamp: unset !important;
   overflow: hidden !important;
@@ -591,7 +698,8 @@ html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel {
   position: relative !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel > span,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel > span {
   display: block !important;
   border-radius: 9px !important;
   opacity: 1 !important;
@@ -609,19 +717,22 @@ html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span {
   will-change: background-position !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(1) {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(1),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(1) {
   height: 12px !important;
   width: min(520px, 82%) !important;
   margin-top: 0px !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(2) {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(2),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(2) {
   height: 12px !important;
   width: min(520px, 74%) !important;
   margin-top: 6px !important;
 }
 
-html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(3) {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(3),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-child(3) {
   height: 12px !important;
   width: min(520px, 58%) !important;
   margin-top: 6px !important;
@@ -631,24 +742,31 @@ html[data-yslv-subs-view="list"] {
   --yslvShortW: var(--yslv-shorts-w, 160px);
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short #content {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short #content,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short #content {
   width: var(--yslvShortW) !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short a.reel-item-endpoint,
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short a.shortsLockupViewModelHostEndpoint.reel-item-endpoint {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short a.reel-item-endpoint,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short a.shortsLockupViewModelHostEndpoint.reel-item-endpoint,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short a.reel-item-endpoint,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short a.shortsLockupViewModelHostEndpoint.reel-item-endpoint {
   width: var(--yslvShortW) !important;
   display: block !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short yt-thumbnail-view-model,
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short .ytThumbnailViewModelImage,
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short .shortsLockupViewModelHostThumbnailParentContainer {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short yt-thumbnail-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short .ytThumbnailViewModelImage,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short .shortsLockupViewModelHostThumbnailParentContainer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short yt-thumbnail-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short .ytThumbnailViewModelImage,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short .shortsLockupViewModelHostThumbnailParentContainer {
   width: var(--yslvShortW) !important;
   aspect-ratio: 2/3 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short img.ytCoreImageHost {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short img.ytCoreImageHost,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short img.ytCoreImageHost {
   width: 100% !important;
   height: 100% !important;
   object-fit: cover !important;
@@ -656,15 +774,18 @@ html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short img.ytCore
   display: block !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-container {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-container,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-container {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   gap: 8px !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-annotation-container-outer,
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) yt-icon {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-annotation-container-outer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) yt-icon,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #title-annotation-container-outer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) yt-icon {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
@@ -675,11 +796,13 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   line-height: 1 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer #dismissible {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer #dismissible,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer #dismissible {
   margin-top: 0 !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short > #content {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short > #content,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short > #content {
   padding-bottom: 3rem !important;
 }
 
@@ -697,20 +820,29 @@ html:not([dark])[data-yslv-subs-view="list"] {
   --spec-text-secondary: #606060;
 }
 
-html[data-yslv-subs-view="list"] .ytLockupAttachmentsViewModelHost,
-html[data-yslv-subs-view="list"] yt-lockup-attachments-view-model,
-html[data-yslv-subs-view="list"] .yt-lockup-view-model__attachments,
-html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__attachments {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytLockupAttachmentsViewModelHost,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-attachments-view-model,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-view-model__attachments,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__attachments,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .ytLockupAttachmentsViewModelHost,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-attachments-view-model,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-view-model__attachments,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yt-lockup-metadata-view-model__attachments {
   width: fit-content !important;
   order: 4 !important;
   margin-top: 8px !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-counterfactual-renderer.ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-list-header-renderer.ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-shelf-renderer.ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
-html[data-yslv-subs-view="list"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-counterfactual-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #content.ytd-rich-section-renderer > ytd-rich-list-header-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #content.ytd-rich-section-renderer > ytd-shelf-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed],
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-counterfactual-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #content.ytd-rich-section-renderer > ytd-rich-list-header-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #content.ytd-rich-section-renderer > ytd-shelf-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #content.ytd-rich-section-renderer > ytd-rich-shelf-renderer.ytd-rich-section-renderer,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #content.ytd-rich-section-renderer > ytd-inline-survey-renderer.ytd-rich-section-renderer[is-dismissed] {
   margin-top: 0 !important;
-  margin-bottom: 4px !important; /* Unificado a 4px para que coincida con Relevantes */
+  margin-bottom: 4px !important;
 }
