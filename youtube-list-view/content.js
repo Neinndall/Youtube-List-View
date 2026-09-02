@@ -1421,57 +1421,36 @@
     const subsBrowse = getActiveSubsBrowse()
     if (!subsBrowse) return
 
-    const shelfSelectors = 'ytd-rich-section-renderer, ytd-rich-shelf-renderer, ytd-shelf-renderer, ytd-item-section-renderer, ytd-reel-shelf-renderer'
+    const shelfSelectors = "ytd-rich-section-renderer, ytd-shelf-renderer, ytd-item-section-renderer, ytd-reel-shelf-renderer"
     const containers = subsBrowse.querySelectorAll(shelfSelectors)
     
     containers.forEach(el => {
-      const titleEl = el.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')
-      const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]')
-      const hasShortsTitle = titleEl?.textContent?.toLowerCase().includes("shorts")
+      const titleEl = el.querySelector("#title, #title-text, .title, h2, h3, yt-formatted-string")
+      const headerEl = el.querySelector("#rich-shelf-header, .grid-subheader, #header")
+      const titleTxt = (titleEl?.textContent || headerEl?.textContent || "").trim().toLowerCase()
+
+      const hasShortsContent = el.querySelector("ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]")
+      const hasShortsTitle = titleTxt.includes("shorts")
       const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
       const isShortsShelf = !!(hasShortsContent || hasShortsTitle || hasShortsIcon)
 
       // 1. "Most Relevant"
-      let isRelevant = false
-      if (titleEl && titleEl.textContent) {
-        const txt = titleEl.textContent.trim().toLowerCase()
-        isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => txt.includes(t))
-      } else {
-        const headerEl = el.querySelector('#rich-shelf-header, .grid-subheader, #header')
-        if (headerEl && headerEl.textContent) {
-          const txt = headerEl.textContent.trim().toLowerCase()
-          isRelevant = ["most relevant", "más relevantes", "más relevante"].some(t => txt.includes(t))
-        }
-      }
+      const isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => titleTxt.includes(t))
 
       if (isRelevant) {
-        const sec = el.closest('ytd-rich-section-renderer') || el
-        const targets = new Set([
-          el,
-          sec,
-          ...Array.from(sec.querySelectorAll('ytd-rich-item-renderer, ytd-rich-shelf-renderer, #contents, #dismissible, #header, #rich-shelf-header, .grid-subheader'))
-        ])
-        if (STATE.hideMostRelevant) {
-          targets.forEach(node => node.classList.add("yslv-section-hidden"))
-        } else {
-          targets.forEach(node => node.classList.remove("yslv-section-hidden"))
-        }
+        el.classList.toggle("yslv-section-hidden", !!STATE.hideMostRelevant)
       }
 
       // 2. "Shorts"
-      if (STATE.hideShorts) {
-        if (isShortsShelf) {
-          el.classList.add("yslv-shorts-hidden")
-        }
-      } else {
-        el.classList.remove("yslv-shorts-hidden")
+      if (isShortsShelf) {
+        el.classList.toggle("yslv-shorts-hidden", !!STATE.hideShorts)
       }
     })
 
     // 3. Fallback for individual Shorts items inside subscriptions
     if (STATE.hideShorts) {
       subsBrowse.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
-        const isShort = item.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer') || item.hasAttribute("is-shorts")
+        const isShort = item.querySelector("ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer") || item.hasAttribute("is-shorts")
         if (isShort) item.classList.add("yslv-shorts-hidden")
       })
     } else {
