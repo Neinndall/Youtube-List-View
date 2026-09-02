@@ -1256,6 +1256,7 @@
     if (!item || item.nodeType !== 1) return
     if (item.tagName !== "YTD-RICH-ITEM-RENDERER") return
     if (!isSubscriptionsCard(item)) return // STRICT GUARD: Never touch non-subscription cards!
+    if (item.classList.contains("yslv-section-hidden") || item.closest(".yslv-section-hidden")) return
 
     const shortsLockup = item.querySelector("ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model")
     if (shortsLockup && CFG.list.shorts.enabled) {
@@ -1444,8 +1445,17 @@
       }
 
       if (isRelevant) {
-        if (STATE.hideMostRelevant) el.classList.add("yslv-section-hidden")
-        else el.classList.remove("yslv-section-hidden")
+        const sec = el.closest('ytd-rich-section-renderer') || el
+        const targets = new Set([
+          el,
+          sec,
+          ...Array.from(sec.querySelectorAll('ytd-rich-item-renderer, ytd-rich-shelf-renderer, #contents, #dismissible, #header, #rich-shelf-header, .grid-subheader'))
+        ])
+        if (STATE.hideMostRelevant) {
+          targets.forEach(node => node.classList.add("yslv-section-hidden"))
+        } else {
+          targets.forEach(node => node.classList.remove("yslv-section-hidden"))
+        }
       }
 
       // 2. "Shorts"
