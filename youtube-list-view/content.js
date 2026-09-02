@@ -1456,16 +1456,9 @@
       } else {
         el.classList.remove("yslv-shorts-hidden")
       }
-      // 3. Empty phantom shelves (no title, no videos, no subscribe button)
-      const titleTxt = titleEl?.textContent?.trim() || ""
-      const hasVideos = el.querySelector('ytd-rich-item-renderer, ytd-video-renderer, ytd-reel-item-renderer')
-      const hasBtn = el.querySelector('#subscribe-button, ytd-button-renderer')
-      if (!titleTxt && !hasVideos && !hasBtn && !isShortsShelf) {
-        el.classList.add("yslv-section-hidden")
-      }
     })
 
-    // 4. Fallback for individual Shorts items inside subscriptions
+    // 3. Fallback for individual Shorts items inside subscriptions
     if (STATE.hideShorts) {
       subsBrowse.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
         const isShort = item.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer') || item.hasAttribute("is-shorts")
