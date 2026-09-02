@@ -279,6 +279,7 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #content.ytd-rich-section-renderer {
   margin-top: 0 !important;
   padding-top: 0 !important;
+  border-top: none !important;
 }
 
 /* The chronological header */
@@ -780,6 +781,9 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   margin-left: 0 !important;
   padding-top: 0 !important;
   margin-top: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  border-top: none !important;
 }
 
 /* Tighter gap and clean styling for non-shorts shelves like Más relevantes */
