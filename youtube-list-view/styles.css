@@ -168,8 +168,7 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   margin-top: var(--yslv-row-pad-y, 16px) !important;
   margin-bottom: 0 !important;
   padding-top: 0 !important;
-  padding-bottom: var(--yslv-row-pad-y, 16px) !important;
-  border-bottom: 1px solid var(--yt-spec-10-percent-layer, var(--yslv-sep, rgba(0, 0, 0, 0.1))) !important;
+  padding-bottom: 0 !important;
   display: block !important;
 }
 
@@ -310,7 +309,7 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-list-header-renderer #content,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-list-header-renderer #title-container {
   margin-top: 0 !important;
-  margin-bottom: 2px !important;
+  margin-bottom: var(--yslv-header-gap, 6px) !important;
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   min-height: 0 !important;
