@@ -808,6 +808,12 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   margin-bottom: var(--yslv-header-gap, 6px) !important;
 }
 
+/* Gap between Shorts header (icon + title) and Shorts video cards, controlled by Canal -> Video */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) #rich-shelf-header,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) #rich-shelf-header {
+  margin-bottom: var(--yslv-channel-video-gap, 18px) !important;
+}
+
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:not(:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts])) #title,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:not(:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts])) #title {
   font-size: 15px !important;
