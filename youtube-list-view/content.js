@@ -401,28 +401,33 @@
     const browse = getActiveSubsBrowse()
     if (!browse) return null
 
-    const candidates = [
-      browse.querySelector('ytd-rich-section-renderer:not(.yslv-section-hidden) #subscribe-button'),
-      browse.querySelector('ytd-rich-shelf-renderer:not(.yslv-section-hidden) #subscribe-button'),
-      browse.querySelector('ytd-shelf-renderer:not(.yslv-section-hidden) #subscribe-button'),
-      browse.querySelector('ytd-item-section-renderer:not(.yslv-section-hidden) #subscribe-button'),
-      browse.querySelector('ytd-rich-grid-renderer :not(.yslv-section-hidden) #subscribe-button'),
-      browse.querySelector(':not(.yslv-section-hidden) #subscribe-button'),
-      browse.querySelector('ytd-rich-section-renderer:not(.yslv-section-hidden) #title-container ytd-button-renderer'),
-      browse.querySelector('ytd-rich-shelf-renderer:not(.yslv-section-hidden) #title-container ytd-button-renderer'),
-      browse.querySelector(':not(.yslv-section-hidden) #title-container ytd-button-renderer'),
-      browse.querySelector('ytd-rich-section-renderer:not(.yslv-section-hidden) #title-container'),
-      browse.querySelector('ytd-rich-shelf-renderer:not(.yslv-section-hidden) #title-container'),
-      browse.querySelector('ytd-shelf-renderer:not(.yslv-section-hidden) .grid-subheader'),
-      browse.querySelector('ytd-rich-grid-renderer :not(.yslv-section-hidden) #title-container'),
-      browse.querySelector(':not(.yslv-section-hidden) #title-container'),
-      browse.querySelector('#subscribe-button'),
-      browse.querySelector('#title-container')
-    ]
+    // 1. Highest priority: The visible #subscribe-button ("Todas las suscripciones")
+    const subsButtons = browse.querySelectorAll('#subscribe-button')
+    for (const btn of subsButtons) {
+      if (btn.isConnected && !btn.closest('.yslv-section-hidden') && !btn.closest('.yslv-shorts-hidden')) {
+        return btn
+      }
+    }
 
-    for (const el of candidates) {
-      if (el && el.isConnected && !el.closest('.yslv-section-hidden') && !el.closest('.yslv-shorts-hidden')) {
-        return el
+    // 2. Second priority: Button renderer with subscription/manage text
+    const allBtns = browse.querySelectorAll('ytd-button-renderer')
+    for (const btn of allBtns) {
+      if (btn.isConnected && !btn.closest('.yslv-section-hidden') && !btn.closest('.yslv-shorts-hidden')) {
+        const txt = (btn.textContent || '').toLowerCase()
+        if (txt.includes('suscrip') || txt.includes('subscri') || txt.includes('manage')) {
+          return btn
+        }
+      }
+    }
+
+    // 3. Third priority: The actual title-container of the visible latest videos feed
+    const titleContainers = browse.querySelectorAll('#title-container, .grid-subheader')
+    for (const tc of titleContainers) {
+      if (tc.isConnected && !tc.closest('.yslv-section-hidden') && !tc.closest('.yslv-shorts-hidden')) {
+        const txt = (tc.textContent || '').toLowerCase()
+        if (txt.includes('reciente') || txt.includes('latest') || txt.includes('today') || txt.includes('hoy')) {
+          return tc
+        }
       }
     }
 
@@ -430,17 +435,22 @@
   }
 
   function ensureToggle() {
-    const existing = document.getElementById(CFG.ids.toggle)
-    if (existing && existing.isConnected) {
-      if (!existing.closest('.yslv-section-hidden') && !existing.closest('.yslv-shorts-hidden')) {
-        paintToggle()
-        return
-      }
-      existing.remove()
-    }
-
     const mountAnchor = findToggleMountAnchor()
     if (!mountAnchor) return
+
+    const existing = document.getElementById(CFG.ids.toggle)
+    if (existing && existing.isConnected) {
+      if (existing.closest('.yslv-section-hidden') || existing.closest('.yslv-shorts-hidden')) {
+        existing.remove()
+      } else {
+        const isNextToAnchor = existing.previousElementSibling === mountAnchor || existing.parentElement === mountAnchor
+        if (isNextToAnchor) {
+          paintToggle()
+          return
+        }
+        existing.remove()
+      }
+    }
 
     document.querySelectorAll(`#${CFG.ids.toggle}`).forEach(n => n.remove())
 
@@ -1446,9 +1456,16 @@
       } else {
         el.classList.remove("yslv-shorts-hidden")
       }
+      // 3. Empty phantom shelves (no title, no videos, no subscribe button)
+      const titleTxt = titleEl?.textContent?.trim() || ""
+      const hasVideos = el.querySelector('ytd-rich-item-renderer, ytd-video-renderer, ytd-reel-item-renderer')
+      const hasBtn = el.querySelector('#subscribe-button, ytd-button-renderer')
+      if (!titleTxt && !hasVideos && !hasBtn && !isShortsShelf) {
+        el.classList.add("yslv-section-hidden")
+      }
     })
 
-    // 3. Fallback for individual Shorts items inside subscriptions
+    // 4. Fallback for individual Shorts items inside subscriptions
     if (STATE.hideShorts) {
       subsBrowse.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
         const isShort = item.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer') || item.hasAttribute("is-shorts")
@@ -1477,6 +1494,7 @@
       if (!STATE.active) return
       
       processSections()
+      ensureToggle()
 
       if (STATE.view !== "list") return
       for (const m of muts) {
@@ -1586,10 +1604,16 @@
     resetNavState()
   }
 
-  function ensureToggleMountLoop() {
+  function ensureToggleMountLoop(attempt = 0) {
     if (!STATE.active) return
     ensureToggle()
-    if (STATE.active && !document.getElementById(CFG.ids.toggle)) setTimeout(ensureToggleMountLoop, 250)
+    const toggle = document.getElementById(CFG.ids.toggle)
+    const browse = getActiveSubsBrowse()
+    const idealBtn = browse?.querySelector(':not(.yslv-section-hidden) #subscribe-button')
+    const needsMove = idealBtn && toggle && toggle.previousElementSibling !== idealBtn
+    if (STATE.active && (!toggle || needsMove) && attempt < 15) {
+      setTimeout(() => ensureToggleMountLoop(attempt + 1), 200)
+    }
   }
 
   function pageSig() {
