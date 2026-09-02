@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hideMostRelevant: false,
     hideShorts: false,
     thumbW: 260,
-    rowPadY: 26,
+    rowPadY: 16,
     containerW: 100,
     channelSize: 20,
     titleSize: 16,

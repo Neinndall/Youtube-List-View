@@ -17,34 +17,11 @@
     },
 
     list: {
-      maxWidth: 1120,
-      rowPadY: 22,
-      separator: true,
-
-      thumbW: 240,
-      thumbRadius: 14,
-
       shorts: {
         enabled: true,
-        cardW: 170,
-      },
-
-      titleClamp: 2,
-      descClamp: 2,
-
-      rowHead: {
-        enabled: true,
-        gap: 12,
-        marginBottom: 14, // Updated to 14 for perfect balance
-        avatarSize: 32,
-      },
-
-      metaRow: {
-        gap: 8,
       },
 
       desc: {
-        marginTop: 10,
         skeleton: {
           enabled: true,
           lines: 2,
@@ -72,7 +49,6 @@
     },
 
     ids: {
-      style: "yslv-subs-style",
       toggle: "yslv-subs-toggle",
     },
 
@@ -95,23 +71,21 @@
 
     cssVars: {
       shimmerX: "--yslvSkelX",
-      shortW: "--yslvShortW",
     },
   }
 
   const STATE = {
     active: false,
     view: "grid",
-    styleEl: null,
-
     q: [],
     qSet: new Set(),
     processing: false,
 
-    processedItems: new WeakSet(),
-
     movedAvatars: new WeakMap(),
     movedMetaAnchors: new WeakMap(),
+    movedMenus: new WeakMap(),
+    movedAttachments: new WeakMap(),
+    expandedShortsShelves: new WeakSet(),
 
     mo: null,
     observedTarget: null,
@@ -136,7 +110,7 @@
     sectionTimer: 0,
 
     thumbW: 260,
-    rowPadY: 26,
+    rowPadY: 16,
     containerW: 100,
     channelSize: 20,
     titleSize: 16,
@@ -517,7 +491,40 @@
 
   function getChannelName(lockup) {
     const src = pickChannelDisplaySource(lockup)
-    return normalizeText(src?.textContent || "")
+    const direct = normalizeText(src?.textContent || "")
+    if (direct) return direct
+
+    // Collaborative lockups may expose names only through link accessibility
+    // attributes while their visible text is rendered in a separate overlay.
+    const names = []
+    const seen = new Set()
+    const links = lockup.querySelectorAll('a[href^="/@"], a[href^="/channel/"]')
+    for (const link of links) {
+      const label = normalizeText(
+        link.textContent ||
+        link.getAttribute("aria-label") ||
+        link.getAttribute("title") ||
+        link.querySelector("img")?.getAttribute("alt") ||
+        ""
+      )
+      const key = label.toLocaleLowerCase()
+      if (!label || seen.has(key)) continue
+      seen.add(key)
+      names.push(label)
+    }
+    if (names.length) return names.join(" y ")
+
+    const avatarLabels = Array.from(
+      lockup.querySelectorAll(
+        "yt-avatar-stack-view-model [aria-label], yt-decorated-avatar-view-model [aria-label], yt-avatar-shape img[alt]"
+      )
+    )
+      .map(node => normalizeText(node.getAttribute("aria-label") || node.getAttribute("alt") || ""))
+      .filter(Boolean)
+    if (avatarLabels.length) return [...new Set(avatarLabels)].join(" y ")
+
+    if (lockup.querySelector("yt-avatar-stack-view-model")) return "Colaboradores"
+    return ""
   }
 
   function isIconish(node) {
@@ -612,7 +619,9 @@
 
   function restoreMovedMetaAnchors() {
     const entries = []
-    document.querySelectorAll("yt-lockup-view-model").forEach(lockup => {
+    document.querySelectorAll(
+      "yt-lockup-view-model, .yt-lockup-view-model, .ytLockupViewModelWrapper, .ytLockupViewModelHost, ytd-video-renderer, ytd-rich-grid-media"
+    ).forEach(lockup => {
       const info = STATE.movedMetaAnchors.get(lockup)
       if (!info) return
       entries.push(info)
@@ -635,10 +644,29 @@
   function setHeaderNameTextOnly(destLink, lockup) {
     if (!destLink) return
     const href = getChannelHref(lockup)
-    destLink.href = href || "javascript:void(0)"
+    if (href) destLink.href = href
+    else destLink.removeAttribute("href")
 
     const src = pickChannelDisplaySource(lockup)
-    setTextOnly(destLink, src?.textContent || "")
+    const channelName = getChannelName(lockup)
+    setTextOnly(destLink, channelName)
+    destLink.dataset.yslvHasName = channelName ? "true" : "false"
+
+    // Keep verified/artist badges for single and collaborative channels without
+    // cloning nested links into this header anchor.
+    const anchors = src?.matches?.("a") ? [src] : Array.from(src?.querySelectorAll?.("a") || [])
+    const seen = new Set()
+    for (const anchor of anchors) {
+      for (const badge of collectBadgeNodesFromAnchor(anchor)) {
+        const key = `${badge.tagName}|${badge.getAttribute("class") || ""}|${badge.getAttribute("aria-label") || ""}`
+        if (seen.has(key)) continue
+        seen.add(key)
+        const wrap = document.createElement("span")
+        wrap.className = "yslv-channel-badge"
+        wrap.appendChild(badge.cloneNode(true))
+        destLink.appendChild(wrap)
+      }
+    }
   }
 
   function moveAvatarToHeaderOnce(item, lockup, head) {
@@ -675,8 +703,6 @@
   }
 
   function ensureRowHeader(item, lockup) {
-    if (!CFG.list.rowHead.enabled) return
-
     let head = item.querySelector(`:scope > .${CFG.cls.rowHead}`)
     if (!head) {
       head = document.createElement("div")
@@ -768,7 +794,9 @@
         left.appendChild(link)
       }
 
-      link.href = getChannelHref(lockup) || "javascript:void(0)"
+      const href = getChannelHref(lockup)
+      if (href) link.href = href
+      else link.removeAttribute("href")
 
       const src = pickChannelDisplaySource(lockup)
       if (src) {
@@ -966,8 +994,11 @@
         const res = await fetch(`https://www.youtube.com/watch?v=${encodeURIComponent(vid)}`, {
           credentials: "same-origin",
         })
+        if (!res.ok) return ""
         const html = await res.text()
-        const m = html.match(/ytInitialPlayerResponse\s*=\s*(\{.*?\});/s)
+        const m =
+          html.match(/ytInitialPlayerResponse\s*=\s*(\{.*?\});/s) ||
+          html.match(/["']ytInitialPlayerResponse["']\s*:\s*(\{.*?\})\s*,\s*["']/s)
         if (!m) return ""
         const json = JSON.parse(m[1])
         const raw = String(json?.videoDetails?.shortDescription || "").trim()
@@ -1120,11 +1151,8 @@
     if (!STATE.active || STATE.view !== "list") return
     if (!item || item.nodeType !== 1) return
     if (item.tagName !== "YTD-RICH-ITEM-RENDERER") return
-    if (STATE.processedItems.has(item)) return
-
     const shortsLockup = item.querySelector("ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model")
     if (shortsLockup && CFG.list.shorts.enabled) {
-      STATE.processedItems.add(item)
       item.classList.add(CFG.cls.isShort)
       return
     }
@@ -1156,8 +1184,6 @@
       metadataColumn.querySelector(".ytContentMetadataViewModelHost") ||
       metadataColumn
 
-    STATE.processedItems.add(item)
-
     // Move menu button to be a direct child of lockup for grid placement
     const menuBtn = 
       lockup.querySelector(".yt-lockup-metadata-view-model__menu-button") || 
@@ -1166,6 +1192,9 @@
       lockup.querySelector("#menu")
     
     if (menuBtn) {
+      if (!STATE.movedMenus.has(item) && menuBtn.parentNode) {
+        STATE.movedMenus.set(item, { node: menuBtn, parent: menuBtn.parentNode, nextSibling: menuBtn.nextSibling })
+      }
       const wrapper = lockup.querySelector(":scope > div")
       if (wrapper && menuBtn.parentNode !== wrapper) {
         wrapper.appendChild(menuBtn)
@@ -1186,6 +1215,13 @@
       lockup.querySelector(".ytLockupAttachmentsViewModelHost")
     
     if (attachments && attachments.parentNode !== textContainer) {
+      if (!STATE.movedAttachments.has(item)) {
+        STATE.movedAttachments.set(item, {
+          node: attachments,
+          parent: attachments.parentNode,
+          nextSibling: attachments.nextSibling,
+        })
+      }
       textContainer.appendChild(attachments)
     }
   }
@@ -1193,6 +1229,20 @@
   function enqueue(node) {
     if (!STATE.active || STATE.view !== "list") return
     if (!node || node.nodeType !== 1) return
+
+    // Ignore mutations produced by our own generated UI to avoid feedback loops.
+    if (
+      node.matches?.(`.${CFG.cls.rowHead}, .${CFG.cls.metaRow}, .${CFG.cls.desc}, .yslv-channel-badge`) ||
+      node.closest?.(`.${CFG.cls.rowHead}, .${CFG.cls.metaRow}, .${CFG.cls.desc}`)
+    ) return
+
+    // YouTube often hydrates an already-connected card by adding descendants.
+    // Requeue its owning card so late titles/channel metadata are not missed.
+    const owner = node.closest?.("ytd-rich-item-renderer")
+    if (owner && owner !== node) {
+      enqueue(owner)
+      return
+    }
 
     if (node.tagName === "YTD-RICH-ITEM-RENDERER") {
       if (STATE.qSet.has(node)) return
@@ -1257,6 +1307,9 @@
     
     containers.forEach(el => {
       const titleEl = el.querySelector('#title, #title-text, .title, h2, h3, yt-formatted-string')
+      const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]')
+      const hasShortsTitle = titleEl?.textContent?.toLowerCase().includes("shorts")
+      const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
       
       // 1. "Most Relevant"
       if (titleEl) {
@@ -1270,15 +1323,39 @@
 
       // 2. "Shorts"
       if (STATE.hideShorts) {
-        const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]')
-        const hasShortsTitle = titleEl?.textContent?.toLowerCase().includes("shorts")
-        const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
-
         if (hasShortsContent || hasShortsTitle || hasShortsIcon) {
           el.classList.add("yslv-shorts-hidden")
         }
       } else {
         el.classList.remove("yslv-shorts-hidden")
+
+        // YouTube currently renders a reduced first batch in some Shorts shelves.
+        // Expanding once exposes the remaining cards; CSS then fits as many as the
+        // available width allows instead of leaving a five-card layout.
+        const isShortsShelf = hasShortsContent || hasShortsTitle || hasShortsIcon
+        if (STATE.view === "list" && isShortsShelf && !STATE.expandedShortsShelves.has(el)) {
+          const moreHost = el.querySelector("#show-more-button, ytd-button-renderer#show-more-button")
+          const more = moreHost?.matches?.("button")
+            ? moreHost
+            : moreHost?.querySelector?.("button, yt-button-shape button")
+          if (
+            more &&
+            typeof more.click === "function" &&
+            !more.disabled &&
+            more.getAttribute("aria-disabled") !== "true"
+          ) {
+            STATE.expandedShortsShelves.add(el)
+            requestAnimationFrame(() => {
+              if (
+                STATE.active &&
+                STATE.view === "list" &&
+                !STATE.hideShorts &&
+                more.isConnected &&
+                typeof more.click === "function"
+              ) more.click()
+            })
+          }
+        }
       }
     })
 
@@ -1358,9 +1435,26 @@
     STATE.movedAvatars = new WeakMap()
   }
 
+  function restoreMovedNodes(map) {
+    document.querySelectorAll("ytd-rich-item-renderer").forEach(item => {
+      const info = map.get(item)
+      if (!info) return
+      const { node, parent, nextSibling } = info
+      if (!node || !parent || !node.isConnected || node.parentNode === parent) return
+      try {
+        if (nextSibling && nextSibling.parentNode === parent) parent.insertBefore(node, nextSibling)
+        else parent.appendChild(node)
+      } catch {}
+    })
+  }
+
   function cleanupListArtifacts() {
     restoreMovedAvatars()
     restoreMovedMetaAnchors()
+    restoreMovedNodes(STATE.movedMenus)
+    restoreMovedNodes(STATE.movedAttachments)
+    STATE.movedMenus = new WeakMap()
+    STATE.movedAttachments = new WeakMap()
     document.querySelectorAll(`.${CFG.cls.rowHead}`).forEach(n => n.remove())
     document.querySelectorAll(`.${CFG.cls.metaRow}`).forEach(n => n.remove())
     document.querySelectorAll(`.${CFG.cls.desc}`).forEach(n => n.remove())
@@ -1370,7 +1464,6 @@
   }
 
   function resetNavState() {
-    STATE.processedItems = new WeakSet()
     STATE.q.length = 0
     STATE.qSet.clear()
 
@@ -1383,6 +1476,7 @@
     STATE.descQueued.clear()
     STATE.descPumpRunning = false
     STATE.lastQueueSig = ""
+    STATE.expandedShortsShelves = new WeakSet()
 
     STATE.observedTarget = null
   }
@@ -1425,9 +1519,10 @@
     if (settings.shortsGap != null) root.style.setProperty("--yslv-shorts-gap", settings.shortsGap + "px")
   }
 
-  function apply() {
+  async function apply() {
     if (!isContextValid()) return
-    ensureDescStoreLoaded()
+    await ensureDescStoreLoaded()
+    if (!STATE.active || !isContextValid()) return
     
     const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
     chrome.storage.local.get(keys, result => {
@@ -1436,12 +1531,12 @@
       STATE.hideMostRelevant = result.hideMostRelevant ?? false
       STATE.hideShorts = result.hideShorts ?? false
       STATE.thumbW = result.thumbW ?? 260
-      STATE.rowPadY = result.rowPadY ?? 26
+      STATE.rowPadY = result.rowPadY ?? 16
       STATE.containerW = result.containerW ?? 100
       STATE.channelSize = result.channelSize ?? 20
       STATE.titleSize = result.titleSize ?? 16
-      STATE.shortsW = result.shortsW ?? 170
-      STATE.shortsGap = result.shortsGap ?? 16
+      STATE.shortsW = result.shortsW ?? 160
+      STATE.shortsGap = result.shortsGap ?? 14
 
       processSections()
       applyDynamicSettings(STATE)
@@ -1498,7 +1593,6 @@
 
       // If we finished navigation (even to the same URL), ensure content is processed
       if (isNavFinish) {
-        const sigChanged = sig !== STATE.lastPageSig
         STATE.lastPageSig = sig
 
         if (STATE.view === "list") {

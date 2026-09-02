@@ -173,9 +173,11 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #contents.ytd-rich-shelf-renderer {
   display: grid !important;
-  grid-template-columns: repeat(auto-fill, minmax(var(--yslv-shorts-w, 170px), 1fr)) !important;
-  column-gap: var(--yslv-shorts-gap, 16px) !important;
+  grid-template-columns: repeat(auto-fill, minmax(120px, var(--yslv-shorts-w, 160px))) !important;
+  column-gap: var(--yslv-shorts-gap, 14px) !important;
   row-gap: 20px !important;
+  justify-content: space-between !important;
+  align-items: start !important;
   margin-top: 0 !important;
 }
 
@@ -184,10 +186,6 @@ html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-rende
   width: 100% !important;
   margin: 0 !important;
   padding: 0 !important;
-}
-
-html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short):not([is-expanded]) #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer:nth-child(n+10) {
-  display: none !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-shelf-renderer:has(ytd-rich-item-renderer.yslv-is-short) #show-more-button,
@@ -258,6 +256,34 @@ html[data-yslv-subs-view="list"] ytd-item-section-renderer {
   display: block !important;
 }
 
+/* The chronological header is a structural section, not a content shelf. Keep
+   it close to the first card even when YouTube wraps it in a new renderer. */
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) #title-container,
+html[data-yslv-subs-view="list"] ytd-rich-list-header-renderer,
+html[data-yslv-subs-view="list"] ytd-rich-list-header-renderer #content,
+html[data-yslv-subs-view="list"] ytd-rich-list-header-renderer #title-container {
+  margin-top: 0 !important;
+  margin-bottom: 2px !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+html[data-yslv-subs-view="list"] #contents.ytd-rich-grid-renderer > ytd-rich-item-renderer:first-of-type,
+html[data-yslv-subs-view="list"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) + ytd-rich-item-renderer {
+  padding-top: 2px !important;
+  margin-top: 0 !important;
+}
+
 html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
   display: flex !important;
   flex-direction: column !important;
@@ -271,7 +297,7 @@ html[data-yslv-subs-view="list"] ytd-rich-grid-renderer #contents {
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer {
   display: block !important;
   width: 100% !important;
-  padding: var(--yslv-row-pad-y, 26px) 0 !important;
+  padding: var(--yslv-row-pad-y, 16px) 0 !important;
   margin: 0 !important;
   border-bottom: 1px solid var(--yt-spec-10-percent-layer, var(--yslv-sep, rgba(0, 0, 0, 0.1))) !important;    
 }
@@ -351,6 +377,12 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead-name {
   line-height: 1.15 !important;
   display: inline-flex !important;
   align-items: center;
+}
+
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead-name .yslv-channel-badge {
+  display: inline-flex !important;
+  align-items: center !important;
+  margin-left: 4px !important;
 }
 
 html[data-yslv-subs-view="list"] yt-lockup-view-model,
@@ -441,7 +473,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead yt-avatar-stack-view-model {
 }
 
 /* Prevent the row header from taking space or showing text before script finishes */
-html[data-yslv-subs-view="list"] .yslv-subs-rowhead:not(:has(a.yslv-subs-rowhead-name:not(:empty))) {
+html[data-yslv-subs-view="list"] .yslv-subs-rowhead:has(a.yslv-subs-rowhead-name[data-yslv-has-name="false"]) {
   visibility: hidden !important;
 }
 
@@ -453,7 +485,12 @@ html[data-yslv-subs-view="list"] .ytContentMetadataViewModelHost {
 }
 
 html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__title,
-html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle {
+html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelTitle,
+html[data-yslv-subs-view="list"] .yt-lockup-metadata-view-model__heading-reset,
+html[data-yslv-subs-view="list"] .ytLockupMetadataViewModelHeading,
+html[data-yslv-subs-view="list"] ytd-rich-grid-media #video-title,
+html[data-yslv-subs-view="list"] ytd-rich-grid-media #video-title-link,
+html[data-yslv-subs-view="list"] ytd-rich-grid-media h3 {
   display: -webkit-box !important;
   -webkit-box-orient: vertical !important;
   -webkit-line-clamp: var(--yslv-title-clamp, 2) !important;
@@ -586,7 +623,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-desc.yslv-subs-desc-skel > span:nth-
 }
 
 html[data-yslv-subs-view="list"] {
-  --yslvShortW: 170px;
+  --yslvShortW: var(--yslv-shorts-w, 160px);
 }
 
 html[data-yslv-subs-view="list"] ytd-rich-item-renderer.yslv-is-short #content {

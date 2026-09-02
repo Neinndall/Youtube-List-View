@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "YouTube List View",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Alterna entre vista de cuadrícula y lista en tus suscripciones de YouTube",
   "permissions": [
     "storage"
