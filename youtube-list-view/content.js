@@ -85,7 +85,6 @@
     movedMetaAnchors: new WeakMap(),
     movedMenus: new WeakMap(),
     movedAttachments: new WeakMap(),
-    expandedShortsShelves: new WeakSet(),
 
     mo: null,
     observedTarget: null,
@@ -1310,7 +1309,8 @@
       const hasShortsContent = el.querySelector('ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]')
       const hasShortsTitle = titleEl?.textContent?.toLowerCase().includes("shorts")
       const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
-      
+      const isShortsShelf = !!(hasShortsContent || hasShortsTitle || hasShortsIcon)
+
       // 1. "Most Relevant"
       if (titleEl) {
         const txt = titleEl.textContent.trim().toLowerCase()
@@ -1323,39 +1323,11 @@
 
       // 2. "Shorts"
       if (STATE.hideShorts) {
-        if (hasShortsContent || hasShortsTitle || hasShortsIcon) {
+        if (isShortsShelf) {
           el.classList.add("yslv-shorts-hidden")
         }
       } else {
         el.classList.remove("yslv-shorts-hidden")
-
-        // YouTube currently renders a reduced first batch in some Shorts shelves.
-        // Expanding once exposes the remaining cards; CSS then fits as many as the
-        // available width allows instead of leaving a five-card layout.
-        const isShortsShelf = hasShortsContent || hasShortsTitle || hasShortsIcon
-        if (STATE.view === "list" && isShortsShelf && !STATE.expandedShortsShelves.has(el)) {
-          const moreHost = el.querySelector("#show-more-button, ytd-button-renderer#show-more-button")
-          const more = moreHost?.matches?.("button")
-            ? moreHost
-            : moreHost?.querySelector?.("button, yt-button-shape button")
-          if (
-            more &&
-            typeof more.click === "function" &&
-            !more.disabled &&
-            more.getAttribute("aria-disabled") !== "true"
-          ) {
-            STATE.expandedShortsShelves.add(el)
-            requestAnimationFrame(() => {
-              if (
-                STATE.active &&
-                STATE.view === "list" &&
-                !STATE.hideShorts &&
-                more.isConnected &&
-                typeof more.click === "function"
-              ) more.click()
-            })
-          }
-        }
       }
     })
 
@@ -1476,7 +1448,6 @@
     STATE.descQueued.clear()
     STATE.descPumpRunning = false
     STATE.lastQueueSig = ""
-    STATE.expandedShortsShelves = new WeakSet()
 
     STATE.observedTarget = null
   }
