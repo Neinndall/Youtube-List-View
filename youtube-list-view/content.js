@@ -118,6 +118,49 @@
     shortsGap: 14,
   }
 
+  const SETTINGS_CACHE_KEY = "yslv_settings_cache_v1"
+
+  function loadSettingsCache() {
+    try {
+      const raw = localStorage.getItem(SETTINGS_CACHE_KEY)
+      if (raw) return JSON.parse(raw)
+    } catch {}
+    return null
+  }
+
+  function saveSettingsCache(settings) {
+    try {
+      const data = {
+        hideMostRelevant: !!settings.hideMostRelevant,
+        hideShorts: !!settings.hideShorts,
+        thumbW: Number(settings.thumbW) || 260,
+        rowPadY: Number(settings.rowPadY) || 16,
+        channelVideoGap: Number(settings.channelVideoGap) || 18,
+        containerW: Number(settings.containerW) || 100,
+        channelSize: Number(settings.channelSize) || 20,
+        titleSize: Number(settings.titleSize) || 16,
+        shortsW: Number(settings.shortsW) || 160,
+        shortsGap: Number(settings.shortsGap) || 14,
+      }
+      localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(data))
+    } catch {}
+  }
+
+  // Preload settings from cache immediately at document_start
+  const _cached = loadSettingsCache()
+  if (_cached && typeof _cached === "object") {
+    if (_cached.hideMostRelevant !== undefined) STATE.hideMostRelevant = !!_cached.hideMostRelevant
+    if (_cached.hideShorts !== undefined) STATE.hideShorts = !!_cached.hideShorts
+    if (_cached.thumbW !== undefined) STATE.thumbW = Number(_cached.thumbW)
+    if (_cached.rowPadY !== undefined) STATE.rowPadY = Number(_cached.rowPadY)
+    if (_cached.channelVideoGap !== undefined) STATE.channelVideoGap = Number(_cached.channelVideoGap)
+    if (_cached.containerW !== undefined) STATE.containerW = Number(_cached.containerW)
+    if (_cached.channelSize !== undefined) STATE.channelSize = Number(_cached.channelSize)
+    if (_cached.titleSize !== undefined) STATE.titleSize = Number(_cached.titleSize)
+    if (_cached.shortsW !== undefined) STATE.shortsW = Number(_cached.shortsW)
+    if (_cached.shortsGap !== undefined) STATE.shortsGap = Number(_cached.shortsGap)
+  }
+
   const SHIMMER = {
     raf: 0,
     running: false,
@@ -1267,8 +1310,7 @@
       processQueue()
     }
 
-    if (window.requestIdleCallback) requestIdleCallback(run, { timeout: 300 })
-    else setTimeout(run, 80)
+    requestAnimationFrame(run)
   }
 
   function processQueue() {
@@ -1313,13 +1355,21 @@
       const isShortsShelf = !!(hasShortsContent || hasShortsTitle || hasShortsIcon)
 
       // 1. "Most Relevant"
-      if (titleEl) {
+      let isRelevant = false
+      if (titleEl && titleEl.textContent) {
         const txt = titleEl.textContent.trim().toLowerCase()
-        const isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => txt.includes(t))
-        if (isRelevant) {
-          if (STATE.hideMostRelevant) el.classList.add("yslv-section-hidden")
-          else el.classList.remove("yslv-section-hidden")
+        isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => txt.includes(t))
+      } else {
+        const headerEl = el.querySelector('#rich-shelf-header, .grid-subheader, #header')
+        if (headerEl && headerEl.textContent) {
+          const txt = headerEl.textContent.trim().toLowerCase()
+          isRelevant = ["most relevant", "más relevantes", "más relevante"].some(t => txt.includes(t))
         }
+      }
+
+      if (isRelevant) {
+        if (STATE.hideMostRelevant) el.classList.add("yslv-section-hidden")
+        else el.classList.remove("yslv-section-hidden")
       }
 
       // 2. "Shorts"
@@ -1349,7 +1399,8 @@
 
   function attachObserver() {
     if (!STATE.active) return
-    const target = document.body
+    const target = document.documentElement || document.body
+    if (!target) return
     if (STATE.observedTarget === target && STATE.mo) return
 
     if (STATE.mo) STATE.mo.disconnect()
@@ -1358,8 +1409,7 @@
     STATE.mo = new MutationObserver(muts => {
       if (!STATE.active) return
       
-      clearTimeout(STATE.sectionTimer)
-      STATE.sectionTimer = setTimeout(processSections, 150)
+      processSections()
 
       if (STATE.view !== "list") return
       for (const m of muts) {
@@ -1385,7 +1435,7 @@
           if (!STATE.active || STATE.view !== "list") return
           enqueueAllOnce()
           triggerReflow()
-        }, 100)
+        }, 50)
       }
     })
 
@@ -1482,6 +1532,7 @@
 
   function applyDynamicSettings(settings) {
     const root = document.documentElement
+    if (!root) return
     if (settings.thumbW != null) root.style.setProperty("--yslv-thumb-w", settings.thumbW + "px")
     if (settings.rowPadY != null) root.style.setProperty("--yslv-row-pad-y", settings.rowPadY + "px")
     if (settings.channelVideoGap != null) root.style.setProperty("--yslv-channel-video-gap", settings.channelVideoGap + "px")
@@ -1490,6 +1541,12 @@
     if (settings.titleSize != null) root.style.setProperty("--yslv-title-size", settings.titleSize + "px")
     if (settings.shortsW != null) root.style.setProperty("--yslv-shorts-w", settings.shortsW + "px")
     if (settings.shortsGap != null) root.style.setProperty("--yslv-shorts-gap", settings.shortsGap + "px")
+
+    if (settings.hideMostRelevant) root.setAttribute("data-yslv-hide-relevant", "true")
+    else root.removeAttribute("data-yslv-hide-relevant")
+
+    if (settings.hideShorts) root.setAttribute("data-yslv-hide-shorts", "true")
+    else root.removeAttribute("data-yslv-hide-shorts")
   }
 
   async function apply() {
@@ -1501,17 +1558,18 @@
     chrome.storage.local.get(keys, result => {
       if (chrome.runtime.lastError || !isContextValid()) return
       
-      STATE.hideMostRelevant = result.hideMostRelevant ?? false
-      STATE.hideShorts = result.hideShorts ?? false
-      STATE.thumbW = result.thumbW ?? 260
-      STATE.rowPadY = result.rowPadY ?? 16
-      STATE.channelVideoGap = result.channelVideoGap ?? 18
-      STATE.containerW = result.containerW ?? 100
-      STATE.channelSize = result.channelSize ?? 20
-      STATE.titleSize = result.titleSize ?? 16
-      STATE.shortsW = result.shortsW ?? 160
-      STATE.shortsGap = result.shortsGap ?? 14
+      STATE.hideMostRelevant = result.hideMostRelevant ?? STATE.hideMostRelevant
+      STATE.hideShorts = result.hideShorts ?? STATE.hideShorts
+      STATE.thumbW = result.thumbW ?? STATE.thumbW
+      STATE.rowPadY = result.rowPadY ?? STATE.rowPadY
+      STATE.channelVideoGap = result.channelVideoGap ?? STATE.channelVideoGap
+      STATE.containerW = result.containerW ?? STATE.containerW
+      STATE.channelSize = result.channelSize ?? STATE.channelSize
+      STATE.titleSize = result.titleSize ?? STATE.titleSize
+      STATE.shortsW = result.shortsW ?? STATE.shortsW
+      STATE.shortsGap = result.shortsGap ?? STATE.shortsGap
 
+      saveSettingsCache(STATE)
       processSections()
       applyDynamicSettings(STATE)
     })
@@ -1541,6 +1599,7 @@
       if (document.documentElement.getAttribute(CFG.attr.view) !== savedView) {
         applyViewAttr(savedView)
       }
+      applyDynamicSettings(STATE)
     }
 
     // 2. Initial activation (Navigation from other page or Reload)
@@ -1564,6 +1623,7 @@
       ensureToggleMountLoop()
       paintToggle()
       attachObserver()
+      processSections()
 
       // If we finished navigation (even to the same URL), ensure content is processed
       if (isNavFinish) {
@@ -1583,6 +1643,16 @@
   }
 
   function init() {
+    // Early synchronous styling at document_start
+    if (isSubsPage()) {
+      const savedView = loadView()
+      STATE.view = savedView
+      if (savedView === "list") {
+        document.documentElement.setAttribute(CFG.attr.view, savedView)
+        applyDynamicSettings(STATE)
+      }
+    }
+
     syncActive(true)
 
     if (isContextValid()) {
@@ -1594,12 +1664,14 @@
           let needsDynamicUpdate = false
 
           keys.forEach(k => {
-            if (changes[k]) {
+            if (changes[k] !== undefined) {
               STATE[k] = changes[k].newValue
               if (k.startsWith("hide")) needsSectionUpdate = true
               else needsDynamicUpdate = true
             }
           })
+
+          saveSettingsCache(STATE)
 
           if (needsSectionUpdate) processSections()
           if (needsDynamicUpdate) applyDynamicSettings(STATE)

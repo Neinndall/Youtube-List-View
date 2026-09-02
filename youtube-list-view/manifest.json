@@ -14,12 +14,12 @@
       "matches": ["https://www.youtube.com/*"],
       "js": ["content.js"],
       "css": ["styles.css"],
-      "run_at": "document_end"
+      "run_at": "document_start"
     },
     {
       "matches": ["https://www.youtube.com/*"],
       "js": ["shorts-main.js"],
-      "run_at": "document_end",
+      "run_at": "document_start",
       "world": "MAIN"
     }
   ],
