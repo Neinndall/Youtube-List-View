@@ -340,18 +340,6 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   border-bottom: 1px solid var(--yt-spec-10-percent-layer, var(--yslv-sep, rgba(0, 0, 0, 0.1))) !important;    
 }
 
-/* Pegado absoluto del primer video al título para eliminar cualquier gap */
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #contents > ytd-rich-item-renderer:first-child,
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #contents > ytd-rich-item-renderer:first-child,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer:not(.yslv-section-hidden) + ytd-rich-item-renderer {
-  padding-top: 0 !important;
-  margin-top: 0 !important;
-}
 
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-is-short {
