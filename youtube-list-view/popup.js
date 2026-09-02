@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const sliders = {
     thumbW: { el: document.getElementById('thumbW'), val: document.getElementById('valThumbW'), unit: 'px' },
     rowPadY: { el: document.getElementById('rowPadY'), val: document.getElementById('valRowPadY'), unit: 'px' },
+    channelVideoGap: { el: document.getElementById('channelVideoGap'), val: document.getElementById('valChannelVideoGap'), unit: 'px' },
     containerW: { el: document.getElementById('containerW'), val: document.getElementById('valContainerW'), unit: '%' },
     channelSize: { el: document.getElementById('channelSize'), val: document.getElementById('valChannelSize'), unit: 'px' },
     titleSize: { el: document.getElementById('titleSize'), val: document.getElementById('valTitleSize'), unit: 'px' },
@@ -26,6 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     hideShorts: false,
     thumbW: 260,
     rowPadY: 16,
+    channelVideoGap: 18,
     containerW: 100,
     channelSize: 20,
     titleSize: 16,

@@ -328,7 +328,7 @@ html[data-yslv-subs-view="list"] .yslv-subs-rowhead {
   display: flex !important;
   align-items: center !important;
   gap: 12px !important;
-  margin: 0 0 14px 0 !important;
+  margin: 0 0 var(--yslv-channel-video-gap, 18px) 0 !important;
 }
 
 html[data-yslv-subs-view="list"] .yslv-subs-rowhead .yt-lockup-metadata-view-model__avatar,
