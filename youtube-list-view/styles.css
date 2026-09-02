@@ -269,15 +269,6 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   display: block !important;
 }
 
-/* Shorts section: compensate for internal header height so the Shorts icon sits at the EXACT same visual distance as channel avatars */
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]),
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts]) {
-  margin-top: calc(var(--yslv-row-pad-y, 16px) - 18px) !important;
-  margin-bottom: 0 !important;
-  padding-top: 0 !important;
-  padding-bottom: 0 !important;
-  display: block !important;
-}
 
 /* Reset margins on all internal shelf containers so they never double the section spacing */
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer,
