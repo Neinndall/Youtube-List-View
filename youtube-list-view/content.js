@@ -1442,9 +1442,20 @@
       }
 
       // 2. "Shorts"
+      el.classList.toggle("yslv-shorts-shelf", isShortsShelf)
       if (isShortsShelf) {
         el.classList.toggle("yslv-shorts-hidden", !!STATE.hideShorts)
       }
+
+      // 3. Chronological Header ("Más recientes", etc.)
+      const isHeader = !isRelevant && !isShortsShelf && (
+        titleTxt.includes("reciente") || titleTxt.includes("latest") ||
+        titleTxt.includes("hoy") || titleTxt.includes("today") ||
+        el.querySelector("#subscribe-button") ||
+        el.querySelector("#" + CFG.ids.toggle) ||
+        el.querySelector("ytd-rich-list-header-renderer")
+      )
+      el.classList.toggle("yslv-header-section", !!isHeader)
     })
 
     // 3. Fallback for individual Shorts items inside subscriptions
@@ -1455,6 +1466,44 @@
       })
     } else {
       subsBrowse.querySelectorAll(".yslv-shorts-hidden").forEach(el => el.classList.remove("yslv-shorts-hidden"))
+    }
+
+    // 4. Classify the first visible content after header
+    const gridContents = subsBrowse.querySelector("#contents.ytd-rich-grid-renderer")
+    if (gridContents) {
+      const children = Array.from(gridContents.children)
+      let foundHeader = false
+      let firstContent = null
+
+      for (const child of children) {
+        if (child.classList.contains("yslv-section-hidden") || child.classList.contains("yslv-shorts-hidden")) continue
+
+        const isHeaderLike = child.classList.contains("yslv-header-section") ||
+          child.matches?.("ytd-rich-section-renderer:has(ytd-rich-list-header-renderer)") ||
+          child.querySelector?.(".yslv-header-section, #subscribe-button, #" + CFG.ids.toggle) ||
+          (child.querySelector?.("#title-container, .grid-subheader") && !child.matches?.(".yslv-shorts-shelf, ytd-rich-item-renderer"))
+
+        if (isHeaderLike) {
+          foundHeader = true
+          child.classList.add("yslv-header-section")
+          continue
+        }
+
+        if (foundHeader && !firstContent) {
+          firstContent = child
+          break
+        }
+      }
+
+      children.forEach(child => {
+        const isFirst = (child === firstContent)
+        if (child.matches?.(".yslv-shorts-shelf, ytd-rich-section-renderer")) {
+          child.classList.toggle("yslv-first-section", isFirst)
+        }
+        if (child.matches?.("ytd-rich-item-renderer")) {
+          child.classList.toggle("yslv-first-video", isFirst)
+        }
+      })
     }
   }
 
@@ -1550,6 +1599,9 @@
     document.querySelectorAll(`.${CFG.cls.rowHead}`).forEach(n => n.remove())
     document.querySelectorAll(`.${CFG.cls.metaRow}`).forEach(n => n.remove())
     document.querySelectorAll(`.${CFG.cls.desc}`).forEach(n => n.remove())
+    document.querySelectorAll(".yslv-first-video, .yslv-first-section, .yslv-header-section, .yslv-shorts-shelf").forEach(n => {
+      n.classList.remove("yslv-first-video", "yslv-first-section", "yslv-header-section", "yslv-shorts-shelf")
+    })
     STATE.descQueue.length = 0
     STATE.descQueued.clear()
     STATE.lastQueueSig = ""
