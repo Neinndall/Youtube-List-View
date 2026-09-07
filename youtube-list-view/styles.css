@@ -269,19 +269,12 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   display: block !important;
 }
 
-/* YouTube puede añadir padding/margen propio en los wrappers internos del shelf de Shorts.
-   El espacio respecto al separador debe venir únicamente de --yslv-row-pad-y,
-   igual que en una fila de vídeo normal. */
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-shorts-shelf > #content,
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-shorts-shelf ytd-rich-shelf-renderer > #content,
+/* Shorts usa --yslv-row-pad-y de la sección; solo neutralizamos el offset superior de #header. */
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-shorts-shelf #header,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-shorts-shelf > #content,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-shorts-shelf ytd-rich-shelf-renderer > #content,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-shorts-shelf #header {
   margin-top: 0 !important;
   padding-top: 0 !important;
 }
-
 
 /* Reset margins on all internal shelf containers so they never double the section spacing */
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer,
@@ -360,14 +353,6 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) + ytd-rich-section-renderer {
   margin-top: 0 !important;
   padding-top: 0 !important;
-}
-
-/* El header nativo de Shorts añade ~9px antes del icono/título visible.
-   Compensamos solo ese offset para que separador -> Shorts use visualmente
-   el mismo --yslv-row-pad-y que separador -> avatar en una fila normal. */
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-shorts-shelf:not(.yslv-first-section),
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-shorts-shelf:not(.yslv-first-section) {
-  margin-top: max(0px, calc(var(--yslv-row-pad-y, 16px) - 9px)) !important;
 }
 
 /* Any video following a section (like Shorts) MUST have standard row padding so the channel header is separated from the divider line by --yslv-row-pad-y */
