@@ -269,11 +269,10 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   display: block !important;
 }
 
-/* Shorts usa --yslv-row-pad-y de la sección; solo neutralizamos el offset superior de #header. */
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-shorts-shelf #header,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-shorts-shelf #header {
-  margin-top: 0 !important;
-  padding-top: 0 !important;
+/* El encabezado visual de Shorts tiene un inset nativo de 9px; compénsalo sin crear un ajuste separado. */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-shorts-shelf:not(.yslv-first-section),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-shorts-shelf:not(.yslv-first-section) {
+  margin-top: calc(var(--yslv-row-pad-y, 16px) - 9px) !important;
 }
 
 /* Reset margins on all internal shelf containers so they never double the section spacing */
