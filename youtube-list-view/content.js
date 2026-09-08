@@ -846,7 +846,11 @@
 
     const out = []
     const seen = new Set()
-    for (const t of rows) {
+    for (let t of rows) {
+      if (chName && t.toLowerCase().startsWith(chName.toLowerCase())) {
+        t = normalizeText(t.slice(chName.length))
+      }
+      if (!t) continue
       const k = t.toLowerCase()
       if (seen.has(k)) continue
       seen.add(k)
@@ -1493,7 +1497,7 @@
       )
 
       if (headerSection && relevantSection && headerSection.parentNode === gridContents && relevantSection.parentNode === gridContents) {
-        if (STATE.view === "list" && !STATE.hideMostRelevant) {
+        if (STATE.view === "list") {
           if (relevantSection.compareDocumentPosition(headerSection) & Node.DOCUMENT_POSITION_PRECEDING) {
             gridContents.insertBefore(relevantSection, headerSection)
           }
