@@ -1953,8 +1953,10 @@
     const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "channelVideoGap", "headerGap", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
     chrome.storage.local.get(keys, result => {
       if (chrome.runtime.lastError || !isContextValid()) return
-      const alignAfterHide = prepareRelevantHideTransition(result.hideMostRelevant ?? STATE.hideMostRelevant)
-      STATE.hideMostRelevant = result.hideMostRelevant ?? STATE.hideMostRelevant
+      const nextHideMostRelevant = result.hideMostRelevant ?? STATE.hideMostRelevant
+      const requeueAfterRelevantReveal = STATE.hideMostRelevant && !nextHideMostRelevant
+      const alignAfterHide = prepareRelevantHideTransition(nextHideMostRelevant)
+      STATE.hideMostRelevant = nextHideMostRelevant
       STATE.hideShorts = result.hideShorts ?? STATE.hideShorts
       STATE.thumbW = result.thumbW ?? STATE.thumbW
       STATE.rowPadY = result.rowPadY ?? STATE.rowPadY
@@ -1969,6 +1971,7 @@
       saveSettingsCache(STATE)
       processSections()
       applyDynamicSettings(STATE)
+      if (requeueAfterRelevantReveal) enqueueAllOnce()
       if (alignAfterHide) scheduleRelevantHeaderAlignment()
     })
 
@@ -2061,10 +2064,12 @@
           let needsSectionUpdate = false
           let needsDynamicUpdate = false
           let alignAfterHide = false
+          let requeueAfterRelevantReveal = false
 
           keys.forEach(k => {
             if (changes[k] !== undefined) {
               if (k === "hideMostRelevant") {
+                requeueAfterRelevantReveal = STATE.hideMostRelevant && !changes[k].newValue
                 alignAfterHide = prepareRelevantHideTransition(changes[k].newValue) || alignAfterHide
               }
               STATE[k] = changes[k].newValue
@@ -2080,7 +2085,10 @@
           saveSettingsCache(STATE)
 
           if (needsDynamicUpdate) applyDynamicSettings(STATE)
-          if (needsSectionUpdate) processSections()
+          if (needsSectionUpdate) {
+            processSections()
+            if (requeueAfterRelevantReveal) enqueueAllOnce()
+          }
           if (alignAfterHide) scheduleRelevantHeaderAlignment()
         }
       })
