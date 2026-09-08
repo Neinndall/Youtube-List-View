@@ -220,25 +220,42 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   padding: 0 !important;
 }
 
-/* Clean spacing for chronological headers (Más recientes) */
+/* Subheader wrappers reset to zero margins/padding so they never double header-gap */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .grid-subheader,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-header-section .grid-subheader,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .grid-subheader,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-header-section .grid-subheader,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer .grid-subheader {
+  display: flex !important;
+  align-items: center !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  min-height: 0 !important;
+  height: auto !important;
+  border: none !important;
+}
+
+/* Clean spacing for chronological headers (Más recientes) - single 1x margin-bottom application */
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:not(.yslv-relevant-shelf):not(:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts])) #title-container,
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer:not(.yslv-relevant-shelf):not(:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts])) .grid-subheader,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-shelf-renderer:not(.yslv-relevant-shelf):not(:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts])) #title-container,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:not(.yslv-relevant-shelf):not(:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts])) #title-container,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer:not(.yslv-relevant-shelf):not(:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts])) .grid-subheader,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-renderer:not(.yslv-relevant-shelf):not(:has(ytd-rich-item-renderer.yslv-is-short, ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-shelf-renderer, ytd-reel-item-renderer, [is-shorts])) #title-container {
   display: flex !important;
   flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
   margin-left: 0 !important;
-  margin-bottom: var(--yslv-header-gap, 6px) !important;
+  margin-right: 0 !important;
   margin-top: 0 !important;
+  margin-bottom: var(--yslv-header-gap, 6px) !important;
   padding-top: 0 !important;
-  width: 100% !important;
-  padding-right: 24px !important;
+  padding-bottom: 0 !important;
   padding-left: 0 !important;
-  min-height: 32px !important;
+  padding-right: 24px !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  height: auto !important;
   position: relative !important;
   z-index: 10 !important;
 }
@@ -361,11 +378,9 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 }
 
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-header-section #title-container,
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-header-section .grid-subheader,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) #title-container,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-list-header-renderer #title-container,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-header-section #title-container,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-header-section .grid-subheader,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) #title-container,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-list-header-renderer #title-container {
   margin-top: 0 !important;
