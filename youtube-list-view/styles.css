@@ -409,7 +409,7 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   height: auto !important;
 }
 
-/* First video after chronological header (when no shorts shelf is in front) */
+/* First video after chronological header: match the relevant shelf's header-to-row offset. */
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-item-renderer.yslv-first-video,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-header-section + ytd-rich-item-renderer,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) + ytd-rich-item-renderer,
@@ -417,7 +417,7 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-header-section + ytd-rich-item-renderer,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer:has(ytd-rich-list-header-renderer) + ytd-rich-item-renderer {
   padding-top: 0 !important;
-  margin-top: -4px !important;
+  margin-top: -8px !important;
 }
 
 /* First video in "Más relevantes" shelf: calibrated so gap to header exactly matches "Más recientes" */
