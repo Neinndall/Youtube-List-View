@@ -107,6 +107,14 @@
     hideMostRelevant: false,
     hideShorts: false,
     sectionTimer: 0,
+    relevantHeaderTop: null,
+    relevantHeaderAlignmentRaf: 0,
+    relevantHeaderAlignmentToken: 0,
+    alignedChronologicalSection: null,
+    alignedChronologicalOriginalMarginTop: "",
+    alignedChronologicalOriginalMarginTopPriority: "",
+    alignedChronologicalBaseMarginTop: 0,
+    alignedChronologicalAppliedOffset: 0,
 
     thumbW: 260,
     rowPadY: 16,
@@ -499,6 +507,7 @@
       if (mode === "list") {
         enqueueAllOnce()
         startShimmer()
+        if (STATE.hideMostRelevant) scheduleRelevantHeaderAlignment()
       } else {
         stopShimmer()
       }
@@ -1421,6 +1430,204 @@
     }
   }
 
+  const SECTION_HEADING_SELECTORS = [
+    "#header #title",
+    "#title-container #title",
+    ".grid-subheader #title",
+  ]
+  const RELEVANT_SECTION_TITLES = new Set(["most relevant", "mas relevantes", "mas relevante", "relevantes", "relevancia"])
+  const CHRONOLOGICAL_SECTION_TITLES = new Set(["most recent", "most recent videos", "mas recientes", "mas reciente", "recientes", "latest", "today", "hoy"])
+
+  function normalizeSectionHeadingText(value) {
+    return String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
+      .trim()
+      .toLowerCase()
+  }
+
+  function findListSectionAnchors(subsBrowse = getActiveSubsBrowse()) {
+    const gridContents = subsBrowse?.querySelector("#contents.ytd-rich-grid-renderer")
+    if (!gridContents) return null
+
+    const children = Array.from(gridContents.children || [])
+    const headerSection = children.find(c =>
+      c.classList.contains("yslv-header-section") ||
+      c.matches?.("ytd-rich-section-renderer:has(ytd-rich-list-header-renderer)") ||
+      c.querySelector?.(".yslv-header-section, #subscribe-button, #" + CFG.ids.toggle)
+    )
+    const relevantSection = children.find(c =>
+      c.classList.contains("yslv-relevant-shelf") ||
+      c.querySelector?.(".yslv-relevant-shelf")
+    )
+
+    if (!headerSection || !relevantSection || headerSection.parentNode !== gridContents || relevantSection.parentNode !== gridContents) {
+      return null
+    }
+
+    let relevantHeader = null
+    let chronologicalHeader = null
+    for (const selector of SECTION_HEADING_SELECTORS) {
+      const relevantCandidate = Array.from(relevantSection.querySelectorAll(selector)).find(candidate =>
+        RELEVANT_SECTION_TITLES.has(normalizeSectionHeadingText(candidate.textContent))
+      )
+      const chronologicalCandidate = Array.from(headerSection.querySelectorAll(selector)).find(candidate => {
+        if (!CHRONOLOGICAL_SECTION_TITLES.has(normalizeSectionHeadingText(candidate.textContent))) return false
+        const rect = candidate.getBoundingClientRect()
+        return candidate.isConnected && (rect.width > 0 || rect.height > 0)
+      })
+      if (relevantCandidate && chronologicalCandidate) {
+        relevantHeader = relevantCandidate
+        chronologicalHeader = chronologicalCandidate
+        break
+      }
+    }
+
+    return { gridContents, relevantHeader, chronologicalHeader, chronologicalSection: headerSection }
+  }
+
+  function getAnchorTop(anchor, gridContents) {
+    if (!anchor?.isConnected || !gridContents?.isConnected) return null
+    const anchorRect = anchor.getBoundingClientRect()
+    const gridRect = gridContents.getBoundingClientRect()
+    if ((anchorRect.width === 0 && anchorRect.height === 0) || !Number.isFinite(anchorRect.top) || !Number.isFinite(gridRect.top)) {
+      return null
+    }
+    return anchorRect.top - gridRect.top
+  }
+
+  function restoreAlignedChronologicalSection() {
+    const section = STATE.alignedChronologicalSection
+    if (section) {
+      if (STATE.alignedChronologicalOriginalMarginTop) {
+        section.style.setProperty(
+          "margin-top",
+          STATE.alignedChronologicalOriginalMarginTop,
+          STATE.alignedChronologicalOriginalMarginTopPriority
+        )
+      } else {
+        section.style.removeProperty("margin-top")
+      }
+    }
+    STATE.alignedChronologicalSection = null
+    STATE.alignedChronologicalOriginalMarginTop = ""
+    STATE.alignedChronologicalOriginalMarginTopPriority = ""
+    STATE.alignedChronologicalBaseMarginTop = 0
+    STATE.alignedChronologicalAppliedOffset = 0
+  }
+
+  function clearRelevantHeaderAlignment() {
+    if (STATE.relevantHeaderAlignmentRaf) {
+      cancelAnimationFrame(STATE.relevantHeaderAlignmentRaf)
+      STATE.relevantHeaderAlignmentRaf = 0
+    }
+    STATE.relevantHeaderAlignmentToken++
+    STATE.relevantHeaderTop = null
+    restoreAlignedChronologicalSection()
+  }
+
+  function captureRelevantHeaderPosition() {
+    if (!STATE.active || STATE.view !== "list" || !isSubsPage()) return false
+
+    // Keep the existing section classification current while the relevant shelf is visible.
+    const wasHidden = STATE.hideMostRelevant
+    const root = document.documentElement
+    const hadHideAttribute = root?.getAttribute("data-yslv-hide-relevant")
+    if (wasHidden) STATE.hideMostRelevant = false
+    if (wasHidden) root?.removeAttribute("data-yslv-hide-relevant")
+    try {
+      processSections()
+      const anchors = findListSectionAnchors()
+      const top = getAnchorTop(anchors?.relevantHeader, anchors?.gridContents)
+      if (top == null) return false
+
+      STATE.relevantHeaderTop = top
+      return true
+    } finally {
+      STATE.hideMostRelevant = wasHidden
+      if (hadHideAttribute != null) root?.setAttribute("data-yslv-hide-relevant", hadHideAttribute)
+      else if (wasHidden) root?.removeAttribute("data-yslv-hide-relevant")
+    }
+  }
+
+  function prepareRelevantHideTransition(nextValue) {
+    const nextHideMostRelevant = !!nextValue
+    if (nextHideMostRelevant === STATE.hideMostRelevant) {
+      if (nextHideMostRelevant && STATE.relevantHeaderTop == null) {
+        captureRelevantHeaderPosition()
+        return true
+      }
+      return false
+    }
+    if (!nextHideMostRelevant) {
+      clearRelevantHeaderAlignment()
+      return false
+    }
+    captureRelevantHeaderPosition()
+    return true
+  }
+
+  function scheduleRelevantHeaderAlignment() {
+    if (STATE.relevantHeaderAlignmentRaf) cancelAnimationFrame(STATE.relevantHeaderAlignmentRaf)
+    const token = ++STATE.relevantHeaderAlignmentToken
+    let retries = 0
+    let pass = 0
+    const align = () => {
+      STATE.relevantHeaderAlignmentRaf = 0
+      if (
+        token !== STATE.relevantHeaderAlignmentToken ||
+        !STATE.active ||
+        STATE.view !== "list" ||
+        !STATE.hideMostRelevant ||
+        !isSubsPage()
+      ) {
+        return
+      }
+
+      if (STATE.relevantHeaderTop == null) {
+        const captured = captureRelevantHeaderPosition()
+        if (!captured) {
+          if (retries++ < 6) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
+          return
+        }
+        processSections()
+      }
+
+      const anchors = findListSectionAnchors()
+      const chronologicalTop = getAnchorTop(anchors?.chronologicalHeader, anchors?.gridContents)
+      const chronologicalSection = anchors?.chronologicalSection
+      if (chronologicalTop == null || !chronologicalSection?.isConnected) {
+        if (pass++ < 3) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
+        return
+      }
+
+      const delta = STATE.relevantHeaderTop - chronologicalTop
+      if (!Number.isFinite(delta)) return
+      if (STATE.alignedChronologicalSection && STATE.alignedChronologicalSection !== chronologicalSection) {
+        restoreAlignedChronologicalSection()
+      }
+      if (STATE.alignedChronologicalSection !== chronologicalSection) {
+        STATE.alignedChronologicalSection = chronologicalSection
+        STATE.alignedChronologicalOriginalMarginTop = chronologicalSection.style.getPropertyValue("margin-top")
+        STATE.alignedChronologicalOriginalMarginTopPriority = chronologicalSection.style.getPropertyPriority("margin-top")
+        const computedMarginTop = Number.parseFloat(getComputedStyle(chronologicalSection).marginTop)
+        STATE.alignedChronologicalBaseMarginTop = Number.isFinite(computedMarginTop) ? computedMarginTop : 0
+      }
+      if (Math.abs(delta) >= 0.01) {
+        STATE.alignedChronologicalAppliedOffset += delta
+      }
+      chronologicalSection.style.setProperty(
+        "margin-top",
+        `${STATE.alignedChronologicalBaseMarginTop + STATE.alignedChronologicalAppliedOffset}px`,
+        "important"
+      )
+
+      if (pass++ < 3) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
+    }
+    STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
+  }
+
   function processSections() {
     if (!STATE.active) return
     const subsBrowse = getActiveSubsBrowse()
@@ -1566,6 +1773,9 @@
       ensureToggle()
 
       if (STATE.view !== "list") return
+      if (STATE.hideMostRelevant && (STATE.relevantHeaderTop == null || !STATE.alignedChronologicalSection?.isConnected)) {
+        scheduleRelevantHeaderAlignment()
+      }
       for (const m of muts) {
         for (const node of m.addedNodes) {
           if (node.nodeType === 1) enqueue(node)
@@ -1586,6 +1796,9 @@
       processSections()
       attachObserver()
       ensureToggleMountLoop()
+      if (STATE.view === "list" && STATE.hideMostRelevant && (STATE.relevantHeaderTop == null || !STATE.alignedChronologicalSection?.isConnected)) {
+        scheduleRelevantHeaderAlignment()
+      }
       if (STATE.view === "list") {
         setTimeout(() => {
           if (!STATE.active || STATE.view !== "list") return
@@ -1665,6 +1878,7 @@
   }
 
   function resetNavState() {
+    clearRelevantHeaderAlignment()
     STATE.q.length = 0
     STATE.qSet.clear()
 
@@ -1739,7 +1953,7 @@
     const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "channelVideoGap", "headerGap", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
     chrome.storage.local.get(keys, result => {
       if (chrome.runtime.lastError || !isContextValid()) return
-      
+      const alignAfterHide = prepareRelevantHideTransition(result.hideMostRelevant ?? STATE.hideMostRelevant)
       STATE.hideMostRelevant = result.hideMostRelevant ?? STATE.hideMostRelevant
       STATE.hideShorts = result.hideShorts ?? STATE.hideShorts
       STATE.thumbW = result.thumbW ?? STATE.thumbW
@@ -1755,6 +1969,7 @@
       saveSettingsCache(STATE)
       processSections()
       applyDynamicSettings(STATE)
+      if (alignAfterHide) scheduleRelevantHeaderAlignment()
     })
 
     pruneDescStore()
@@ -1817,6 +2032,7 @@
           enqueueAllOnce()
           startShimmer()
           triggerReflow()
+          if (STATE.hideMostRelevant) scheduleRelevantHeaderAlignment()
         } else {
           stopShimmer()
         }
@@ -1844,9 +2060,13 @@
           const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "channelVideoGap", "headerGap", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
           let needsSectionUpdate = false
           let needsDynamicUpdate = false
+          let alignAfterHide = false
 
           keys.forEach(k => {
             if (changes[k] !== undefined) {
+              if (k === "hideMostRelevant") {
+                alignAfterHide = prepareRelevantHideTransition(changes[k].newValue) || alignAfterHide
+              }
               STATE[k] = changes[k].newValue
               if (k.startsWith("hide")) {
                 needsSectionUpdate = true
@@ -1861,6 +2081,7 @@
 
           if (needsDynamicUpdate) applyDynamicSettings(STATE)
           if (needsSectionUpdate) processSections()
+          if (alignAfterHide) scheduleRelevantHeaderAlignment()
         }
       })
     }
