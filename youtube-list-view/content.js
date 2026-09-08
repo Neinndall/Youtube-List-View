@@ -1445,6 +1445,7 @@
       el.classList.toggle("yslv-shorts-shelf", isShortsShelf)
       if (isShortsShelf) {
         el.classList.toggle("yslv-shorts-hidden", !!STATE.hideShorts)
+        el.classList.toggle("yslv-section-hidden", !!STATE.hideShorts)
       }
 
       // 3. Chronological Header ("Más recientes", etc.)
@@ -1791,15 +1792,19 @@
           keys.forEach(k => {
             if (changes[k] !== undefined) {
               STATE[k] = changes[k].newValue
-              if (k.startsWith("hide")) needsSectionUpdate = true
-              else needsDynamicUpdate = true
+              if (k.startsWith("hide")) {
+                needsSectionUpdate = true
+                needsDynamicUpdate = true
+              } else {
+                needsDynamicUpdate = true
+              }
             }
           })
 
           saveSettingsCache(STATE)
 
-          if (needsSectionUpdate) processSections()
           if (needsDynamicUpdate) applyDynamicSettings(STATE)
+          if (needsSectionUpdate) processSections()
         }
       })
     }
