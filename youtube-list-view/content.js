@@ -1439,6 +1439,14 @@
 
       if (isRelevant) {
         el.classList.toggle("yslv-section-hidden", !!STATE.hideMostRelevant)
+        el.classList.toggle("yslv-relevant-shelf", true)
+        const parentSec = el.closest("ytd-rich-section-renderer")
+        if (parentSec) {
+          parentSec.classList.toggle("yslv-relevant-shelf", true)
+          parentSec.classList.toggle("yslv-section-hidden", !!STATE.hideMostRelevant)
+        }
+      } else {
+        el.classList.remove("yslv-relevant-shelf")
       }
 
       // 2. "Shorts"
@@ -1469,9 +1477,33 @@
       subsBrowse.querySelectorAll(".yslv-shorts-hidden").forEach(el => el.classList.remove("yslv-shorts-hidden"))
     }
 
-    // 4. Classify the first visible content after header
+    // 4. Reorder sections and classify the first visible content after header
     const gridContents = subsBrowse.querySelector("#contents.ytd-rich-grid-renderer")
     if (gridContents) {
+      // 4.1 Reorder: Place "Más relevantes" before "Más recientes" header so "Más recientes" sits directly on top of its videos
+      const headerSection = Array.from(gridContents.children).find(c =>
+        c.classList.contains("yslv-header-section") ||
+        c.matches?.("ytd-rich-section-renderer:has(ytd-rich-list-header-renderer)") ||
+        c.querySelector?.(".yslv-header-section, #subscribe-button, #" + CFG.ids.toggle)
+      )
+      const relevantSection = Array.from(gridContents.children).find(c =>
+        c.classList.contains("yslv-relevant-shelf") ||
+        c.querySelector?.(".yslv-relevant-shelf")
+      )
+
+      if (headerSection && relevantSection && headerSection.parentNode === gridContents && relevantSection.parentNode === gridContents) {
+        if (STATE.view === "list" && !STATE.hideMostRelevant) {
+          if (relevantSection.compareDocumentPosition(headerSection) & Node.DOCUMENT_POSITION_PRECEDING) {
+            gridContents.insertBefore(relevantSection, headerSection)
+          }
+        } else {
+          if (headerSection.compareDocumentPosition(relevantSection) & Node.DOCUMENT_POSITION_PRECEDING) {
+            gridContents.insertBefore(headerSection, relevantSection)
+          }
+        }
+      }
+
+      // 4.2 Classify first visible content after header
       const children = Array.from(gridContents.children)
       let foundHeader = false
       let firstContent = null
@@ -1482,7 +1514,7 @@
         const isHeaderLike = child.classList.contains("yslv-header-section") ||
           child.matches?.("ytd-rich-section-renderer:has(ytd-rich-list-header-renderer)") ||
           child.querySelector?.(".yslv-header-section, #subscribe-button, #" + CFG.ids.toggle) ||
-          (child.querySelector?.("#title-container, .grid-subheader") && !child.matches?.(".yslv-shorts-shelf, ytd-rich-item-renderer"))
+          (child.querySelector?.("#title-container, .grid-subheader") && !child.matches?.(".yslv-shorts-shelf, .yslv-relevant-shelf, ytd-rich-shelf-renderer, ytd-rich-item-renderer"))
 
         if (isHeaderLike) {
           foundHeader = true
@@ -1606,6 +1638,25 @@
     STATE.descQueue.length = 0
     STATE.descQueued.clear()
     STATE.lastQueueSig = ""
+
+    const browse = getActiveSubsBrowse()
+    const gridContents = browse?.querySelector("#contents.ytd-rich-grid-renderer")
+    if (gridContents) {
+      const headerSection = Array.from(gridContents.children).find(c =>
+        c.classList.contains("yslv-header-section") ||
+        c.matches?.("ytd-rich-section-renderer:has(ytd-rich-list-header-renderer)") ||
+        c.querySelector?.("#subscribe-button, #" + CFG.ids.toggle)
+      )
+      const relevantSection = Array.from(gridContents.children).find(c =>
+        c.classList.contains("yslv-relevant-shelf") ||
+        c.querySelector?.(".yslv-relevant-shelf")
+      )
+      if (headerSection && relevantSection && headerSection.parentNode === gridContents && relevantSection.parentNode === gridContents) {
+        if (headerSection.compareDocumentPosition(relevantSection) & Node.DOCUMENT_POSITION_PRECEDING) {
+          gridContents.insertBefore(headerSection, relevantSection)
+        }
+      }
+    }
   }
 
   function resetNavState() {
