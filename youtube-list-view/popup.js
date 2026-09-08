@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     thumbW: 260,
     rowPadY: 16,
     channelVideoGap: 18,
-    headerGap: 6,
+    headerGap: 12,
     containerW: 100,
     channelSize: 20,
     titleSize: 16,
