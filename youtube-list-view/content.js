@@ -1530,7 +1530,6 @@
   function captureRelevantHeaderPosition() {
     if (!STATE.active || STATE.view !== "list" || !isSubsPage()) return false
 
-    // Keep the existing section classification current while the relevant shelf is visible.
     const wasHidden = STATE.hideMostRelevant
     const root = document.documentElement
     const hadHideAttribute = root?.getAttribute("data-yslv-hide-relevant")
@@ -1541,7 +1540,6 @@
       const anchors = findListSectionAnchors()
       const top = getAnchorTop(anchors?.relevantHeader, anchors?.gridContents)
       if (top == null) return false
-
       STATE.relevantHeaderTop = top
       return true
     } finally {
@@ -1553,18 +1551,15 @@
 
   function prepareRelevantHideTransition(nextValue) {
     const nextHideMostRelevant = !!nextValue
-    if (nextHideMostRelevant === STATE.hideMostRelevant) {
-      if (nextHideMostRelevant && STATE.relevantHeaderTop == null) {
-        captureRelevantHeaderPosition()
-        return true
-      }
-      return false
-    }
     if (!nextHideMostRelevant) {
       clearRelevantHeaderAlignment()
       return false
     }
-    captureRelevantHeaderPosition()
+
+    // Do not measure synchronously here. During YouTube SPA navigation the subscription DOM can
+    // still be half-built. The scheduled RAF pass temporarily reveals the relevant shelf, measures
+    // the real heading position, restores the hidden state, and only then aligns "Más recientes".
+    STATE.relevantHeaderTop = null
     return true
   }
 
@@ -1588,7 +1583,7 @@
       if (STATE.relevantHeaderTop == null) {
         const captured = captureRelevantHeaderPosition()
         if (!captured) {
-          if (retries++ < 6) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
+          if (retries++ < 12) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
           return
         }
         processSections()
@@ -1598,7 +1593,7 @@
       const chronologicalTop = getAnchorTop(anchors?.chronologicalHeader, anchors?.gridContents)
       const chronologicalSection = anchors?.chronologicalSection
       if (chronologicalTop == null || !chronologicalSection?.isConnected) {
-        if (pass++ < 3) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
+        if (pass++ < 6) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
         return
       }
 
@@ -1623,7 +1618,9 @@
         "important"
       )
 
-      if (pass++ < 3) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
+      // Re-check several frames: this is what keeps the two headings pixel-identical even while
+      // YouTube finishes fonts/images/layout after an SPA navigation.
+      if (pass++ < 6) STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
     }
     STATE.relevantHeaderAlignmentRaf = requestAnimationFrame(align)
   }
@@ -1634,49 +1631,70 @@
     if (!subsBrowse) return
 
     const shelfSelectors = "ytd-rich-section-renderer, ytd-shelf-renderer, ytd-item-section-renderer, ytd-reel-shelf-renderer"
-    const containers = subsBrowse.querySelectorAll(shelfSelectors)
-    
+    const containers = Array.from(subsBrowse.querySelectorAll(shelfSelectors))
+
+    // YouTube builds subscription shelves incrementally during SPA navigation. A container can
+    // temporarily expose another shelf's title, so classification classes must never be sticky.
+    // Rebuild them from the current DOM on every pass before deciding what should be hidden.
     containers.forEach(el => {
+      el.classList.remove(
+        "yslv-relevant-shelf",
+        "yslv-shorts-shelf",
+        "yslv-shorts-hidden",
+        "yslv-section-hidden",
+        "yslv-header-section"
+      )
+    })
+
+    const getSectionTitleText = el => {
       const titleEl = el.querySelector("#title, #title-text, .title, h2, h3, yt-formatted-string")
       const headerEl = el.querySelector("#rich-shelf-header, .grid-subheader, #header")
-      const titleTxt = (titleEl?.textContent || headerEl?.textContent || "").trim().toLowerCase()
+      return (titleEl?.textContent || headerEl?.textContent || "").trim().toLowerCase()
+    }
+
+    const isChronologicalContainer = (el, titleTxt = getSectionTitleText(el)) => (
+      titleTxt.includes("reciente") || titleTxt.includes("latest") ||
+      titleTxt.includes("hoy") || titleTxt.includes("today") ||
+      !!el.querySelector("#subscribe-button, ytd-rich-list-header-renderer, #" + CFG.ids.toggle)
+    )
+
+    containers.forEach(el => {
+      const titleTxt = getSectionTitleText(el)
 
       const hasShortsContent = el.querySelector("ytm-shorts-lockup-view-model-v2, ytm-shorts-lockup-view-model, ytd-reel-item-renderer, [is-shorts]")
       const hasShortsTitle = titleTxt.includes("shorts")
       const hasShortsIcon = el.querySelector('path[d^="M17.7,9.3c0.3-0.2,0.5-0.5,0.6-0.8"], svg[viewBox="0 0 24 24"] g path[d*="M17.77,10.32"]')
       const isShortsShelf = !!(hasShortsContent || hasShortsTitle || hasShortsIcon)
+      const isChronological = isChronologicalContainer(el, titleTxt)
 
-      // 1. "Most Relevant"
-      const isRelevant = ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => titleTxt.includes(t))
+      // 1. "Most Relevant". Never allow the chronological header/control container to be
+      // classified as relevant, even if YouTube temporarily nests/reuses shelf DOM during SPA.
+      const isRelevant = !isChronological &&
+        ["most relevant", "más relevantes", "más relevante", "relevantes", "relevancia", "relevance"].some(t => titleTxt.includes(t))
+
+      el.classList.toggle("yslv-relevant-shelf", isRelevant)
 
       if (isRelevant) {
-        el.classList.toggle("yslv-section-hidden", !!STATE.hideMostRelevant)
-        el.classList.toggle("yslv-relevant-shelf", true)
         const parentSec = el.closest("ytd-rich-section-renderer")
-        if (parentSec) {
-          parentSec.classList.toggle("yslv-relevant-shelf", true)
+        if (parentSec && parentSec !== el && !isChronologicalContainer(parentSec)) {
+          parentSec.classList.add("yslv-relevant-shelf")
           parentSec.classList.toggle("yslv-section-hidden", !!STATE.hideMostRelevant)
         }
-      } else {
-        el.classList.remove("yslv-relevant-shelf")
       }
 
       // 2. "Shorts"
       el.classList.toggle("yslv-shorts-shelf", isShortsShelf)
-      if (isShortsShelf) {
-        el.classList.toggle("yslv-shorts-hidden", !!STATE.hideShorts)
-        el.classList.toggle("yslv-section-hidden", !!STATE.hideShorts)
-      }
+      el.classList.toggle("yslv-shorts-hidden", isShortsShelf && !!STATE.hideShorts)
+
+      // One owner for the generic hidden class prevents a transient classification from leaving
+      // Más recientes (including its controls) permanently collapsed after SPA navigation.
+      el.classList.toggle(
+        "yslv-section-hidden",
+        (isRelevant && !!STATE.hideMostRelevant) || (isShortsShelf && !!STATE.hideShorts)
+      )
 
       // 3. Chronological Header ("Más recientes", etc.)
-      const isHeader = !isRelevant && !isShortsShelf && (
-        titleTxt.includes("reciente") || titleTxt.includes("latest") ||
-        titleTxt.includes("hoy") || titleTxt.includes("today") ||
-        el.querySelector("#subscribe-button") ||
-        el.querySelector("#" + CFG.ids.toggle) ||
-        el.querySelector("ytd-rich-list-header-renderer")
-      )
-      el.classList.toggle("yslv-header-section", !!isHeader)
+      el.classList.toggle("yslv-header-section", !isRelevant && !isShortsShelf && isChronological)
     })
 
     // 3. Fallback for individual Shorts items inside subscriptions
@@ -1705,7 +1723,7 @@
 
       if (headerSection && relevantSection && headerSection.parentNode === gridContents && relevantSection.parentNode === gridContents) {
         if (STATE.view === "list") {
-          if (relevantSection.compareDocumentPosition(headerSection) & Node.DOCUMENT_POSITION_PRECEDING) {
+          if (!STATE.hideMostRelevant && (relevantSection.compareDocumentPosition(headerSection) & Node.DOCUMENT_POSITION_PRECEDING)) {
             gridContents.insertBefore(relevantSection, headerSection)
           }
         } else {

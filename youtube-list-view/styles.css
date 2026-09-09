@@ -98,7 +98,6 @@ html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-ri
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-section-hidden,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-section-renderer.yslv-section-hidden,
 html[data-yslv-hide-relevant="true"] .yslv-relevant-shelf,
-html[data-yslv-hide-relevant="true"] ytd-rich-section-renderer:has(.yslv-relevant-shelf),
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-relevant-shelf.yslv-section-hidden,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-relevant-shelf.yslv-section-hidden {
   display: none !important;
