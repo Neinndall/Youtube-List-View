@@ -536,29 +536,83 @@
     })
   }
 
-  function pickChannelDisplaySource(lockup) {
-    // Try to find a metadata row that might contain multiple collaborators
-    const metaRow =
-      lockup.querySelector("yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row") ||
-      lockup.querySelector(".ytContentMetadataViewModelMetadataRow") ||
-      lockup.querySelector(".yt-lockup-metadata-view-model__metadata-row") ||
-      lockup.querySelector(".ytLockupMetadataViewModelMetadataRow")
+  function isIconish(node) {
+    if (!node || node.nodeType !== 1) return false
+    if (node.matches("yt-icon-shape, .yt-icon-shape")) return true
+    if (node.querySelector("yt-icon-shape, .yt-icon-shape")) return true
+    if (node.querySelector("svg, img")) return true
+    if (node.getAttribute("role") === "img") return true
+    if (node.querySelector('[role="img"]')) return true
+    return false
+  }
 
-    if (metaRow) {
-      const links = metaRow.querySelectorAll('a[href^="/@"], a[href^="/channel/"]')
-      // If it has multiple channel links or indicators of "more", return the whole row for full text
-      if (
-        links.length > 1 ||
-        metaRow.textContent.includes(" y ") ||
-        metaRow.textContent.includes(" and ") ||
-        metaRow.textContent.includes(" más") ||
-        metaRow.textContent.includes(" more")
-      ) {
-        return metaRow
+  function cleanBylineText(s) {
+    return normalizeText(s)
+      .replace(/([a-zA-Z0-9\u00C0-\u024F])\s*y\s+([a-zA-Z0-9\u00C0-\u024F])/g, "$1 y $2")
+      .replace(/([a-zA-Z0-9\u00C0-\u024F])\s*and\s+([a-zA-Z0-9\u00C0-\u024F])/gi, "$1 and $2")
+      .replace(/\s+/g, " ")
+      .trim()
+  }
+
+  function extractChannelFromCombined(raw) {
+    return cleanBylineText(
+      normalizeText(String(raw || ""))
+        .replace(/\s*\d+[\d,\.]*\s*(?:k|m|b|mil|millones)?\s*(?:visualizaciones|views)?\s*(?:hace|\d+\s*(?:d|h|m|s|d[ií]as|horas|min|minutos|meses|a[ñn]os|days|hours|weeks|months|years)).*$/i, "")
+    )
+  }
+
+  function extractStatsFromCombined(raw, chName) {
+    let rest = cleanBylineText(normalizeText(String(raw || "")))
+    if (chName && rest.toLowerCase().startsWith(chName.toLowerCase())) {
+      rest = rest.slice(chName.length).trim()
+    }
+    return rest
+      .replace(/^[•\s\-_–—|/]+/, "")
+      .replace(/(\d+(?:[,\.]\d+)?\s*(?:[kmb]|mil|millones)?(?:\s*(?:visualizaciones|views))?)\s*(hace\s+\d+.*)/i, (m, a, b) => `${a} ${b}`)
+      .trim()
+  }
+
+  function getElementCleanText(el) {
+    if (!el) return ""
+    const parts = []
+    function walk(node) {
+      if (!node) return
+      if (node.nodeType === 3) {
+        const t = normalizeText(node.textContent || "")
+        if (t) parts.push(t)
+        return
+      }
+      if (node.nodeType === 1) {
+        if (isIconish(node)) return
+        for (const child of node.childNodes) {
+          walk(child)
+        }
       }
     }
+    walk(el)
+    if (!parts.length) return cleanBylineText(el.textContent || "")
+    return cleanBylineText(parts.join(" "))
+  }
 
-    const a =
+  function isCollaborative(lockup, item, head) {
+    const scope = head || item || lockup
+    if (!scope) return false
+    if (
+      scope.querySelector(
+        "yt-avatar-stack-view-model, .ytLockupMetadataViewModelAvatar:has(yt-avatar-stack-view-model), .yslv-subs-rowhead yt-avatar-stack-view-model"
+      )
+    ) {
+      return true
+    }
+    if (item && STATE.movedAvatars.get(item)?.avatarEl?.matches?.("yt-avatar-stack-view-model, :has(yt-avatar-stack-view-model)")) {
+      return true
+    }
+    return false
+  }
+
+  function pickChannelAnchor(lockup) {
+    if (!lockup) return null
+    return (
       lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/@"]') ||
       lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/channel/"]') ||
       lockup.querySelector('.ytContentMetadataViewModelMetadataRow a[href^="/@"]') ||
@@ -566,8 +620,26 @@
       lockup.querySelector('a[href^="/@"]') ||
       lockup.querySelector('a[href^="/channel/"]') ||
       null
+    )
+  }
 
+  function pickChannelDisplaySource(lockup, item, head) {
+    if (!lockup) return null
+
+    // For standard videos with channel anchor, return that anchor
+    const a = pickChannelAnchor(lockup)
     if (a) return a
+
+    if (isCollaborative(lockup, item, head)) {
+      const scope = head || item || lockup
+      const metaRows = lockup.querySelectorAll(
+        "yt-content-metadata-view-model > .yt-content-metadata-view-model__metadata-row, " +
+        "yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row, " +
+        ".ytContentMetadataViewModelMetadataRow"
+      )
+      if (metaRows.length > 1) return metaRows[0]
+      return scope.querySelector("yt-avatar-stack-view-model") || metaRows[0] || null
+    }
 
     return (
       lockup.querySelector(
@@ -578,22 +650,17 @@
     )
   }
 
-  function pickChannelAnchor(lockup) {
-    return (
-      lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/@"]') ||
-      lockup.querySelector('yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row a[href^="/channel/"]') ||
-      lockup.querySelector('.ytContentMetadataViewModelMetadataRow a[href^="/@"]') ||
-      lockup.querySelector('.ytContentMetadataViewModelMetadataRow a[href^="/channel/"]') ||
-      lockup.querySelector('a[href^="/@"]') ||
-      lockup.querySelector('a[href^="/channel/"]') ||
-      null
-    )
-  }
-
-  function getChannelHref(lockup) {
+  function getChannelHref(lockup, item, head) {
     const a = pickChannelAnchor(lockup)
-    const href = String(a?.getAttribute?.("href") || "").trim()
-    if (!href) return ""
+    let href = String(a?.getAttribute?.("href") || "").trim()
+    if (!href) {
+      const scope = head || item || lockup
+      const anyA = scope?.querySelector?.(
+        'a[href^="/@"], a[href^="/channel/"], a[href^="/c/"], a[href^="/user/"], #avatar-link[href]'
+      )
+      href = String(anyA?.getAttribute?.("href") || "").trim()
+    }
+    if (!href || href.startsWith("#") || href.startsWith("javascript:")) return ""
     try {
       return new URL(href, location.origin).href
     } catch {
@@ -601,52 +668,53 @@
     }
   }
 
-  function getChannelName(lockup) {
-    const src = pickChannelDisplaySource(lockup)
-    const direct = normalizeText(src?.textContent || "")
-    if (direct) return direct
+  function getChannelName(lockup, item, head) {
+    if (!lockup && !item && !head) return ""
 
-    // Collaborative lockups may expose names only through link accessibility
-    // attributes while their visible text is rendered in a separate overlay.
-    const names = []
-    const seen = new Set()
-    const links = lockup.querySelectorAll('a[href^="/@"], a[href^="/channel/"]')
-    for (const link of links) {
-      const label = normalizeText(
-        link.textContent ||
-        link.getAttribute("aria-label") ||
-        link.getAttribute("title") ||
-        link.querySelector("img")?.getAttribute("alt") ||
-        ""
-      )
-      const key = label.toLocaleLowerCase()
-      if (!label || seen.has(key)) continue
-      seen.add(key)
-      names.push(label)
+    // 1. Standard single-channel video: If it has a channel anchor, use it directly!
+    const a = pickChannelAnchor(lockup)
+    if (a) {
+      const name = normalizeText(a.textContent || "")
+      if (name) return name
     }
-    if (names.length) return names.join(" y ")
 
-    const avatarLabels = Array.from(
-      lockup.querySelectorAll(
-        "yt-avatar-stack-view-model [aria-label], yt-decorated-avatar-view-model [aria-label], yt-avatar-shape img[alt]"
-      )
-    )
-      .map(node => normalizeText(node.getAttribute("aria-label") || node.getAttribute("alt") || ""))
-      .filter(Boolean)
-    if (avatarLabels.length) return [...new Set(avatarLabels)].join(" y ")
+    // 2. Collaborative video (avatar stack or multiple channels)
+    if (isCollaborative(lockup, item, head)) {
+      const scope = head || item || lockup
 
-    if (lockup.querySelector("yt-avatar-stack-view-model")) return "Colaboradores"
+      // A) Extract from metadata rows/texts using combined channel extraction
+      if (lockup) {
+        const rawTexts = Array.from(
+          lockup.querySelectorAll(
+            "yt-content-metadata-view-model > .yt-content-metadata-view-model__metadata-row, " +
+            "yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row, " +
+            ".ytContentMetadataViewModelMetadataRow, " +
+            "yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-text, " +
+            "yt-content-metadata-view-model span[role='text']"
+          )
+        )
+          .map(el => cleanBylineText(getElementCleanText(el)))
+          .filter(Boolean)
+
+        for (const raw of rawTexts) {
+          const ch = extractChannelFromCombined(raw)
+          if (ch && (ch.includes(" y ") || ch.includes(" and ") || ch.includes(" & ") || ch.length > 3)) {
+            return ch
+          }
+        }
+      }
+
+      return "Colaboradores"
+    }
+
+    // 3. Fallback for non-collaborative videos without <a> tag
+    const src = pickChannelDisplaySource(lockup, item, head)
+    const direct = normalizeText(src?.textContent || "")
+    if (direct && !/\b(?:visualizaciones|views|usuarios|espectadores)\b/i.test(direct) && !/\bhace\s+\d+/i.test(direct)) {
+      return direct
+    }
+
     return ""
-  }
-
-  function isIconish(node) {
-    if (!node || node.nodeType !== 1) return false
-    if (node.matches("yt-icon-shape, .yt-icon-shape")) return true
-    if (node.querySelector("yt-icon-shape, .yt-icon-shape")) return true
-    if (node.querySelector("svg, img")) return true
-    if (node.getAttribute("role") === "img") return true
-    if (node.querySelector('[role="img"]')) return true
-    return false
   }
 
   function collectBadgeNodesFromAnchor(a) {
@@ -753,22 +821,11 @@
     STATE.movedMetaAnchors = new WeakMap()
   }
 
-  function setHeaderNameTextOnly(destLink, lockup) {
-    if (!destLink) return
-    const href = getChannelHref(lockup)
-    if (href) destLink.href = href
-    else destLink.removeAttribute("href")
-
-    const src = pickChannelDisplaySource(lockup)
-    const channelName = getChannelName(lockup)
-    setTextOnly(destLink, channelName)
-    destLink.dataset.yslvHasName = channelName ? "true" : "false"
-
-    // Keep verified/artist badges for single and collaborative channels without
-    // cloning nested links into this header anchor.
-    const anchors = src?.matches?.("a") ? [src] : Array.from(src?.querySelectorAll?.("a") || [])
+  function copyBadgesFromSource(src, destLink) {
+    if (!src || !destLink) return
+    const anchors = src.matches?.("a") ? [src] : Array.from(src.querySelectorAll?.("a") || [])
     const seen = new Set()
-    for (const anchor of anchors) {
+    for (const anchor of (anchors.length ? anchors : [src])) {
       for (const badge of collectBadgeNodesFromAnchor(anchor)) {
         const key = `${badge.tagName}|${badge.getAttribute("class") || ""}|${badge.getAttribute("aria-label") || ""}`
         if (seen.has(key)) continue
@@ -779,6 +836,39 @@
         destLink.appendChild(wrap)
       }
     }
+  }
+
+  function setHeaderNameTextOnly(destLink, lockup, item, head) {
+    if (!destLink) return
+    const href = getChannelHref(lockup, item, head)
+    if (href) {
+      destLink.href = href
+      destLink.style.cursor = "pointer"
+    } else {
+      destLink.removeAttribute("href")
+      destLink.style.cursor = "default"
+    }
+
+    const src = pickChannelDisplaySource(lockup, item, head)
+    const channelName = getChannelName(lockup, item, head)
+    setTextOnly(destLink, channelName)
+    destLink.dataset.yslvHasName = channelName ? "true" : "false"
+
+    if (!href && src) {
+      destLink.onclick = e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const clickTarget = src.querySelector("button, a, [role='button']") || src
+        clickTarget.click?.()
+      }
+      destLink.style.cursor = "pointer"
+    } else {
+      destLink.onclick = null
+    }
+
+    // Keep verified/artist badges for single and collaborative channels without
+    // cloning nested links into this header anchor.
+    copyBadgesFromSource(src, destLink)
   }
 
   function moveAvatarToHeaderOnce(item, lockup, head) {
@@ -831,35 +921,52 @@
       head.appendChild(name)
     }
 
-    setHeaderNameTextOnly(name, lockup)
+    setHeaderNameTextOnly(name, lockup, item, head)
     moveAvatarToHeaderOnce(item, lockup, head)
   }
 
-  function getRightMetaRowsText(lockup) {
-    const chName = getChannelName(lockup)
+  function getRightMetaRowsText(lockup, item, chName) {
+    if (!lockup) return ""
+    if (!chName) chName = getChannelName(lockup, item)
     const rows = Array.from(
       lockup.querySelectorAll(
+        "yt-content-metadata-view-model > .yt-content-metadata-view-model__metadata-row, " +
         "yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row, " +
-        "yt-content-metadata-view-model .ytContentMetadataViewModelMetadataRow, " +
-        ".yt-content-metadata-view-model__metadata-row, " +
-        ".ytContentMetadataViewModelMetadataRow, " +
-        ".yt-lockup-metadata-view-model__metadata-row, " +
-        ".ytLockupMetadataViewModelMetadataRow"
+        ".ytContentMetadataViewModelMetadataRow"
       )
     )
-      .map(r => normalizeText(r.textContent || ""))
+      .map(r => cleanBylineText(getElementCleanText(r)))
       .filter(Boolean)
-      .filter(t => (chName ? t !== chName : true))
 
     if (!rows.length) return ""
+
+    const normCh = normalizeText(chName || "").toLowerCase()
+    const chParts = normCh
+      ? normCh.split(/\s+(?:y|and|&)\s+|,/i).map(s => s.trim().toLowerCase()).filter(Boolean)
+      : []
 
     const out = []
     const seen = new Set()
     for (let t of rows) {
-      if (chName && t.toLowerCase().startsWith(chName.toLowerCase())) {
-        t = normalizeText(t.slice(chName.length))
+      let normT = normalizeText(t).toLowerCase()
+      if (!normT) continue
+
+      if (normCh && normT.startsWith(normCh)) {
+        t = extractStatsFromCombined(t, chName)
+        normT = normalizeText(t).toLowerCase()
+      } else if (normCh && (normT === normCh || normCh.includes(normT))) {
+        continue
       }
-      if (!t) continue
+
+      let isCollabPart = false
+      for (const part of chParts) {
+        if (normT === part) {
+          isCollabPart = true
+          break
+        }
+      }
+      if (isCollabPart || !t) continue
+
       const k = t.toLowerCase()
       if (seen.has(k)) continue
       seen.add(k)
@@ -870,7 +977,7 @@
     return out.join(" • ")
   }
 
-  function ensureInlineMeta(textContainer, lockup) {
+  function ensureInlineMeta(textContainer, lockup, item) {
     let row = textContainer.querySelector(`.${CFG.cls.metaRow}`)
     if (!row) {
       row = document.createElement("div")
@@ -894,7 +1001,7 @@
     }
 
     const srcA = detachMetaAnchorOnce(lockup)
-    const chName = getChannelName(lockup)
+    const chName = getChannelName(lockup, item)
 
     if (srcA) {
       try {
@@ -910,19 +1017,34 @@
         left.appendChild(link)
       }
 
-      const href = getChannelHref(lockup)
-      if (href) link.href = href
-      else link.removeAttribute("href")
-
-      const src = pickChannelDisplaySource(lockup)
-      if (src) {
-        cloneInto(link, src)
+      const href = getChannelHref(lockup, item)
+      if (href) {
+        link.href = href
+        link.style.cursor = "pointer"
       } else {
-        setTextOnly(link, chName || "")
+        link.removeAttribute("href")
+        link.style.cursor = "default"
       }
+
+      const src = pickChannelDisplaySource(lockup, item)
+      setTextOnly(link, chName || (src ? cleanBylineText(getElementCleanText(src)) : ""))
+
+      if (!href && src) {
+        link.onclick = e => {
+          e.preventDefault()
+          e.stopPropagation()
+          const clickTarget = src.querySelector("button, a, [role='button']") || src
+          clickTarget.click?.()
+        }
+        link.style.cursor = "pointer"
+      } else {
+        link.onclick = null
+      }
+
+      copyBadgesFromSource(src, link)
     }
 
-    const right = getRightMetaRowsText(lockup)
+    const right = getRightMetaRowsText(lockup, item, chName)
     let r = row.querySelector(`:scope > .${CFG.cls.metaRt}`)
     if (right) {
       if (!r) {
@@ -1250,6 +1372,28 @@
     SHIMMER.raf = requestAnimationFrame(tick)
   }
 
+  function refreshMissingRowHeadNames() {
+    if (!STATE.active || STATE.view !== "list") return
+    const root = getActiveSubsRoot()
+    if (!root) return
+    const missing = root.querySelectorAll(`.${CFG.cls.rowHeadName}[data-yslv-has-name="false"]`)
+    if (!missing.length) return
+    for (const nameLink of missing) {
+      const item = nameLink.closest("ytd-rich-item-renderer")
+      if (!item || !item.isConnected) continue
+      const lockup =
+        item.querySelector("yt-lockup-view-model") ||
+        item.querySelector(".yt-lockup-view-model") ||
+        item.querySelector(".ytLockupViewModelWrapper") ||
+        item.querySelector(".ytLockupViewModelHost") ||
+        item.querySelector("ytd-video-renderer") ||
+        item.querySelector("ytd-rich-grid-media")
+      if (lockup) {
+        setHeaderNameTextOnly(nameLink, lockup, item, nameLink.parentNode)
+      }
+    }
+  }
+
   function ensureDescQueueLoop() {
     if (STATE.descTimer) clearInterval(STATE.descTimer)
     if (!STATE.active) return
@@ -1258,6 +1402,7 @@
         stopShimmer()
         return
       }
+      refreshMissingRowHeadNames()
       pruneDescStore()
       buildDescQueueFromDom()
       if (hasSkeletons()) startShimmer()
@@ -1325,7 +1470,7 @@
     }
 
     ensureRowHeader(item, lockup)
-    const mRow = ensureInlineMeta(textContainer, lockup)
+    const mRow = ensureInlineMeta(textContainer, lockup, item)
     ensureDesc(textContainer, lockup, mRow)
 
     // Move attachments (e.g. "Recibir Aviso" / Set Reminder button) into textContainer for ordering
@@ -1798,10 +1943,14 @@
         for (const node of m.addedNodes) {
           if (node.nodeType === 1) enqueue(node)
         }
+        if (m.type === "characterData" && m.target?.parentNode) {
+          const item = m.target.parentNode.closest?.("ytd-rich-item-renderer, ytd-video-renderer")
+          if (item) enqueue(item)
+        }
       }
     })
 
-    STATE.mo.observe(target, { childList: true, subtree: true })
+    STATE.mo.observe(target, { childList: true, subtree: true, characterData: true })
   }
 
   function attachPageManagerObserver() {
