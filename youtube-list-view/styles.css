@@ -995,3 +995,9 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+/* Shorts first-section spacing correction: compensate YouTube's native header inset only at the top of the feed. */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-shorts-shelf.yslv-first-section:not(.yslv-shorts-hidden):not(.yslv-section-hidden),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-shorts-shelf.yslv-first-section:not(.yslv-shorts-hidden):not(.yslv-section-hidden) {
+  margin-top: -12px !important;
+}
