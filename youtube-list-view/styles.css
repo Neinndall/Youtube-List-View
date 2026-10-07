@@ -553,11 +553,35 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   align-items: center;
 }
 
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-rowhead-name .yslv-channel-badge,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-rowhead-name .yslv-channel-badge {
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch .yslv-channel-badge,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch .yslv-channel-badge {
   display: inline-flex !important;
   align-items: center !important;
-  margin-left: 4px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  width: 14px !important;
+  height: 14px !important;
+  min-width: 14px !important;
+  max-width: 14px !important;
+  position: static !important;
+  transform: none !important;
+  flex: 0 0 14px !important;
+}
+
+/* Normalize every native wrapper, preserving the SVG paths and their transforms. */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-channel-badge :not(svg *),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-channel-badge :not(svg *) {
+  display: inline-flex !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  position: static !important;
+  transform: none !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  flex: 0 0 auto !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model,
@@ -754,6 +778,11 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   display: inline-flex !important;
   align-items: center !important;
   min-width: 0 !important;
+  width: fit-content !important;
+  max-width: 100% !important;
+  justify-content: flex-start !important;
+  column-gap: 4px !important;
+  padding: 0 !important;
   transition: color 0.15s ease !important;
 }
 
@@ -763,15 +792,28 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   text-decoration: none !important;
 }
 
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch a > span,
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch a > span {
-  display: inline-flex !important;
-  align-items: center !important;
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch a > .yslv-channel-name,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch a > .yslv-channel-name {
+  display: block !important;
+  flex: 0 1 auto !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch a::before,
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch a::after,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch a::before,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch a::after {
+  content: none !important;
+  display: none !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mch .yt-icon-shape.ytSpecIconShapeHost,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-subs-mch .yt-icon-shape.ytSpecIconShapeHost {
-  margin-right: 2px !important;
+  margin-right: 0 !important;
 }
 
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-subs-mrt,

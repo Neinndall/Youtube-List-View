@@ -557,7 +557,10 @@
   function extractChannelFromCombined(raw) {
     return cleanBylineText(
       normalizeText(String(raw || ""))
+        // Premiere metadata can be concatenated directly after a collaborative byline.
+        .replace(/\s*(?:fecha\s+de\s+estreno|premiere\s+date)\s*:\s*.*$/i, "")
         .replace(/\s*\d+[\d,\.]*\s*(?:k|m|b|mil|millones)?\s*(?:visualizaciones|views)?\s*(?:hace|\d+\s*(?:d|h|m|s|d[ií]as|horas|min|minutos|meses|a[ñn]os|days|hours|weeks|months|years)).*$/i, "")
+        .replace(/[•\s\-_–—|/]+$/, "")
     )
   }
 
@@ -637,8 +640,7 @@
         "yt-content-metadata-view-model .yt-content-metadata-view-model__metadata-row, " +
         ".ytContentMetadataViewModelMetadataRow"
       )
-      if (metaRows.length > 1) return metaRows[0]
-      return scope.querySelector("yt-avatar-stack-view-model") || metaRows[0] || null
+      return metaRows[0] || scope.querySelector("yt-avatar-stack-view-model") || null
     }
 
     return (
@@ -717,46 +719,80 @@
     return ""
   }
 
+  function getChannelBadgeSource(src) {
+    if (!src) return null
+    // YouTube can render the badge beside the channel link, outside the anchor.
+    return src.closest(
+      ".yt-content-metadata-view-model__metadata-row, .ytContentMetadataViewModelMetadataRow"
+    ) || src.closest(
+      ".yt-content-metadata-view-model__metadata-text, .ytContentMetadataViewModelMetadataText"
+    ) || src
+  }
+
+  function isChannelBadge(el) {
+    if (!el || !isIconish(el)) return false
+    // Disclosure/play controls are not channel verification or artist badges.
+    if (el.closest("button, [role='button']")) return false
+    const labels = [el, ...el.querySelectorAll("[aria-label], [title], [icon], [data-tooltip-text]")]
+      .map(node => ["aria-label", "title", "icon", "data-tooltip-text", "class"]
+        .map(attr => node.getAttribute(attr) || "").join(" "))
+      .join(" ")
+    if (/(?:verified|verificad[oa]|official[_ -]?artist|artista\s+oficial|badge-style-type-verified)/i.test(labels)) return true
+    // Native badge hosts also support badges without a localized tooltip attribute.
+    return el.matches("yt-badge-view-model, .ytBadgeViewModelHost, ytd-badge-supported-renderer") &&
+      !normalizeText(el.textContent)
+  }
+
   function collectBadgeNodesFromAnchor(a) {
     const out = []
     if (!a) return out
 
-    const candidates = a.querySelectorAll(
-      ".yt-core-attributed-string__image-element, .ytIconWrapperHost, .yt-core-attributed-string__image-element--image-alignment-vertical-center, yt-icon-shape, .yt-icon-shape"
-    )
+    const candidates = Array.from(a.querySelectorAll(
+      "yt-badge-view-model, .ytBadgeViewModelHost, ytd-badge-supported-renderer, " +
+      ".yt-core-attributed-string__image-element, .ytIconWrapperHost, " +
+      ".yt-core-attributed-string__image-element--image-alignment-vertical-center, " +
+      "yt-icon, yt-icon-shape, .yt-icon-shape"
+    ))
 
-    const seen = new Set()
     for (const el of candidates) {
-      if (!el) continue
-      let root =
-        el.closest(".yt-core-attributed-string__image-element") ||
-        el.closest(".ytIconWrapperHost") ||
-        el.closest(".yt-core-attributed-string__image-element--image-alignment-vertical-center") ||
-        el
-
-      if (!root || root === a) continue
-      if (!isIconish(root)) continue
-
-      const key =
-        root.tagName + "|" + (root.getAttribute("class") || "") + "|" + (root.getAttribute("aria-label") || "")
-      if (seen.has(key)) continue
-      seen.add(key)
-      out.push(root)
+      // Keep the outer badge (including its tooltip), without copying nested icons twice.
+      if (candidates.some(parent => parent !== el && parent.contains(el))) continue
+      if (!isChannelBadge(el)) continue
+      out.push(el)
     }
 
     return out
   }
 
-  function normalizeMetaAnchorInPlace(a, nameText) {
+  function setMetaChannelName(a, nameText) {
+    clearChildren(a)
+    const name = document.createElement("span")
+    name.className = "yslv-channel-name"
+    name.textContent = normalizeText(nameText)
+    a.appendChild(name)
+  }
+
+  function normalizeMetaAnchorInPlace(a, nameText, badgeSource, adjacentBadges) {
     if (!a) return
     const name = normalizeText(nameText || "")
     if (!name) return
 
     const badgeRoots = collectBadgeNodesFromAnchor(a)
+    // Clone adjacent native badges so switching back to grid retains the originals.
+    if (badgeSource && !a.contains(badgeSource)) {
+      const seen = new Set(badgeRoots.map(badge => badge.outerHTML))
+      for (const badge of collectBadgeNodesFromAnchor(badgeSource)) {
+        if (a.contains(badge) || seen.has(badge.outerHTML)) continue
+        seen.add(badge.outerHTML)
+        const clone = badge.cloneNode(true)
+        adjacentBadges?.add(clone)
+        badgeRoots.push(clone)
+      }
+    }
     const badges = []
 
     for (const r of badgeRoots) {
-      if (!r || !r.isConnected) continue
+      if (!r) continue
       badges.push(r)
     }
 
@@ -766,22 +802,16 @@
       } catch {}
     }
 
-    clearChildren(a)
-    a.appendChild(document.createTextNode(name))
+    setMetaChannelName(a, name)
 
     for (const b of badges) {
       if (!isIconish(b)) continue
       const wrap = document.createElement("span")
-      wrap.style.display = "inline-flex"
-      wrap.style.alignItems = "center"
-      wrap.style.marginLeft = "4px"
+      wrap.className = "yslv-channel-badge"
       wrap.appendChild(b)
       a.appendChild(wrap)
     }
 
-    for (const s of Array.from(a.querySelectorAll(":scope > span"))) {
-      if (!s.querySelector || !isIconish(s)) s.remove()
-    }
   }
 
   function detachMetaAnchorOnce(lockup) {
@@ -793,7 +823,9 @@
 
     const parent = a.parentNode
     const nextSibling = a.nextSibling
-    STATE.movedMetaAnchors.set(lockup, { a, parent, nextSibling })
+    STATE.movedMetaAnchors.set(lockup, {
+      a, parent, nextSibling, badgeSource: getChannelBadgeSource(a), adjacentBadges: new Set()
+    })
     return a
   }
 
@@ -811,6 +843,12 @@
       const { a, parent, nextSibling } = info
       if (!a || !parent) continue
       if (!a.isConnected) continue
+      for (const badge of info.adjacentBadges || []) {
+        if (!a.contains(badge)) continue
+        const wrap = badge.closest(".yslv-channel-badge")
+        badge.remove()
+        if (wrap && !wrap.childNodes.length) wrap.remove()
+      }
       if (a.parentNode === parent) continue
       try {
         if (nextSibling && nextSibling.parentNode === parent) parent.insertBefore(a, nextSibling)
@@ -823,18 +861,16 @@
 
   function copyBadgesFromSource(src, destLink) {
     if (!src || !destLink) return
-    const anchors = src.matches?.("a") ? [src] : Array.from(src.querySelectorAll?.("a") || [])
+    const badgeSource = getChannelBadgeSource(src)
     const seen = new Set()
-    for (const anchor of (anchors.length ? anchors : [src])) {
-      for (const badge of collectBadgeNodesFromAnchor(anchor)) {
-        const key = `${badge.tagName}|${badge.getAttribute("class") || ""}|${badge.getAttribute("aria-label") || ""}`
-        if (seen.has(key)) continue
-        seen.add(key)
-        const wrap = document.createElement("span")
-        wrap.className = "yslv-channel-badge"
-        wrap.appendChild(badge.cloneNode(true))
-        destLink.appendChild(wrap)
-      }
+    for (const badge of collectBadgeNodesFromAnchor(badgeSource)) {
+      const key = badge.outerHTML
+      if (seen.has(key)) continue
+      seen.add(key)
+      const wrap = document.createElement("span")
+      wrap.className = "yslv-channel-badge"
+      wrap.appendChild(badge.cloneNode(true))
+      destLink.appendChild(wrap)
     }
   }
 
@@ -866,9 +902,7 @@
       destLink.onclick = null
     }
 
-    // Keep verified/artist badges for single and collaborative channels without
-    // cloning nested links into this header anchor.
-    copyBadgesFromSource(src, destLink)
+    // Channel badges are shown only beside the name below the video title.
   }
 
   function moveAvatarToHeaderOnce(item, lockup, head) {
@@ -1007,7 +1041,8 @@
       try {
         srcA.style.margin = "0"
       } catch {}
-      normalizeMetaAnchorInPlace(srcA, chName)
+      const info = STATE.movedMetaAnchors.get(lockup)
+      normalizeMetaAnchorInPlace(srcA, chName, info?.badgeSource, info?.adjacentBadges)
       clearChildren(left)
       left.appendChild(srcA)
     } else {
@@ -1027,7 +1062,7 @@
       }
 
       const src = pickChannelDisplaySource(lockup, item)
-      setTextOnly(link, chName || (src ? cleanBylineText(getElementCleanText(src)) : ""))
+      setMetaChannelName(link, chName || (src ? cleanBylineText(getElementCleanText(src)) : ""))
 
       if (!href && src) {
         link.onclick = e => {
