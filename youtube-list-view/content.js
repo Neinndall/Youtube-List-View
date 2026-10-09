@@ -82,7 +82,6 @@
     processing: false,
 
     movedAvatars: new WeakMap(),
-    movedMetaAnchors: new WeakMap(),
     movedMenus: new WeakMap(),
     movedAttachments: new WeakMap(),
 
@@ -754,10 +753,10 @@
       "yt-icon, yt-icon-shape, .yt-icon-shape"
     ))
 
-    for (const el of candidates) {
+    const badges = candidates.filter(isChannelBadge)
+    for (const el of badges) {
       // Keep the outer badge (including its tooltip), without copying nested icons twice.
-      if (candidates.some(parent => parent !== el && parent.contains(el))) continue
-      if (!isChannelBadge(el)) continue
+      if (badges.some(parent => parent !== el && parent.contains(el))) continue
       out.push(el)
     }
 
@@ -772,93 +771,6 @@
     a.appendChild(name)
   }
 
-  function normalizeMetaAnchorInPlace(a, nameText, badgeSource, adjacentBadges) {
-    if (!a) return
-    const name = normalizeText(nameText || "")
-    if (!name) return
-
-    const badgeRoots = collectBadgeNodesFromAnchor(a)
-    // Clone adjacent native badges so switching back to grid retains the originals.
-    if (badgeSource && !a.contains(badgeSource)) {
-      const seen = new Set(badgeRoots.map(badge => badge.outerHTML))
-      for (const badge of collectBadgeNodesFromAnchor(badgeSource)) {
-        if (a.contains(badge) || seen.has(badge.outerHTML)) continue
-        seen.add(badge.outerHTML)
-        const clone = badge.cloneNode(true)
-        adjacentBadges?.add(clone)
-        badgeRoots.push(clone)
-      }
-    }
-    const badges = []
-
-    for (const r of badgeRoots) {
-      if (!r) continue
-      badges.push(r)
-    }
-
-    for (const b of badges) {
-      try {
-        if (b.parentNode) b.parentNode.removeChild(b)
-      } catch {}
-    }
-
-    setMetaChannelName(a, name)
-
-    for (const b of badges) {
-      if (!isIconish(b)) continue
-      const wrap = document.createElement("span")
-      wrap.className = "yslv-channel-badge"
-      wrap.appendChild(b)
-      a.appendChild(wrap)
-    }
-
-  }
-
-  function detachMetaAnchorOnce(lockup) {
-    if (!lockup) return null
-    if (STATE.movedMetaAnchors.has(lockup)) return STATE.movedMetaAnchors.get(lockup)?.a || null
-
-    const a = pickChannelAnchor(lockup)
-    if (!a || !a.parentNode) return null
-
-    const parent = a.parentNode
-    const nextSibling = a.nextSibling
-    STATE.movedMetaAnchors.set(lockup, {
-      a, parent, nextSibling, badgeSource: getChannelBadgeSource(a), adjacentBadges: new Set()
-    })
-    return a
-  }
-
-  function restoreMovedMetaAnchors() {
-    const entries = []
-    document.querySelectorAll(
-      "yt-lockup-view-model, .yt-lockup-view-model, .ytLockupViewModelWrapper, .ytLockupViewModelHost, ytd-video-renderer, ytd-rich-grid-media"
-    ).forEach(lockup => {
-      const info = STATE.movedMetaAnchors.get(lockup)
-      if (!info) return
-      entries.push(info)
-    })
-
-    for (const info of entries) {
-      const { a, parent, nextSibling } = info
-      if (!a || !parent) continue
-      if (!a.isConnected) continue
-      for (const badge of info.adjacentBadges || []) {
-        if (!a.contains(badge)) continue
-        const wrap = badge.closest(".yslv-channel-badge")
-        badge.remove()
-        if (wrap && !wrap.childNodes.length) wrap.remove()
-      }
-      if (a.parentNode === parent) continue
-      try {
-        if (nextSibling && nextSibling.parentNode === parent) parent.insertBefore(a, nextSibling)
-        else parent.appendChild(a)
-      } catch {}
-    }
-
-    STATE.movedMetaAnchors = new WeakMap()
-  }
-
   function copyBadgesFromSource(src, destLink) {
     if (!src || !destLink) return
     const badgeSource = getChannelBadgeSource(src)
@@ -869,7 +781,18 @@
       seen.add(key)
       const wrap = document.createElement("span")
       wrap.className = "yslv-channel-badge"
-      wrap.appendChild(badge.cloneNode(true))
+      // Native badge hosts are hydrated by YouTube. Keep their layout and lifecycle
+      // outside our row; only the rendered icon is needed here.
+      const svg = badge.querySelector("svg")
+      wrap.appendChild((svg || badge).cloneNode(true))
+      const labelled = badge.matches("[aria-label], [title], [data-tooltip-text]")
+        ? badge : badge.querySelector("[aria-label], [title], [data-tooltip-text]")
+      const label = labelled?.getAttribute("aria-label") || labelled?.getAttribute("title") ||
+        labelled?.getAttribute("data-tooltip-text")
+      if (label) {
+        wrap.setAttribute("aria-label", label)
+        wrap.title = label
+      }
       destLink.appendChild(wrap)
     }
   }
@@ -1034,50 +957,41 @@
       row.appendChild(left)
     }
 
-    const srcA = detachMetaAnchorOnce(lockup)
     const chName = getChannelName(lockup, item)
-
-    if (srcA) {
-      try {
-        srcA.style.margin = "0"
-      } catch {}
-      const info = STATE.movedMetaAnchors.get(lockup)
-      normalizeMetaAnchorInPlace(srcA, chName, info?.badgeSource, info?.adjacentBadges)
+    let link = left.querySelector(":scope > a")
+    if (!link) {
       clearChildren(left)
-      left.appendChild(srcA)
-    } else {
-      let link = left.querySelector("a")
-      if (!link) {
-        link = document.createElement("a")
-        left.appendChild(link)
-      }
-
-      const href = getChannelHref(lockup, item)
-      if (href) {
-        link.href = href
-        link.style.cursor = "pointer"
-      } else {
-        link.removeAttribute("href")
-        link.style.cursor = "default"
-      }
-
-      const src = pickChannelDisplaySource(lockup, item)
-      setMetaChannelName(link, chName || (src ? cleanBylineText(getElementCleanText(src)) : ""))
-
-      if (!href && src) {
-        link.onclick = e => {
-          e.preventDefault()
-          e.stopPropagation()
-          const clickTarget = src.querySelector("button, a, [role='button']") || src
-          clickTarget.click?.()
-        }
-        link.style.cursor = "pointer"
-      } else {
-        link.onclick = null
-      }
-
-      copyBadgesFromSource(src, link)
+      link = document.createElement("a")
+      left.appendChild(link)
     }
+
+    const href = getChannelHref(lockup, item)
+    if (href) {
+      link.href = href
+      link.style.cursor = "pointer"
+    } else {
+      link.removeAttribute("href")
+      link.style.cursor = "default"
+    }
+
+    // Build a stable row from the native metadata without moving YouTube's anchor.
+    // The original stays available for hydration, SPA navigation and grid view.
+    const src = pickChannelDisplaySource(lockup, item)
+    setMetaChannelName(link, chName || (src ? cleanBylineText(getElementCleanText(src)) : ""))
+
+    if (!href && src) {
+      link.onclick = e => {
+        e.preventDefault()
+        e.stopPropagation()
+        const clickTarget = src.querySelector("button, a, [role='button']") || src
+        clickTarget.click?.()
+      }
+      link.style.cursor = "pointer"
+    } else {
+      link.onclick = null
+    }
+
+    copyBadgesFromSource(src, link)
 
     const right = getRightMetaRowsText(lockup, item, chName)
     let r = row.querySelector(`:scope > .${CFG.cls.metaRt}`)
@@ -2044,7 +1958,6 @@
 
   function cleanupListArtifacts() {
     restoreMovedAvatars()
-    restoreMovedMetaAnchors()
     restoreMovedNodes(STATE.movedMenus)
     restoreMovedNodes(STATE.movedAttachments)
     STATE.movedMenus = new WeakMap()

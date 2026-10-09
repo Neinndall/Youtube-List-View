@@ -198,6 +198,13 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   padding: 0 !important;
 }
 
+/* Keep Shorts to the first nine cards while YouTube rehydrates a shelf.
+   The MAIN-world controller removes this attribute when "Mostrar más" is clicked. */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] ytd-rich-shelf-renderer[data-yslv-shorts-collapsed] #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer:nth-of-type(n+10),
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-shelf-renderer[data-yslv-shorts-collapsed] #contents.ytd-rich-shelf-renderer > ytd-rich-item-renderer:nth-of-type(n+10) {
+  display: none !important;
+}
+
 /* Show more button on shelves (Shorts, Más relevantes, etc.) */
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] #show-more-button,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .ytd-rich-shelf-renderer #show-more-button,
@@ -568,9 +575,9 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   flex: 0 0 14px !important;
 }
 
-/* Normalize every native wrapper, preserving the SVG paths and their transforms. */
-html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-channel-badge :not(svg *),
-html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-channel-badge :not(svg *) {
+/* Keep the copied badge icon independent from YouTube's hydrated badge layout. */
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-channel-badge > *,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-channel-badge > * {
   display: inline-flex !important;
   width: 100% !important;
   height: 100% !important;
@@ -582,6 +589,16 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   margin: 0 !important;
   padding: 0 !important;
   flex: 0 0 auto !important;
+}
+
+html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] .yslv-channel-badge svg,
+html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] .yslv-channel-badge svg {
+  display: block !important;
+  width: 14px !important;
+  height: 14px !important;
+  flex: 0 0 14px !important;
+  vertical-align: middle !important;
+  fill: currentColor;
 }
 
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model,
