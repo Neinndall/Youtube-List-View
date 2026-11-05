@@ -51,6 +51,8 @@
   }
 
   function enforceShelf(shelf) {
+    if (!isListSubscriptions() ||
+        !shelf?.closest?.('ytd-browse[page-subtype="subscriptions"]:not([hidden])')) return
     if (!isShortsShelf(shelf)) {
       // Polymer can reuse the element for an unrelated shelf on SPA navigation.
       shelf.removeAttribute("data-yslv-shorts-collapsed")
@@ -99,7 +101,8 @@
         shelf.displayedContents.some((item, index) => item !== contents[index])) {
       setDisplayedContents(shelf, contents)
       requestAnimationFrame(() => {
-        if (!shelf.isConnected || shelf.isExpanded || shelf.data?.isExpanded) return
+        if (!isListSubscriptions() || !shelf.isConnected || shelf.isExpanded || shelf.data?.isExpanded ||
+            !shelf.closest('ytd-browse[page-subtype="subscriptions"]:not([hidden])')) return
         shelf.elementsPerRow = BASE_COUNT
         shelf.currentElementsPerRow = BASE_COUNT
         shelf.slimItemsPerRow = BASE_COUNT
@@ -114,11 +117,11 @@
   function enforceAll() {
     scheduled = false
     if (!isListSubscriptions()) return
-    document.querySelectorAll("ytd-rich-shelf-renderer").forEach(enforceShelf)
+    document.querySelectorAll('ytd-browse[page-subtype="subscriptions"]:not([hidden]) ytd-rich-shelf-renderer').forEach(enforceShelf)
   }
 
   function schedule() {
-    if (scheduled) return
+    if (!isListSubscriptions() || scheduled) return
     scheduled = true
     requestAnimationFrame(enforceAll)
   }

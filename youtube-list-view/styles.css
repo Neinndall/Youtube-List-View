@@ -69,13 +69,14 @@ ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-shelf-r
   flex: 1 1 auto !important;
 }
 
-ytd-masthead {
+html[data-yslv-subs-active="true"] ytd-masthead {
   position: sticky !important;
   top: 0 !important;
   z-index: 3000 !important;
 }
 
-#title-text {
+ytd-browse[page-subtype="subscriptions"] #title-text,
+ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] #title-text {
   position: relative !important;
   z-index: 1 !important;
 }
@@ -688,7 +689,8 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
   display: none !important;
 }
 
-/* Hide original avatar ONLY in subscriptions */
+/* Keep pending native avatars measurable for YouTube's lazy image loader.
+   They leave this scope once their loaded host moves into our row header. */
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model .yt-lockup-view-model__avatar-container,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model .yt-lockup-metadata-view-model__avatar,
 html[data-yslv-subs-view="list"] ytd-browse[page-subtype="subscriptions"] yt-lockup-view-model .ytLockupMetadataViewModelAvatar,
@@ -697,7 +699,10 @@ html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-sub
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-view-model .yt-lockup-metadata-view-model__avatar,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] yt-lockup-view-model .ytLockupMetadataViewModelAvatar,
 html[data-yslv-subs-view="list"] ytd-two-column-browse-results-renderer[page-subtype="subscriptions"] ytd-rich-grid-media #avatar-link {
-  display: none !important;
+  display: block !important;
+  position: absolute !important;
+  width: 40px !important;
+  height: 40px !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }

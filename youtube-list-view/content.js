@@ -76,6 +76,7 @@
 
   const STATE = {
     active: false,
+    activationId: 0,
     view: "grid",
     q: [],
     qSet: new Set(),
@@ -89,6 +90,8 @@
     observedTarget: null,
 
     pmMo: null,
+    pmRefreshTimer: 0,
+    toggleTimer: 0,
 
     descCache: new Map(),
     descInFlight: new Map(),
@@ -101,11 +104,8 @@
     descPumpRunning: false,
     lastQueueSig: "",
 
-    lastPageSig: "",
-
     hideMostRelevant: false,
     hideShorts: false,
-    sectionTimer: 0,
     relevantHeaderTop: null,
     relevantHeaderAlignmentRaf: 0,
     relevantHeaderAlignmentToken: 0,
@@ -143,7 +143,8 @@
         hideShorts: !!settings.hideShorts,
         thumbW: Number(settings.thumbW) || 260,
         rowPadY: Number(settings.rowPadY) || 16,
-        channelVideoGap: Number(settings.channelVideoGap) || 18,
+        channelVideoGap: settings.channelVideoGap != null && Number.isFinite(Number(settings.channelVideoGap))
+          ? Number(settings.channelVideoGap) : 18,
         headerGap: settings.headerGap !== undefined && !isNaN(settings.headerGap) ? Number(settings.headerGap) : 12,
         containerW: Number(settings.containerW) || 100,
         channelSize: Number(settings.channelSize) || 20,
@@ -188,25 +189,10 @@
     while (el.firstChild) el.removeChild(el.firstChild)
   }
 
-  function cloneInto(dest, src) {
-    if (!dest) return
-    clearChildren(dest)
-    if (!src) return
-
-    const frag = document.createDocumentFragment()
-    for (const n of Array.from(src.childNodes || [])) frag.appendChild(n.cloneNode(true))
-
-    for (const host of Array.from(frag.querySelectorAll?.(".ytIconWrapperHost, .yt-icon-shape") || [])) {
-      if (!host.querySelector("svg")) host.remove()
-    }
-
-    dest.appendChild(frag)
-  }
-
   function setTextOnly(dest, txt) {
     if (!dest) return
-    clearChildren(dest)
-    dest.textContent = normalizeText(txt)
+    const text = normalizeText(txt)
+    if (dest.textContent !== text) dest.textContent = text
   }
 
   function isContextValid() {
@@ -240,10 +226,6 @@
     return b.querySelector("ytd-rich-grid-renderer #contents") || b.querySelector("ytd-rich-grid-renderer") || b
   }
 
-  function getActiveSubsDoc() {
-    return getActiveSubsBrowse()
-  }
-
   function normalizeText(s) {
     return String(s || "")
       .replace(/\u200B/g, "")
@@ -269,12 +251,10 @@
   function applyViewAttr(v) {
     STATE.view = v
     saveView(v)
-    document.documentElement.setAttribute(CFG.attr.view, v)
+    if (document.documentElement.getAttribute(CFG.attr.view) !== v) {
+      document.documentElement.setAttribute(CFG.attr.view, v)
+    }
     paintToggle()
-  }
-
-  function clearViewAttr() {
-    document.documentElement.removeAttribute(CFG.attr.view)
   }
 
   function svgEl(paths, viewBox) {
@@ -502,7 +482,6 @@
       applyViewAttr(mode)
       attachObserver()
       ensureDescQueueLoop()
-      triggerReflow()
       if (mode === "list") {
         enqueueAllOnce()
         startShimmer()
@@ -518,11 +497,6 @@
       mountAnchor.insertAdjacentElement("afterend", root)
     }
     paintToggle()
-  }
-
-  function removeToggle() {
-    const root = document.getElementById(CFG.ids.toggle)
-    if (root) root.remove()
   }
 
   function paintToggle() {
@@ -830,7 +804,7 @@
 
   function moveAvatarToHeaderOnce(item, lockup, head) {
     if (!item || !lockup || !head) return null
-    if (STATE.movedAvatars.has(item)) return STATE.movedAvatars.get(item)?.avatarEl || null
+    const previous = STATE.movedAvatars.get(item)
 
     // Robust avatar selector: tries multi-avatar containers first, then specific view models, then general classes
     const avatarEl =
@@ -844,21 +818,45 @@
       lockup.querySelector("yt-avatar-shape") ||
       lockup.querySelector(".yt-spec-avatar-shape")
 
-    if (!avatarEl || !avatarEl.parentNode) return null
+    if (!avatarEl || !avatarEl.parentNode) {
+      // A cached card can lose its header/avatar when YouTube hydrates it again.
+      if (previous && previous.avatarEl.parentNode === head) return previous.avatarEl
+      STATE.movedAvatars.delete(item)
+      return null
+    }
 
     // If we found a single avatar shape but it's inside a decorated/stack container we missed, move the container instead
     const decorated = avatarEl.closest("yt-decorated-avatar-view-model, yt-avatar-stack-view-model, .ytLockupMetadataViewModelAvatar")
     const finalEl = decorated || avatarEl
 
+    // Keep YouTube's image host in its native ancestry until lazy loading finishes.
+    // Moving an empty host can disconnect its loader before it assigns the image.
+    const images = Array.from(finalEl.querySelectorAll("img"))
+    if (!images.length || images.some(img => !img.complete || img.naturalWidth === 0)) return null
+
     const parent = finalEl.parentNode
     const nextSibling = finalEl.nextSibling
-    STATE.movedAvatars.set(item, { avatarEl: finalEl, parent, nextSibling })
 
     try {
       head.insertBefore(finalEl, head.firstChild)
-    } catch {}
+    } catch {
+      return null
+    }
+    if (previous && previous.avatarEl !== finalEl && previous.avatarEl.parentNode === head) {
+      previous.avatarEl.remove()
+    }
+    STATE.movedAvatars.set(item, { avatarEl: finalEl, parent, nextSibling })
 
     return finalEl
+  }
+
+  function onAvatarImageLoad(event) {
+    if (!STATE.active || STATE.view !== "list" || event.target?.tagName !== "IMG") return
+    const item = event.target.closest("ytd-rich-item-renderer")
+    if (!item || !isSubscriptionsCard(item)) return
+    // Header images have already been moved; don't reprocess our own UI.
+    if (event.target.closest(`.${CFG.cls.rowHead}`)) return
+    enqueue(item)
   }
 
   function ensureRowHeader(item, lockup) {
@@ -1209,7 +1207,10 @@
   }
 
   function updateDescDomForVid(vid, text) {
-    const nodes = document.querySelectorAll(`.${CFG.cls.desc}[data-yslv-vid="${CSS.escape(vid)}"]`)
+    if (!STATE.active || STATE.view !== "list") return
+    const root = getActiveSubsRoot()
+    if (!root) return
+    const nodes = root.querySelectorAll(`.${CFG.cls.desc}[data-yslv-vid="${CSS.escape(vid)}"]`)
     for (const n of nodes) {
       if (!n || !n.isConnected) continue
       n.classList.remove(CFG.cls.descSkel)
@@ -1418,7 +1419,6 @@
       }
     }
 
-    ensureRowHeader(item, lockup)
     const mRow = ensureInlineMeta(textContainer, lockup, item)
     ensureDesc(textContainer, lockup, mRow)
 
@@ -1449,10 +1449,7 @@
     if (!isSubscriptionsCard(node) && !getActiveSubsBrowse()?.contains(node)) return
 
     // Ignore mutations produced by our own generated UI to avoid feedback loops.
-    if (
-      node.matches?.(`.${CFG.cls.rowHead}, .${CFG.cls.metaRow}, .${CFG.cls.desc}, .yslv-channel-badge`) ||
-      node.closest?.(`.${CFG.cls.rowHead}, .${CFG.cls.metaRow}, .${CFG.cls.desc}`)
-    ) return
+    if (isGeneratedUi(node)) return
 
     // YouTube often hydrates an already-connected card by adding descendants.
     const owner = node.closest?.("ytd-rich-item-renderer")
@@ -1864,8 +1861,18 @@
     }
   }
 
-  function triggerReflow() {
-    window.dispatchEvent(new Event('resize'))
+  function isGeneratedUi(node) {
+    const element = node?.nodeType === 1 ? node : node?.parentElement
+    return !!element?.closest?.(
+      `.${CFG.cls.rowHead}, .${CFG.cls.metaRow}, .${CFG.cls.desc}, #${CFG.ids.toggle}`
+    )
+  }
+
+  function isOwnUiMutation(mutation) {
+    if (isGeneratedUi(mutation.target)) return true
+    if (mutation.type !== "childList") return false
+    const changed = [...mutation.addedNodes, ...mutation.removedNodes]
+    return changed.length > 0 && changed.every(isGeneratedUi)
   }
 
   function attachObserver() {
@@ -1880,6 +1887,8 @@
 
     STATE.mo = new MutationObserver(muts => {
       if (!STATE.active) return
+      const nativeMutations = muts.filter(m => !isOwnUiMutation(m))
+      if (!nativeMutations.length) return
       
       processSections()
       ensureToggle()
@@ -1888,7 +1897,7 @@
       if (STATE.hideMostRelevant && (STATE.relevantHeaderTop == null || !STATE.alignedChronologicalSection?.isConnected)) {
         scheduleRelevantHeaderAlignment()
       }
-      for (const m of muts) {
+      for (const m of nativeMutations) {
         for (const node of m.addedNodes) {
           if (node.nodeType === 1) enqueue(node)
         }
@@ -1915,11 +1924,12 @@
       if (STATE.view === "list" && STATE.hideMostRelevant && (STATE.relevantHeaderTop == null || !STATE.alignedChronologicalSection?.isConnected)) {
         scheduleRelevantHeaderAlignment()
       }
-      if (STATE.view === "list") {
-        setTimeout(() => {
-          if (!STATE.active || STATE.view !== "list") return
+      if (STATE.view === "list" && !STATE.pmRefreshTimer) {
+        const activationId = STATE.activationId
+        STATE.pmRefreshTimer = setTimeout(() => {
+          STATE.pmRefreshTimer = 0
+          if (!STATE.active || activationId !== STATE.activationId || STATE.view !== "list") return
           enqueueAllOnce()
-          triggerReflow()
         }, 50)
       }
     })
@@ -1932,7 +1942,7 @@
       const info = STATE.movedAvatars.get(item)
       if (!info) return
       const { avatarEl, parent, nextSibling } = info
-      if (!avatarEl || !parent) return
+      if (!avatarEl || !parent || !item.contains(parent)) return
       if (!avatarEl.isConnected) return
       if (avatarEl.parentNode === parent) return
       try {
@@ -1948,7 +1958,7 @@
       const info = map.get(item)
       if (!info) return
       const { node, parent, nextSibling } = info
-      if (!node || !parent || !node.isConnected || node.parentNode === parent) return
+      if (!node || !parent || !item.contains(parent) || !node.isConnected || node.parentNode === parent) return
       try {
         if (nextSibling && nextSibling.parentNode === parent) parent.insertBefore(node, nextSibling)
         else parent.appendChild(node)
@@ -1997,21 +2007,27 @@
     STATE.q.length = 0
     STATE.qSet.clear()
 
-    STATE.descInFlight.clear()
     STATE.descCache.clear()
     STATE.descFetches = 0
-    STATE.descActive = 0
+    // Pending fetches and their pump keep their ownership until they settle.
+    // Resetting these counters here creates duplicate requests/negative counts
+    // when a user leaves subscriptions and returns before a fetch completes.
 
     STATE.descQueue.length = 0
     STATE.descQueued.clear()
-    STATE.descPumpRunning = false
     STATE.lastQueueSig = ""
-
-    STATE.observedTarget = null
   }
 
   function teardown() {
     stopShimmer()
+    if (STATE.toggleTimer) {
+      clearTimeout(STATE.toggleTimer)
+      STATE.toggleTimer = 0
+    }
+    if (STATE.pmRefreshTimer) {
+      clearTimeout(STATE.pmRefreshTimer)
+      STATE.pmRefreshTimer = 0
+    }
     if (STATE.mo) {
       STATE.mo.disconnect()
       STATE.mo = null
@@ -2028,16 +2044,17 @@
     if (!STATE.active) return
     ensureToggle()
     const toggle = document.getElementById(CFG.ids.toggle)
-    const browse = getActiveSubsBrowse()
-    const idealBtn = browse?.querySelector(':not(.yslv-section-hidden) #subscribe-button')
-    const needsMove = idealBtn && toggle && toggle.previousElementSibling !== idealBtn
-    if (STATE.active && (!toggle || needsMove) && attempt < 15) {
-      setTimeout(() => ensureToggleMountLoop(attempt + 1), 200)
+    const anchor = findToggleMountAnchor()
+    const needsMove = anchor && toggle && toggle.previousElementSibling !== anchor && toggle.parentElement !== anchor
+    if (toggle && !needsMove) {
+      if (STATE.toggleTimer) clearTimeout(STATE.toggleTimer)
+      STATE.toggleTimer = 0
+    } else if (attempt < 15 && !STATE.toggleTimer) {
+      STATE.toggleTimer = setTimeout(() => {
+        STATE.toggleTimer = 0
+        ensureToggleMountLoop(attempt + 1)
+      }, 200)
     }
-  }
-
-  function pageSig() {
-    return `${location.pathname}|${location.search}|${document.querySelector("ytd-page-manager") ? "pm" : "nopm"}`
   }
 
   function applyDynamicSettings(settings) {
@@ -2062,12 +2079,13 @@
 
   async function apply() {
     if (!isContextValid()) return
+    const activationId = STATE.activationId
     await ensureDescStoreLoaded()
-    if (!STATE.active || !isContextValid()) return
+    if (!STATE.active || activationId !== STATE.activationId || !isContextValid()) return
     
     const keys = ["hideMostRelevant", "hideShorts", "thumbW", "rowPadY", "channelVideoGap", "headerGap", "containerW", "channelSize", "titleSize", "shortsW", "shortsGap"]
     chrome.storage.local.get(keys, result => {
-      if (chrome.runtime.lastError || !isContextValid()) return
+      if (!STATE.active || activationId !== STATE.activationId || chrome.runtime.lastError || !isContextValid()) return
       const nextHideMostRelevant = result.hideMostRelevant ?? STATE.hideMostRelevant
       const requeueAfterRelevantReveal = STATE.hideMostRelevant && !nextHideMostRelevant
       const alignAfterHide = prepareRelevantHideTransition(nextHideMostRelevant)
@@ -2098,7 +2116,8 @@
     if (STATE.view === "list") {
       enqueueAllOnce()
       startShimmer()
-      triggerReflow()
+      // Navigation restores YouTube's cached image hosts. A synthetic global
+      // resize here needlessly asks its native components to recalculate again.
     } else {
       stopShimmer()
     }
@@ -2106,7 +2125,12 @@
 
   function syncActive(isNavFinish) {
     const shouldBeActive = isSubsPage()
-    const sig = pageSig()
+    const root = document.documentElement
+    if (shouldBeActive) {
+      if (!root.hasAttribute("data-yslv-subs-active")) root.setAttribute("data-yslv-subs-active", "true")
+    } else if (root.hasAttribute("data-yslv-subs-active")) {
+      root.removeAttribute("data-yslv-subs-active")
+    }
 
     // 1. Maintain view and dynamic settings
     if (shouldBeActive) {
@@ -2120,7 +2144,7 @@
     // 2. Initial activation (Navigation from other page or Reload)
     if (shouldBeActive && !STATE.active) {
       STATE.active = true
-      STATE.lastPageSig = sig
+      STATE.activationId++
       apply()
       return
     }
@@ -2128,7 +2152,7 @@
     // 3. Deactivation (Navigation to other page)
     if (!shouldBeActive && STATE.active) {
       STATE.active = false
-      STATE.lastPageSig = sig
+      STATE.activationId++
       teardown()
       return
     }
@@ -2136,20 +2160,15 @@
     // 4. Maintenance (Already active, but URL/Content changed)
     if (shouldBeActive && STATE.active) {
       ensureToggleMountLoop()
-      paintToggle()
       attachObserver()
       processSections()
 
       // If we finished navigation (even to the same URL), ensure content is processed
       if (isNavFinish) {
-        STATE.lastPageSig = sig
-
         if (STATE.view === "list") {
-          // If signature changed or it's a forced finish (click on same link), re-process
-          resetNavState()
+          // Reprocess cached cards without resetting in-flight work or alignment.
           enqueueAllOnce()
           startShimmer()
-          triggerReflow()
           if (STATE.hideMostRelevant) scheduleRelevantHeaderAlignment()
         } else {
           stopShimmer()
@@ -2159,6 +2178,9 @@
   }
 
   function init() {
+    // Image load doesn't bubble. Capture it so offscreen avatars can finish in
+    // their native host and then join the normal, batched card queue.
+    document.addEventListener("load", onAvatarImageLoad, true)
     // Early synchronous styling at document_start
     if (isSubsPage()) {
       const savedView = loadView()

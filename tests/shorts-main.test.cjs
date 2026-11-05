@@ -16,6 +16,8 @@ function mountShelf({ pathname = "/feed/subscriptions", expanded = true } = {}) 
 
   const shelf = {
     isConnected: true,
+    inSubscriptions: true,
+    closest() { return this.inSubscriptions ? {} : null },
     hasShorts: true,
     isExpanded: expanded,
     data: { isExpanded: expanded },
@@ -141,4 +143,21 @@ test("a shelf reused for other content loses the Shorts-only styling", () => {
   view.notifyMutation()
   view.flushFrames()
   assert.equal(view.attributes.has("data-yslv-shorts-collapsed"), false)
+})
+
+test("a cached Home shelf is outside the subscription controller", () => {
+  const view = mountShelf({ expanded: false })
+  view.shelf.inSubscriptions = false
+  view.flushFrames()
+  assert.equal(view.shelf.displayedContents.length, 18)
+  assert.equal(view.attributes.has("data-yslv-shorts-collapsed"), false)
+})
+
+test("a previously hooked shelf keeps its native collapse when reused outside subscriptions", () => {
+  const view = mountShelf({ expanded: false })
+  view.flushFrames()
+  view.shelf.inSubscriptions = false
+  view.shelf.collapseShelf()
+  view.flushFrames()
+  assert.equal(view.shelf.displayedContents.length, 5)
 })

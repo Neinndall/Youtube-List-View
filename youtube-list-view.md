@@ -62,7 +62,7 @@ El núcleo de la lógica en tiempo de ejecución:
 - **Cola de procesamiento incremental (`scheduleProcess`)**: Utiliza `requestAnimationFrame` y lotes de procesamiento (`maxItemsPerTick = 30`) para evitar bloqueos del hilo principal.
 - **Sistema de descripciones (`DESC_STORE`)**:
   - Peticiones asíncronas con limitador de concurrencia (`maxConcurrent = 2`).
-  - Almacenamiento local persistente con expiración TTL (7 días).
+  - Almacenamiento local persistente con expiración TTL (1 hora).
   - Animación shimmer mediante `requestAnimationFrame` vinculada a la variable CSS `--yslvSkelX`.
 
 ### 3.3 `styles.css`
@@ -108,3 +108,24 @@ El núcleo de la lógica en tiempo de ejecución:
 1. **Nunca degradar el rendimiento**: Cualquier manipulación del DOM debe ser no destructiva y procesarse en lotes asíncronos (`requestAnimationFrame`).
 2. **Respetar el aislamiento de páginas**: No aplicar estilos globales a elementos compartidos de YouTube (`ytd-rich-item-renderer`, `ytd-rich-grid-renderer`) sin anteponer el selector de ámbito de Suscripciones.
 3. **Persistencia dual**: Toda preferencia guardada en `chrome.storage.local` debe sincronizarse inmediatamente en `localStorage` (`yslv_settings_cache_v1`) para permitir su lectura instantánea síncrona en `document_start`.
+
+
+## 6. Navegación y validación
+
+- Cada entrada a Suscripciones tiene un identificador de activación. Las respuestas de almacenamiento de una entrada anterior se descartan, incluso si el usuario ya ha vuelto a Suscripciones.
+- Los eventos repetidos de fin de navegación reencolan tarjetas sin reiniciar peticiones pendientes, contadores reales ni la alineación de cabeceras.
+- Al salir se desconectan el observador del feed y los temporizadores de descripciones, montaje del selector y actualización diferida. Las peticiones ya iniciadas pueden finalizar y guardar caché, sin modificar el DOM de Inicio.
+- Las mutaciones del contenido generado por la extensión no provocan nuevos recorridos del feed. Los cambios nativos de YouTube siguen procesándose.
+- El controlador de Shorts y sus tareas diferidas solo modifican estantes de Suscripciones visibles; excluyen los estantes de Inicio que YouTube conserva en memoria.
+- La navegación y el cambio lista/cuadrícula no emiten eventos globales artificiales de resize.
+- Los estilos de la cabecera superior solo se activan con `data-yslv-subs-active="true"`; Inicio conserva su posición nativa. Los estilos de títulos se limitan a los contenedores de Suscripciones.
+
+Validación local (Node.js 22 o posterior para las pruebas de Chrome):
+
+`powershell
+node --test tests/*.test.cjs
+node tests/avatars.browser.cjs
+node tests/navigation.browser.cjs
+`
+
+Las pruebas de navegador abren un perfil nuevo de Chrome. La prueba de navegación usa ambos scripts completos y una página SPA local para verificar tres ciclos Inicio/Suscripciones, el cambio lista/cuadrícula, la estabilidad de observadores y la conservación de miniaturas. No sustituye la comprobación en un feed real de YouTube.
